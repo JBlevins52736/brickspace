@@ -25,10 +25,10 @@ UVodget* UHandSelector::DoRaycast()
 
 	FVector ray = HandPos - EyePos;
 	ray.Normalize();
-	ray *= 20.0;
+	ray *= 10.0;
 
-	FVector StartPos = HandPos - ray;
-	FVector EndPos = HandPos + ray;
+	FVector StartPos = EyePos;
+	FVector EndPos = HandPos;
 
 	if (GetWorld()) { // ECC_WorldDynamic ECC_PhysicsBody ECC_Visibility
 		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, ECC_PhysicsBody, Params, FCollisionResponseParams());
