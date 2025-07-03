@@ -5,6 +5,7 @@
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
 
+//comment for commit
 FString ColocationSetup::GetLocalIPAsString()
 {
 	bool canBind = false;
