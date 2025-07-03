@@ -2,14 +2,16 @@
 
 #pragma once
 #include "OculusXRColocationSession.h"
+#include "ColocationSetup.generated.h"
 
 
 /**
  * 
  */
-class BRICKSPACE_API ColocationSetup : public UBlueprintFunctionLibrary
+UCLASS()
+class BRICKSPACE_API UColocationSetup : public UBlueprintFunctionLibrary
 {
-	//GENERATED_BODY()
+	GENERATED_BODY()
 public:
 	/* Gets the Local IP Address of the device */
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Oculus|ColocationSession", meta = (DisplayName = "Get Local IP As String"))
