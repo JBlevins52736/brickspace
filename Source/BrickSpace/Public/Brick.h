@@ -9,7 +9,7 @@
 #include "Brick.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API UBrick : public UGrabber
@@ -17,7 +17,8 @@ class BRICKSPACE_API UBrick : public UGrabber
 	GENERATED_BODY()
 
 public:
-	
+	enum BrickState { Seeking, Snapping, PinSnapped, RigidSnapped };
+
 	FVector GetWorldStud(int studind);
 
 	std::vector<FVector> studs; // 80cm spacing.
@@ -35,6 +36,23 @@ private:
 	/** called when something leaves the sphere component */
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void UpdateSnaps();
+
+	BrickState brickState = BrickState::Seeking;
+
+	class BrickSnap {
+	public:
+		UBrick* othBrick = nullptr;
+		// For snapping tube over other stud.
+		int tubeind = -1;
+		int othstudind = -1;
+		// For snapping stud under other tube.
+		int studind = -1;
+		int othtubeind = -1;
+	};
+
+	std::list<BrickSnap> snaps;
 
 	UBrick* othBrick = nullptr;
 	int snaptubeind = -1;
