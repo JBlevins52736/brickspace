@@ -1,9 +1,9 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Grabber.h"
+#include "Stud.h"
+#include "Tube.h"
 #include <list>
 
 #include "Brick.generated.h"
@@ -17,12 +17,13 @@ class BRICKSPACE_API UBrick : public UGrabber
 	GENERATED_BODY()
 
 public:
+
+	virtual void ForePinch(USelector* selector, bool state) override;
+
 	enum BrickState { Seeking, Snapping, PinSnapped, RigidSnapped };
 
-	FVector GetWorldStud(int studind);
-
-	std::vector<FVector> studs; // 80cm spacing.
-	std::vector<FVector> tubes; // -32cm (Z) from studs.
+	std::vector<UStud*> studs; // 80cm spacing.
+	std::vector<UTube*> tubes; // Thin spacing -32cm (Z) from studs.
 
 protected:
 	virtual void BeginPlay() override;
@@ -40,21 +41,5 @@ private:
 	void UpdateSnaps();
 
 	BrickState brickState = BrickState::Seeking;
-
-	class BrickSnap {
-	public:
-		UBrick* othBrick = nullptr;
-		// For snapping tube over other stud.
-		int tubeind = -1;
-		int othstudind = -1;
-		// For snapping stud under other tube.
-		int studind = -1;
-		int othtubeind = -1;
-	};
-
-	std::list<BrickSnap> snaps;
-
-	UBrick* othBrick = nullptr;
-	int snaptubeind = -1;
-	int snapstudind = -1;
+	std::list<UBrick *> bricks;	// Note: Assumes no bricks are actually deleted.
 };
