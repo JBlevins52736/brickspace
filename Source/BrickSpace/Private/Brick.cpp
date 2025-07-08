@@ -91,6 +91,18 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	// PinSnapped: Unsnap stress test. If fail: Enter Snapping/Seeking mode. Otherwise: Pin rotate followed by tube/stud proximity matches.
 	// RigidSnapped: Unsnap stress test only.
 
+	//{
+	//	int snapcnt = 0;
+	//	FTransform pivot;
+	//	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
+	//		if (tubes[tubeind]->IsSnapped())
+	//			return;
+	//	for (int studind = 0; studind < studs.size(); ++studind) {
+	//		if (studs[studind]->IsSnapped())
+	//			return;
+	//	}
+	//}
+
 	// Move brick freely, if already snapped the brick will temporarilly be returned to unsnapped movement to allow unsnap testing.
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -120,16 +132,16 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 		}
 	}
 
-	int snapcnt = 0;
-	FTransform pivot;
-	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
-		if (tubes[tubeind]->ApplySnap(clientComponent, pivot, snapcnt)) {
-			++snapcnt;
-
-			// Only 2 snaps needed to make a rigid joint.
-			if (snapcnt >= 2)
-				break;
+	{
+		int snapcnt = 0;
+		FTransform pivot;
+		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
+			if (tubes[tubeind]->ApplySnap(clientComponent, pivot, snapcnt))
+				++snapcnt;
+		}
+		for (int studind = 0; studind < studs.size(); ++studind) {
+			if (studs[studind]->ApplySnap(clientComponent, pivot, snapcnt))
+				++snapcnt;
 		}
 	}
-
 }
