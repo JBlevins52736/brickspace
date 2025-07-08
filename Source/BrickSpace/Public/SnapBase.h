@@ -19,6 +19,7 @@ public:
 	void TryBreakSnap();
 	void TrySnap(USnapBase*);
 	bool ApplySnap(USceneComponent* clientComponent, FTransform &pivot, int snapcnt);
+	bool IsSnapped() { return (snappedTo != nullptr); }
 
 protected:
 	// Called when the game starts
@@ -27,7 +28,7 @@ protected:
 private:
 	// Thin brick distance is 32, if two thin bricks are snapped on top of each other the top stud would be 64 from the bottom most tube.
 	// We cannot allow the top stud to snap to the bottom most tube so we set SnapDist to 60 even though the inter-stud spacing is 78.
-	const float SnapDistSq = 3600;		// 60.0f;
-	const float UnsnapDistSq = 14400.0; // 120.0f;
+	const float SnapDistSq = 900;		// 30.0f;
+	const float UnsnapDistSq = 3600.0;	// 60.0f;
 	USnapBase* snappedTo = nullptr;
 };

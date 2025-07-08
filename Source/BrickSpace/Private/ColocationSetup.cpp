@@ -5,14 +5,15 @@
 #include <IPAddress.h>
 #include <SocketSubsystem.h>
 
-FString ColocationSetup::GetLocalIPAsString()
+//comment for commit
+FString UColocationSetup::GetLocalIPAsString()
 {
 	bool canBind = false;
 	TSharedRef<FInternetAddr> localIp = ISocketSubsystem::Get(PLATFORM_SOCKETSUBSYSTEM)->GetLocalHostAddr(*GLog, canBind);
 	return (localIp->IsValid() ? localIp->ToString(false) : "0.0.0.0");
 }
 
-TArray<uint8> ColocationSetup::CreateByteArrayFromString(const FString& StringToConvert)
+TArray<uint8> UColocationSetup::CreateByteArrayFromString(const FString& StringToConvert)
 {
 	TArray<uint8> arr;
 	arr.SetNumUninitialized(StringToConvert.Len());
@@ -21,7 +22,7 @@ TArray<uint8> ColocationSetup::CreateByteArrayFromString(const FString& StringTo
 	return arr;
 }
 
-bool ColocationSetup::JoinColocationSession(const FOculusXRColocationSession& Session)
+bool UColocationSetup::JoinColocationSession(const FOculusXRColocationSession& Session)
 {
 	FString IP = BytesToString(Session.Metadata.GetData(), Session.Metadata.Num());
 	GEngine->SetClientTravel(GWorld, *IP, ETravelType::TRAVEL_Absolute);

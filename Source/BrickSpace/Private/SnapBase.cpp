@@ -20,14 +20,14 @@ void USnapBase::BeginPlay()
 
 }
 
-void USnapBase::TrySnap(USnapBase* tube)
+void USnapBase::TrySnap(USnapBase* othSnap)
 {
 	if (snappedTo == nullptr)
 	{
 		FVector pos = this->GetComponentLocation();
-		FVector othpos = snappedTo->GetComponentLocation();
+		FVector othpos = othSnap->GetComponentLocation();
 		if (FVector::DistSquared(pos, othpos) < SnapDistSq) {
-			snappedTo = tube;
+			snappedTo = othSnap;
 			snappedTo->snappedTo = this;
 		}
 	}
@@ -65,21 +65,27 @@ bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, i
 
 		// Translate this bricks location by the delta position between the snaps.
 		FVector pos = this->GetComponentLocation();
-		FVector ds = pos - pivot.GetLocation();
+		FVector ds = pivot.GetLocation() - pos;
 		clientComponent->AddWorldOffset(ds);
 	}
 	else if (snapcnt == 1) {
 		// If distance between snapto location and pivot is not 78 then reject it as a false diagonal snap.
 		FVector toDir = snappedTo->GetComponentLocation() - pivot.GetLocation();
 		float len = toDir.Length();
-		if (len < 77.0 || len > 79.0)
-			return false;
+		//if (len < 77.0 || len > 79.0)
+		//	return false;
 		toDir /= len;
 
 		// Otherwise we rotate to a rigid alignment
 		FVector fromDir = (this->GetComponentLocation() - pivot.GetLocation()).GetUnsafeNormal();
 		FQuat dq = FQuat::FindBetweenNormals(fromDir, toDir);
+
+		FVector PivotToComponent = clientComponent->GetComponentLocation() - pivot.GetLocation();
+		FVector RotatedPivotToComponent = dq.RotateVector(PivotToComponent);
+		FVector worldpos = pivot.GetLocation() + RotatedPivotToComponent;
 		clientComponent->AddWorldRotation(dq);
+		clientComponent->SetWorldLocation(worldpos);
+
 	}
 
 	return true;
