@@ -26,7 +26,7 @@ void USnapBase::TrySnap(USnapBase* tube)
 	{
 		FVector pos = this->GetComponentLocation();
 		FVector othpos = snappedTo->GetComponentLocation();
-		if (FVector::DistSquared(pos, othpos) < SnapDist) {
+		if (FVector::DistSquared(pos, othpos) < SnapDistSq) {
 			snappedTo = tube;
 			snappedTo->snappedTo = this;
 		}
@@ -39,7 +39,7 @@ void USnapBase::TryBreakSnap()
 	{
 		FVector pos = this->GetComponentLocation();
 		FVector othpos = snappedTo->GetComponentLocation();
-		if (FVector::DistSquared(pos, othpos) > UnsnapDist) {
+		if (FVector::DistSquared(pos, othpos) > UnsnapDistSq) {
 			snappedTo->snappedTo = nullptr;
 			snappedTo = nullptr;
 		}

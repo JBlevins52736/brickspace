@@ -20,8 +20,8 @@ public:
 
 	virtual void ForePinch(USelector* selector, bool state) override;
 
-	std::vector<UStud*> studs; // 78cm spacing.
-	std::vector<UTube*> tubes; // Thin spacing -32cm (Z) from studs.
+	std::vector<USnapBase*> studs; // 78cm spacing.
+	std::vector<USnapBase*> tubes; // Thin spacing -32cm (Z) from studs.
 
 protected:
 	virtual void BeginPlay() override;

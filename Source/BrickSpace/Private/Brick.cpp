@@ -19,6 +19,15 @@ void UBrick::BeginPlay()
 				studs.push_back(stud);
 		}
 	}
+
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	if (mesh != nullptr)
+	{
+		// Add overlap with other bricks.
+		mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
+		mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
+	}
+
 }
 
 void UBrick::ForePinch(USelector* selector, bool state)
@@ -30,20 +39,20 @@ void UBrick::ForePinch(USelector* selector, bool state)
 	Super::ForePinch(selector, state);
 
 	// Add overlap with other bricks.
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	if (mesh != nullptr)
-	{
-		if (state) {
-			// Add overlap with other bricks.
-			mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
-			mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
-		}
-		else {
-			// Remove overlap with other bricks.
-			mesh->OnComponentBeginOverlap.RemoveAll(this);
-			mesh->OnComponentEndOverlap.RemoveAll(this);
-		}
-	}
+	//UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	//if (mesh != nullptr)
+	//{
+	//	if (state) {
+	//		// Add overlap with other bricks.
+	//		mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
+	//		mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
+	//	}
+	//	else {
+	//		// Remove overlap with other bricks.
+	//		mesh->OnComponentBeginOverlap.RemoveAll(this);
+	//		mesh->OnComponentEndOverlap.RemoveAll(this);
+	//	}
+	//}
 }
 
 void UBrick::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -116,7 +125,7 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
 		if (tubes[tubeind]->ApplySnap(clientComponent, pivot, snapcnt)) {
 			++snapcnt;
-			
+
 			// Only 2 snaps needed to make a rigid joint.
 			if (snapcnt >= 2)
 				break;
