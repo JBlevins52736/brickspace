@@ -26,8 +26,10 @@ void USnapBase::TrySnap(USnapBase* tube)
 	{
 		FVector pos = this->GetComponentLocation();
 		FVector othpos = snappedTo->GetComponentLocation();
-		if (FVector::DistSquared(pos, othpos) < SnapDist)
+		if (FVector::DistSquared(pos, othpos) < SnapDist) {
 			snappedTo = tube;
+			snappedTo->snappedTo = this;
+		}
 	}
 }
 
@@ -37,8 +39,10 @@ void USnapBase::TryBreakSnap()
 	{
 		FVector pos = this->GetComponentLocation();
 		FVector othpos = snappedTo->GetComponentLocation();
-		if (FVector::DistSquared(pos, othpos) > UnsnapDist)
+		if (FVector::DistSquared(pos, othpos) > UnsnapDist) {
+			snappedTo->snappedTo = nullptr;
 			snappedTo = nullptr;
+		}
 	}
 }
 
@@ -53,17 +57,29 @@ bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, i
 		pivot.SetLocation(snappedTo->GetComponentLocation());
 		pivot.SetRotation(snappedTo->GetComponentQuat());
 
-		// Setting world rotation will (should) shift this components location.
-		clientComponent->SetWorldRotation(snappedTo->GetComponentQuat());
+		// Orient this bricks up vector to the up direction of the brick we are snapping to.
+		FVector toDir = snappedTo->GetUpVector();
+		FVector fromDir = clientComponent->GetUpVector();
+		FQuat dq = FQuat::FindBetweenNormals(fromDir, toDir);
+		clientComponent->AddWorldRotation(dq);
 
-		// Translate by the new pos to pivot delta vector.
+		// Translate this bricks location by the delta position between the snaps.
 		FVector pos = this->GetComponentLocation();
 		FVector ds = pos - pivot.GetLocation();
 		clientComponent->AddWorldOffset(ds);
 	}
 	else if (snapcnt == 1) {
-		// Rotate to rigid only if distance between othpos and first snap pos is 78
+		// If distance between snapto location and pivot is not 78 then reject it as a false diagonal snap.
+		FVector toDir = snappedTo->GetComponentLocation() - pivot.GetLocation();
+		float len = toDir.Length();
+		if (len < 77.0 || len > 79.0)
+			return false;
+		toDir /= len;
 
+		// Otherwise we rotate to a rigid alignment
+		FVector fromDir = (this->GetComponentLocation() - pivot.GetLocation()).GetUnsafeNormal();
+		FQuat dq = FQuat::FindBetweenNormals(fromDir, toDir);
+		clientComponent->AddWorldRotation(dq);
 	}
 
 	return true;

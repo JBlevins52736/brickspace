@@ -20,9 +20,7 @@ public:
 
 	virtual void ForePinch(USelector* selector, bool state) override;
 
-	enum BrickState { Seeking, Snapping, PinSnapped, RigidSnapped };
-
-	std::vector<UStud*> studs; // 80cm spacing.
+	std::vector<UStud*> studs; // 78cm spacing.
 	std::vector<UTube*> tubes; // Thin spacing -32cm (Z) from studs.
 
 protected:
@@ -38,8 +36,5 @@ private:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	void UpdateSnaps();
-
-	BrickState brickState = BrickState::Seeking;
 	std::list<UBrick *> bricks;	// Note: Assumes no bricks are actually deleted.
 };

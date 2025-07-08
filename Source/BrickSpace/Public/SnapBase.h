@@ -25,7 +25,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	const float SnapDist = 32.0f;
-	const float UnsnapDist = 64.0f;
+	// Thin brick distance is 32, if two thin bricks are snapped on top of each other the top stud would be 64 from the bottom most tube.
+	// We cannot allow the top stud to snap to the bottom most tube so we set SnapDist to 60 even though the inter-stud spacing is 78.
+	const float SnapDist = 60.0f;  
+	const float UnsnapDist = 120.0f;
 	USnapBase* snappedTo = nullptr;
 };

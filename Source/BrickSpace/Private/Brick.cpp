@@ -74,11 +74,22 @@ void UBrick::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActo
 	}
 }
 
-void UBrick::UpdateSnaps()
+void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	// The brick has been moved to an unsnapped "ghost" position 
+	// States: 
+	// Seeking: No overlap with other bricks, normal grabbing mode only.
+	// Snapping: Normal grabbing mode followed by tube/stud proximity matches.
+	// PinSnapped: Unsnap stress test. If fail: Enter Snapping/Seeking mode. Otherwise: Pin rotate followed by tube/stud proximity matches.
+	// RigidSnapped: Unsnap stress test only.
 
-	// Try breaking existing snaps.
+	// Move brick freely, if already snapped the brick will temporarilly be returned to unsnapped movement to allow unsnap testing.
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// If no bricks are overlapped then there can be no snaps.
+	if (bricks.size() == 0)
+		return;
+
+	// Try breaking any existing snaps.
 	{
 		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
 			tubes[tubeind]->TryBreakSnap();
@@ -88,10 +99,12 @@ void UBrick::UpdateSnaps()
 
 	// Try making new snaps.
 	for (UBrick* brick : bricks) {
+		// Test all local tubes with overlapped bricks studs.
 		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
 			for (int studind = 0; studind < brick->studs.size(); ++studind)
 				tubes[tubeind]->TrySnap(brick->studs[studind]);
 		}
+		// Test all local studs with overlapped bricks tubes.
 		for (int studind = 0; studind < studs.size(); ++studind) {
 			for (int tubeind = 0; tubeind < brick->tubes.size(); ++tubeind)
 				studs[studind]->TrySnap(brick->tubes[tubeind]);
@@ -101,31 +114,13 @@ void UBrick::UpdateSnaps()
 	int snapcnt = 0;
 	FTransform pivot;
 	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
-		if (tubes[tubeind]->ApplySnap(clientComponent, pivot, snapcnt))
+		if (tubes[tubeind]->ApplySnap(clientComponent, pivot, snapcnt)) {
 			++snapcnt;
-	}
-}
-
-
-void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	// States: 
-	// Seeking: No overlap with other bricks, normal grabbing mode only.
-	// Snapping: Normal grabbing mode followed by tube/stud proximity matches.
-	// PinSnapped: Unsnap stress test. If fail: Enter Snapping/Seeking mode. Otherwise: Pin rotate followed by tube/stud proximity matches.
-	// RigidSnapped: Unsnap stress test only.
-
-
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	if (brickState == Seeking) {
-		return;
-	}
-
-	if (brickState == Snapping) {
-
-		UpdateSnaps();
-
+			
+			// Only 2 snaps needed to make a rigid joint.
+			if (snapcnt >= 2)
+				break;
+		}
 	}
 
 }
