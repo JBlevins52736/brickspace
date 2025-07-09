@@ -5,6 +5,7 @@
 #include "Stud.h"
 #include "Tube.h"
 #include <list>
+#include <vector>
 
 #include "Brick.generated.h"
 
