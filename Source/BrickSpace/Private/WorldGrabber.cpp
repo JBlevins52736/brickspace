@@ -182,5 +182,7 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	SetLocalCursor();
 	FTransform worldsrt = childsrt * cursorsrt;
 	FTransform pawnChildOfWorld = GetOwner()->GetActorTransform() * worldsrt.Inverse();
-	GetOwner()->SetActorTransform(pawnChildOfWorld);
+
+	if ( scaleMode )
+		GetOwner()->SetActorTransform(pawnChildOfWorld);
 }
