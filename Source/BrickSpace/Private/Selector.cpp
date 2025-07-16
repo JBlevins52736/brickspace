@@ -33,5 +33,10 @@ const FTransform& USelector::Cursor()
 	return cursor;
 }
 
+void USelector::SetFilter(uint16 filter)
+{
+	selectionFilter = filter;
+}
+
 // This method should be pure virtual but is implemented to avoid Unreal compiler issues.
 void USelector::SetCursor() {}

@@ -22,6 +22,9 @@ public:
 	virtual void MiddlePinch(USelector* cursor, bool state);
 	virtual void Grip(USelector* cursor, bool state);
 
+	UPROPERTY(EditAnywhere, meta = (Bitmask), Category = "VAR")
+	uint16 selectionFilter = 0xFF;
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

@@ -38,7 +38,7 @@ UVodget* UHandSelector::DoRaycast()
 			//retval = Hit.Component->GetOwner()->GetComponentByClass<UVodget>();
 			for (int i = 0; i < Hit.Component->GetNumChildrenComponents(); i++) {
 				retval = Cast<UVodget>(Hit.Component->GetChildComponent(i));
-				if (retval != nullptr)
+				if (retval != nullptr && ((retval->selectionFilter & selectionFilter) > 0) )
 					break;
 			}
 			//UE_LOG(LogTemp, Warning, TEXT("Hit Somethin:%s"), *FString(Hit.Component->GetName()));
@@ -128,5 +128,25 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		}
 
 	}
+
+}
+
+void UHandSelector::SetFilter(uint16 filter)
+{
+	// ToDo: 
+	// As players join their Hat and HandSelectors will be accessed through their Pawns and assigned 
+	// roles initially and changed periodically. 
+	// The hand will be changed by calling this SetFilter(...) method.
+
+	Super::SetFilter(filter);
+	SetHandColor();
+}
+
+void UHandSelector::SetHandColor()
+{
+	// ToDo:
+	// Set based on filter where 0x01 is Assembler, 0x02 is Painter, 0x04 is Supplier, 0x08 is Architect, 0x0F is DevMode
+	// Assembler (Blue), Painter(Red), Supplier(Green), Architect(White), Dev(Yellow)
+
 
 }

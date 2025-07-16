@@ -27,6 +27,10 @@ public:
 	// Inheriting selectors must all maintain a model of a 3D cursor in world coordinates. 
 	const FTransform& Cursor();
 
+	virtual void SetFilter(uint16 filter);
+
+	UPROPERTY(EditAnywhere, meta = (Bitmask), Category = "VAR")
+	uint16 selectionFilter = 0xFF;
 
 protected:
 
