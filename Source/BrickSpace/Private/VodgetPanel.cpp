@@ -1,179 +1,209 @@
-﻿// VodgetPanel.cpp
-// -----------------------------------------------------------------------------
-// Base 3-D panel scene-component with optional wrist-mount (“palm”) behaviour.
-// Visuals: textured quad + 3-D border.
-// Palm logic: offset, face-camera, auto-hide when palm faces away.
-// -----------------------------------------------------------------------------
-
-#include "VodgetPanel.h"
-
+﻿#include "VodgetPanel.h"
+#include "Camera/PlayerCameraManager.h"
 #include "Kismet/GameplayStatics.h"
-#include "Engine/World.h"
+#include "Engine/Engine.h"
+#include "Materials/Material.h"
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Constructor
-// ──────────────────────────────────────────────────────────────────────────────
 UVodgetPanel::UVodgetPanel()
 {
-	PrimaryComponentTick.bCanEverTick = true;   // palm logic needs tick
+	PrimaryComponentTick.bCanEverTick = true;
+
+	// Create panel mesh during construction (safe)
+	PanelMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PanelMesh"));
+	if (PanelMesh)
+	{
+		// Load default plane mesh
+		UStaticMesh* DefaultPlane = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Plane.Plane"));
+		if (DefaultPlane)
+		{
+			PanelMesh->SetStaticMesh(DefaultPlane);
+		}
+
+		// Set collision for raycast detection
+		PanelMesh->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+		PanelMesh->SetCollisionResponseToAllChannels(ECR_Block);
+
+		// Scale to desired size
+		PanelMesh->SetRelativeScale3D(FVector(Width / 100.0f, Height / 100.0f, 1.0f));
+		PanelMesh->SetRelativeRotation(FRotator(0, 0, 90.0f)); // Face forward
+	}
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// BeginPlay
-// ──────────────────────────────────────────────────────────────────────────────
 void UVodgetPanel::BeginPlay()
 {
 	Super::BeginPlay();
+	UpdatePanelVisuals();
 
-	// Build quad + border
-	RebuildPanel();
-
-	// One-time wrist offset & rotation
-	if (bUsePalmLogic)
+	// Initial palm check and set visibility for panel and children
+	if (bAutoHide)
 	{
-		SetRelativeLocation(LocalOffset);            // cm
-		SetRelativeRotation(FRotator(0.f, 90.f, 0.f)); // face camera
-	}
-
-	// Initialise palm state & visibility
-	ApplyPalmLogic();
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Tick
-// ──────────────────────────────────────────────────────────────────────────────
-void UVodgetPanel::TickComponent(float DeltaTime,
-	ELevelTick TickType,
-	FActorComponentTickFunction* ThisTick)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTick);
-
-	if (bUsePalmLogic)
-		ApplyPalmLogic();
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Palm helpers
-// ──────────────────────────────────────────────────────────────────────────────
-bool UVodgetPanel::CalcPalmUp() const
-{
-	if (!GetAttachParent()) return true;   // fail-safe
-
-	const FVector Up = GetAttachParent()->GetUpVector();
-	const FVector CamFwd =
-		UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->GetActorForwardVector();
-
-	return FVector::DotProduct(Up, CamFwd) < PalmDotThreshold;
-}
-
-void UVodgetPanel::ApplyPalmLogic()
-{
-	const bool NewState = CalcPalmUp();
-
-	// Auto-hide
-	if (bAutoHideByPalmUp)
-		SetVisibility(NewState, /*propagate*/true);
-
-	// Notify BP override
-	if (NewState != bIsPalmUp)
-	{
-		bIsPalmUp = NewState;
-		PalmFacingChanged(NewState);       // BlueprintImplementableEvent
+		bLastPalmUp = IsPalmFacingUser();
+		SetPanelAndChildrenVisibility(bLastPalmUp);
 	}
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// Border & visual helpers
-// ──────────────────────────────────────────────────────────────────────────────
-void UVodgetPanel::EnsureChildMeshes()
+void UVodgetPanel::UpdatePanelVisuals()
 {
-	if (!PanelMesh)
-		PanelMesh = Cast<UStaticMeshComponent>(clientComponent);
+	if (!PanelMesh) return;
 
-	for (int32 i = 0; i < 4; ++i)
+	// Update mesh if custom asset is provided
+	if (PanelMeshAsset)
 	{
-		if (!Edge[i])
+		PanelMesh->SetStaticMesh(PanelMeshAsset);
+	}
+
+	// Scale the panel to desired size (default plane is 100x100 units)
+	FVector PanelScale(Width / 100.0f, Height / 100.0f, 1.0f);
+	PanelMesh->SetRelativeScale3D(PanelScale);
+	PanelMesh->SetRelativeRotation(FRotator(0, 0, 90.0f)); // Face forward
+
+	// Apply material - use custom material if provided, otherwise create basic one
+	if (PanelMaterial)
+	{
+		// Use the assigned material
+		PanelMesh->SetMaterial(0, PanelMaterial);
+
+		// Try to create dynamic material instance for color control
+		DynMaterial = PanelMesh->CreateAndSetMaterialInstanceDynamic(0);
+	}
+	else
+	{
+		// Create a basic translucent material that supports color and opacity
+		UMaterialInterface* BaseMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Engine/BasicShapes/BasicShapeMaterial.BasicShapeMaterial"));
+		if (BaseMaterial)
 		{
-			const FName Name = *FString::Printf(TEXT("Edge_%d"), i);
-			Edge[i] = NewObject<UStaticMeshComponent>(this, Name);
-			Edge[i]->SetupAttachment(clientComponent);
-			Edge[i]->RegisterComponent();
-		}
-		if (!Corner[i])
-		{
-			const FName Name = *FString::Printf(TEXT("Corner_%d"), i);
-			Corner[i] = NewObject<UStaticMeshComponent>(this, Name);
-			Corner[i]->SetupAttachment(clientComponent);
-			Corner[i]->RegisterComponent();
+			PanelMesh->SetMaterial(0, BaseMaterial);
+			DynMaterial = PanelMesh->CreateAndSetMaterialInstanceDynamic(0);
 		}
 	}
+
+	// Update material color and opacity
+	if (DynMaterial)
+	{
+		// Try multiple parameter names to ensure color shows up
+		DynMaterial->SetVectorParameterValue("Color", PanelColor);
+		DynMaterial->SetVectorParameterValue("BaseColor", PanelColor);
+		DynMaterial->SetVectorParameterValue("Albedo", PanelColor);
+		DynMaterial->SetVectorParameterValue("Tint", PanelColor);
+
+		// Set opacity/alpha
+		DynMaterial->SetScalarParameterValue("Opacity", PanelColor.A);
+		DynMaterial->SetScalarParameterValue("Alpha", PanelColor.A);
+	}
+
+	// Handle editor vs game visibility
+	bool bIsInGame = GetWorld() && GetWorld()->IsGameWorld();
+	if (!bIsInGame)
+	{
+		// In editor - respect bShowInEditor setting
+		PanelMesh->SetVisibility(bShowInEditor);
+	}
+	// In game - visibility controlled by palm detection
 }
 
-void UVodgetPanel::UpdateBorder()
+bool UVodgetPanel::IsPalmFacingUser() const
 {
-	if (!EdgeMesh) return;
+	const APlayerCameraManager* Cam = UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0);
+	if (!Cam) return true;
 
-	const float W = PanelSize.X * 50.f;         // half width  (cm)
-	const float H = PanelSize.Y * 50.f;         // half height (cm)
+	// Get palm up vector (Z-axis of component)
+	FVector PalmUp = GetComponentTransform().GetUnitAxis(EAxis::Z);
+	FVector ToCamera = (Cam->GetCameraLocation() - GetComponentLocation()).GetSafeNormal();
 
-	const FVector Pos[4] = { { 0,  H, 0}, { 0,-H, 0}, { -W,0,0}, { W,0,0} };
-	const FRotator Rot[4] = { {0,90,0}, {0,90,0}, {0,0,0}, {0,0,0} };
-	const float    Len[4] = { PanelSize.X, PanelSize.X, PanelSize.Y, PanelSize.Y };
+	// Return true if palm is facing toward camera
+	return FVector::DotProduct(PalmUp, ToCamera) > -0.3f;
+}
 
-	for (int32 i = 0; i < 4; ++i)
+void UVodgetPanel::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (bAutoHide)
 	{
-		// Edge strip
-		Edge[i]->SetStaticMesh(EdgeMesh);
-		Edge[i]->SetRelativeLocation(Pos[i]);
-		Edge[i]->SetRelativeRotation(Rot[i]);
-		Edge[i]->SetRelativeScale3D(
-			FVector(Len[i], BorderThickness, BorderThickness));
-
-		// Optional corner cube/bevel
-		if (CornerMesh)
+		bool bPalmUp = IsPalmFacingUser();
+		if (bPalmUp != bLastPalmUp)
 		{
-			const FVector C = Pos[i] + Rot[i].RotateVector(FVector(Len[i] * 50.f, 0, 0));
-			Corner[i]->SetStaticMesh(CornerMesh);
-			Corner[i]->SetRelativeLocation(C);
-			Corner[i]->SetRelativeScale3D(FVector(BorderThickness * 100.f));
+			bLastPalmUp = bPalmUp;
+			SetPanelAndChildrenVisibility(bPalmUp);
 		}
 	}
 }
 
-void UVodgetPanel::RebuildPanel()
+void UVodgetPanel::SetPanelColor(FLinearColor NewColor)
 {
-	EnsureChildMeshes();
+	PanelColor = NewColor;
+	UpdatePanelVisuals();
+}
 
+void UVodgetPanel::ShowPanel(bool bShow)
+{
+	SetPanelAndChildrenVisibility(bShow);
+}
+
+void UVodgetPanel::SetPanelAndChildrenVisibility(bool bIsVisible)
+{
+	// Show/hide the panel mesh only when palm is visible (no manual override)
 	if (PanelMesh)
-		PanelMesh->SetRelativeScale3D(
-			FVector(PanelSize.X, PanelSize.Y, 1.f));   // plane is 1×1 m
+	{
+		PanelMesh->SetVisibility(bIsVisible);
+	}
 
-	if (!Dyn && PanelMesh)
-		Dyn = PanelMesh->CreateDynamicMaterialInstance(0);
+	// Hide/show all child Static Mesh Components (buttons, etc.)
+	TArray<USceneComponent*> ChildComponents;
+	GetChildrenComponents(true, ChildComponents); // true = include all descendants
 
-	UpdateBorder();
+	for (USceneComponent* Child : ChildComponents)
+	{
+		if (UStaticMeshComponent* ChildMesh = Cast<UStaticMeshComponent>(Child))
+		{
+			ChildMesh->SetVisibility(bIsVisible);
+		}
+	}
+
+	// Also disable/enable Vodget children when hidden to prevent interaction
+	TArray<UVodget*> ChildVodgets;
+	GetOwner()->GetComponents<UVodget>(ChildVodgets);
+
+	for (UVodget* ChildVodget : ChildVodgets)
+	{
+		if (ChildVodget != this && ChildVodget->GetAttachParent() == this)
+		{
+			// Disable/enable tick for child vodgets when panel is hidden
+			ChildVodget->SetComponentTickEnabled(bIsVisible);
+		}
+	}
 }
 
-void UVodgetPanel::SetPanelTexture(UTexture2D* Tex)
-{
-	if (Dyn)
-		Dyn->SetTextureParameterValue(TEXT("PanelTexture"), Tex);
-}
-
-void UVodgetPanel::SetPanelOpacity(float Alpha)
-{
-	if (Dyn)
-		Dyn->SetScalarParameterValue(
-			TEXT("PanelOpacity"), FMath::Clamp(Alpha, 0.f, 1.f));
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Editor hot-update
-// ──────────────────────────────────────────────────────────────────────────────
 #if WITH_EDITOR
 void UVodgetPanel::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	RebuildPanel();
+
+	if (PropertyChangedEvent.Property)
+	{
+		FName PropertyName = PropertyChangedEvent.Property->GetFName();
+
+		// Rebuild visuals when relevant properties change
+		if (PropertyName == GET_MEMBER_NAME_CHECKED(UVodgetPanel, Width) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UVodgetPanel, Height) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UVodgetPanel, PanelColor) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UVodgetPanel, PanelMeshAsset) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UVodgetPanel, PanelMaterial) ||
+			PropertyName == GET_MEMBER_NAME_CHECKED(UVodgetPanel, bShowInEditor))
+		{
+			UpdatePanelVisuals();
+		}
+	}
+}
+
+void UVodgetPanel::OnRegister()
+{
+	Super::OnRegister();
+
+	// Setup in editor
+	if (!GetWorld() || !GetWorld()->IsGameWorld())
+	{
+		UpdatePanelVisuals();
+	}
 }
 #endif

@@ -1,11 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Vodget.h"
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "UObject/UnrealType.h"
-
 #include "VodgetPanel.generated.h"
 
 UCLASS(ClassGroup = (UI), meta = (BlueprintSpawnableComponent))
@@ -16,60 +14,61 @@ class BRICKSPACE_API UVodgetPanel : public UVodget
 public:
 	UVodgetPanel();
 
-	/* ---------- Visuals ---------- */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	UStaticMeshComponent* PanelMesh = nullptr;
+	// Simple size control (width x height in cm)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Panel", meta = (ClampMin = "5", ClampMax = "50"))
+	float Width = 20.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly) UStaticMesh* EdgeMesh   = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly) UStaticMesh* CornerMesh = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Panel", meta = (ClampMin = "5", ClampMax = "50"))
+	float Height = 15.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly) FVector2D PanelSize = FVector2D(0.25f, 0.18f);
-	UPROPERTY(EditAnywhere, BlueprintReadOnly) float BorderThickness = 0.01f;
+	// Basic visual properties
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Panel")
+	FLinearColor PanelColor = FLinearColor(0.1f, 0.1f, 0.2f, 0.8f);
 
-	/* ---------- Palm logic ---------- */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Palm")
-	bool bUsePalmLogic = true;
+	// Panel mesh settings
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Panel")
+	UStaticMesh* PanelMeshAsset = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Palm")
-	bool bAutoHideByPalmUp = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Panel")
+	UMaterialInterface* PanelMaterial = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Palm")
-	FVector LocalOffset = FVector(6.f, 0.f, -4.f);  // cm
+	// Show in editor for positioning (game uses palm detection)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Panel")
+	bool bShowInEditor = true;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Palm",
-	          meta = (ClampMin = "-1", ClampMax = "1"))
-	float PalmDotThreshold = -0.30f;
+	// Auto-hide when hand faces away
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Panel")
+	bool bAutoHide = true;
 
-	/** Public flag you can poll anywhere (no delegate) */
-	UPROPERTY(BlueprintReadOnly, Category = "Palm")
-	bool bIsPalmUp = true;
+	UFUNCTION(BlueprintCallable, Category = "Panel")
+	void SetPanelColor(FLinearColor NewColor);
 
-	/** Optional BP hook (override in a Blueprint child if desired) */
-	UFUNCTION(BlueprintImplementableEvent, Category = "Palm")
-	void PalmFacingChanged(bool NewFacingUp);
+	UFUNCTION(BlueprintCallable, Category = "Panel")
+	void ShowPanel(bool bShow = true);
 
-	/* ---------- Helpers ---------- */
-	UFUNCTION(BlueprintCallable) void SetPanelTexture(UTexture2D* Tex);
-	UFUNCTION(BlueprintCallable) void SetPanelOpacity(float Alpha);
-	UFUNCTION(BlueprintCallable) virtual void RebuildPanel();
+	UFUNCTION(BlueprintCallable, Category = "Panel")
+	void HidePanel() { ShowPanel(false); }
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float, ELevelTick,
-	                           FActorComponentTickFunction*) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 #if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& Prop) override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void OnRegister() override;
 #endif
 
-	UPROPERTY() UStaticMeshComponent* Edge[4]{};
-	UPROPERTY() UStaticMeshComponent* Corner[4]{};
+	// Panel mesh created during construction
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Panel")
+	UStaticMeshComponent* PanelMesh = nullptr;
 
 private:
-	UMaterialInstanceDynamic* Dyn = nullptr;
+	UPROPERTY()
+	UMaterialInstanceDynamic* DynMaterial = nullptr;
 
-	void EnsureChildMeshes();
-	void UpdateBorder();
-	bool CalcPalmUp() const;
-	void ApplyPalmLogic();
+	bool bLastPalmUp = true;
+
+	void UpdatePanelVisuals();
+	bool IsPalmFacingUser() const;
+	void SetPanelAndChildrenVisibility(bool bIsVisible);
 };
