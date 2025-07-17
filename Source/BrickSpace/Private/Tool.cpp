@@ -27,7 +27,7 @@ void UTool::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAct
 		if (brickTouched != nullptr)
 		{
 			ChangeBrickTouched();
-			UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin brickTouched:%s"), *FString(brickTouched->GetName()));
+			UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin brickTouched:%s"), *FString(brickTouched->ClientName()));
 			break;
 		}
 	}

@@ -45,3 +45,8 @@ void UVodget::MiddlePinch(USelector* cursor, bool state)
 void UVodget::Grip(USelector* cursor, bool state)
 {
 }
+
+FString UVodget::ClientName()
+{
+	return GetOwner()->GetName();
+}

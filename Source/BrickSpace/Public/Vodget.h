@@ -25,6 +25,8 @@ public:
 	UPROPERTY(EditAnywhere, meta = (Bitmask), Category = "VAR")
 	uint16 selectionFilter = 0xFF;
 
+	FString ClientName();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

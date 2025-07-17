@@ -12,7 +12,7 @@ void UPaintbrush::BeginPlay()
 void UPaintbrush::ChangeBrickTouched()
 {
 	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
-	if (mesh != nullptr)
+	if (mesh != nullptr && mesh->Mobility == EComponentMobility::Movable )
 	{
 		// Add overlap with bricks.
 		mesh->SetMaterial(0, brushMaterial);

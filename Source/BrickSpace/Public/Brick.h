@@ -24,6 +24,9 @@ public:
 	std::vector<USnapBase*> studs; // 78cm spacing.
 	std::vector<USnapBase*> tubes; // Thin spacing -32cm (Z) from studs.
 
+	UPROPERTY(EditAnywhere, Category = "VAR")
+	FString shortName;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

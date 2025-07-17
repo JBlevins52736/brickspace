@@ -66,7 +66,7 @@ void UBrick::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAc
 		if (enteringBrick != nullptr)
 		{
 			bricks.push_back(enteringBrick);
-			UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin enteringBrick:%s"), *FString(enteringBrick->GetName()));
+			UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin enteringBrick:%s"), *FString(enteringBrick->ClientName()));
 			break;
 		}
 	}
@@ -79,7 +79,7 @@ void UBrick::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActo
 		if (exitingBrick != nullptr)
 		{
 			bricks.remove(exitingBrick);
-			UE_LOG(LogTemp, Warning, TEXT("OnOverlapEnd exitingBrick:%s"), *FString(exitingBrick->GetName()));
+			UE_LOG(LogTemp, Warning, TEXT("OnOverlapEnd exitingBrick:%s"), *FString(exitingBrick->ClientName()));
 			break;
 		}
 	}
