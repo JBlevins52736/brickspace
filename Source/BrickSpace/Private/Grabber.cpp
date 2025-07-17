@@ -15,7 +15,8 @@ void UGrabber::ForePinch(USelector* selector, bool state)
 	// ToDo: On Grab button true, set childsrt to the clients transform as a child of the selectors cursor.
 	// You must also grab the selectors focus during the grab and release it when finished.
 
-	if (grabbingSelector != nullptr && grabbingSelector != selector)
+	if (clientComponent->Mobility != EComponentMobility::Movable &&
+		grabbingSelector != nullptr && grabbingSelector != selector)
 		return;
 
 	// We grab the selectors focus when grabbing is true to ensure receiving focusUpdate until grabbing is released.
