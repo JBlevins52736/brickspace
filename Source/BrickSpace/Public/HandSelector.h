@@ -24,6 +24,8 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual void SetFilter(uint16 filter) override;
+
 protected:
 	// Called when the game starts
 	virtual void SetCursor() override;
@@ -37,4 +39,6 @@ private:
 
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
+
+	void SetHandColor();
 };
