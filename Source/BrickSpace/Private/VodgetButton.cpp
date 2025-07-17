@@ -3,6 +3,13 @@
 #include "Components/StaticMeshComponent.h"
 #include "Materials/MaterialInstanceDynamic.h"
 
+void UVodgetButton::BeginPlay()
+{
+    Super::BeginPlay();
+
+    selectionFilter = 0x03; // Only Manufacturer can grab bricks
+}
+
 void UVodgetButton::Focus(USelector* cursor, bool state)
 {
     // Call parent class implementation

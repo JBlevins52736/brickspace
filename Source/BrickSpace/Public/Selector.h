@@ -2,10 +2,11 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "Selector.generated.h"
 
 class UVodget;
 class UMotionControllerComponent;
+
+#include "Selector.generated.h"
 
 UCLASS(Abstract, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API USelector : public UActorComponent

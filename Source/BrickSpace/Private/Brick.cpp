@@ -6,7 +6,7 @@ void UBrick::BeginPlay()
 {
 	Super::BeginPlay();
 
-	selectionFilter = 0x01;
+	selectionFilter = 0x01; // Only Assembler can grab bricks
 
 	// Initialze tubes and studs vectors.
 	for (int i = 0; i < clientComponent->GetNumChildrenComponents(); i++)

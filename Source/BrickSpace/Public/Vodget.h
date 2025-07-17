@@ -4,9 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-#include "Vodget.generated.h"
-
 class USelector;
+
+#include "Vodget.generated.h"
 
 UCLASS(Abstract, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API UVodget : public USceneComponent

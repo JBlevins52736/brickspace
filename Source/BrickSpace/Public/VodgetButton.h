@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "CoreMinimal.h"
 #include "Vodget.h"
 #include "VodgetButton.generated.h"
@@ -25,6 +26,8 @@ public:
 	FButtonToggledDelegate OnToggled;
 
 protected:
+	virtual void BeginPlay() override;
+
 	// Selector currently grabbing this button
 	USelector* grabbingSelector = nullptr;
 

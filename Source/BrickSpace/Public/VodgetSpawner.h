@@ -1,3 +1,5 @@
+#pragma once
+
 #include "CoreMinimal.h"
 #include "Vodget.h"
 #include "Engine/DataTable.h"
