@@ -22,13 +22,17 @@ void USnapBase::BeginPlay()
 
 void USnapBase::TrySnap(USnapBase* othSnap)
 {
+	// If already snappedTo then ApplySnap has already been solved.
 	if (snappedTo == nullptr)
 	{
 		FVector pos = this->GetComponentLocation();
 		FVector othpos = othSnap->GetComponentLocation();
-		if (FVector::DistSquared(pos, othpos) < SnapDistSq) {
-			snappedTo = othSnap;
-			snappedTo->snappedTo = this;
+		float distSq = FVector::DistSquared(pos, othpos);
+		// Search for the closest othSnap withing snap distance.
+		if (distSq < SnapDistSq && !(trySnappedTo != nullptr && distSq > trySnapDistSq)) {
+			// Found a new, or improved, snap candidate.
+			trySnappedTo = othSnap;
+			trySnapDistSq = distSq;
 		}
 	}
 }
@@ -48,8 +52,12 @@ void USnapBase::TryBreakSnap()
 
 bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, int snapcnt)
 {
-	if (snappedTo == nullptr)
+	if (trySnappedTo == nullptr)
 		return false;
+
+	snappedTo = trySnappedTo;
+	snappedTo->snappedTo = this;
+	trySnappedTo = nullptr;
 
 	if (snapcnt == 0) {
 
@@ -69,11 +77,19 @@ bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, i
 		clientComponent->AddWorldOffset(ds);
 	}
 	else if (snapcnt == 1) {
+		// The first snap causes the brick to translate and rotate about a pivot altering subsequent snaps distance criteria.
+		// Any subsequent snap must be to locations exactly on the LUnit grid to avoid diagonal snapping.
 		// If distance between snapto location and pivot is not 78 then reject it as a false diagonal snap.
+		// Inter-stud spacing is 78 in modelling space but 19.5 when scaled 25% in blueprint.
 		FVector toDir = snappedTo->GetComponentLocation() - pivot.GetLocation();
 		float len = toDir.Length();
-		//if (len < 77.0 || len > 79.0)
-		//	return false;
+		if ( len < 19.0 || len > 20.0 ) {
+			// Diagonal or irregular snap detected.
+			snappedTo->snappedTo = nullptr;
+			snappedTo = nullptr;
+			UE_LOG(LogTemp, Warning, TEXT("Diagonal snap detected:%f not 19.5"), len );
+			return false;
+		}
 		toDir /= len;
 
 		// Otherwise we rotate to a rigid alignment
@@ -86,6 +102,9 @@ bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, i
 		clientComponent->AddWorldRotation(dq);
 		clientComponent->SetWorldLocation(worldpos);
 
+	}
+	else {
+		// We only need 2 snaps to make a rigid joint, so theres no need to continue solving.
 	}
 
 	return true;

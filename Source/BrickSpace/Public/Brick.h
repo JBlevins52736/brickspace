@@ -27,6 +27,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "VAR")
 	FString shortName;
 
+	//void FindLayer(int layerind, UBrick* brick);
+
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -40,5 +43,5 @@ private:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	std::list<UBrick *> bricks;	// Note: Assumes no bricks are actually deleted.
+	std::list<UBrick *> overlappedBricks;	// Note: Assumes no bricks are actually deleted.
 };

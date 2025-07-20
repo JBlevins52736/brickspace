@@ -1,6 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Brick.h"
+#include "Assembly.h"
 
 void UBrick::BeginPlay()
 {
@@ -22,13 +23,13 @@ void UBrick::BeginPlay()
 		}
 	}
 
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	if (mesh != nullptr)
-	{
-		// Add overlap with other bricks.
-		mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
-		mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
-	}
+	//UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	//if (mesh != nullptr)
+	//{
+	//	// Add overlap with other bricks.
+	//	mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
+	//	mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
+	//}
 
 }
 
@@ -41,20 +42,45 @@ void UBrick::ForePinch(USelector* selector, bool state)
 	Super::ForePinch(selector, state);
 
 	// Add overlap with other bricks.
-	//UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	//if (mesh != nullptr)
-	//{
-	//	if (state) {
-	//		// Add overlap with other bricks.
-	//		mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
-	//		mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
-	//	}
-	//	else {
-	//		// Remove overlap with other bricks.
-	//		mesh->OnComponentBeginOverlap.RemoveAll(this);
-	//		mesh->OnComponentEndOverlap.RemoveAll(this);
-	//	}
-	//}
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	if (mesh != nullptr)
+	{
+		if (state) {
+			// Add overlap with other bricks.
+			mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
+			mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
+		}
+		else {
+			// Remove overlap with other bricks.
+			mesh->OnComponentBeginOverlap.RemoveAll(this);
+			mesh->OnComponentEndOverlap.RemoveAll(this);
+		}
+	}
+
+	if (UAssembly::PlayMode() && !state) {
+
+		int snapCnt = 0;
+		// On release, if brick is rigidly snapped, we attempt to add this brick to the main assembly.
+		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
+			if ( tubes[tubeind]->IsSnapped() )
+				++snapCnt;
+		for (int studind = 0; studind < studs.size(); ++studind)
+			if (studs[studind]->IsSnapped())
+				++snapCnt;
+
+		// Bricks that are released but not snapped will not be tested against the assembly.
+		if (snapCnt > 0) {
+			// When target brick only had one snap, the full pose cannot be tested, only the pivot.
+			// Best to avoid non-rigidly snapped bricks when authoring the target assembly.
+			if (!UAssembly::TryAddBrick(this)) 
+			{
+				// This brick will be destroyed in a flash of glory when it doesn't match the existing assembly.
+			}
+			else {
+				// This brick will be silently destroyed and the brick in the existing assembly made visible.
+			}
+		}
+	}
 }
 
 void UBrick::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -65,7 +91,7 @@ void UBrick::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAc
 		UBrick* enteringBrick = Cast<UBrick>(OtherComp->GetChildComponent(i));
 		if (enteringBrick != nullptr)
 		{
-			bricks.push_back(enteringBrick);
+			overlappedBricks.push_back(enteringBrick);
 			UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin enteringBrick:%s"), *FString(enteringBrick->ClientName()));
 			break;
 		}
@@ -78,7 +104,7 @@ void UBrick::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActo
 		UBrick* exitingBrick = Cast<UBrick>(OtherComp->GetChildComponent(i));
 		if (exitingBrick != nullptr)
 		{
-			bricks.remove(exitingBrick);
+			overlappedBricks.remove(exitingBrick);
 			UE_LOG(LogTemp, Warning, TEXT("OnOverlapEnd exitingBrick:%s"), *FString(exitingBrick->ClientName()));
 			break;
 		}
@@ -93,24 +119,8 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	// PinSnapped: Unsnap stress test. If fail: Enter Snapping/Seeking mode. Otherwise: Pin rotate followed by tube/stud proximity matches.
 	// RigidSnapped: Unsnap stress test only.
 
-	//{
-	//	int snapcnt = 0;
-	//	FTransform pivot;
-	//	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
-	//		if (tubes[tubeind]->IsSnapped())
-	//			return;
-	//	for (int studind = 0; studind < studs.size(); ++studind) {
-	//		if (studs[studind]->IsSnapped())
-	//			return;
-	//	}
-	//}
-
 	// Move brick freely, if already snapped the brick will temporarilly be returned to unsnapped movement to allow unsnap testing.
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// If no bricks are overlapped then there can be no snaps.
-	if (bricks.size() == 0)
-		return;
 
 	// Try breaking any existing snaps.
 	{
@@ -120,8 +130,12 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 			studs[studind]->TryBreakSnap();
 	}
 
+	// If no bricks are overlapped then there can be no additional snaps.
+	if (overlappedBricks.size() == 0)
+		return;
+
 	// Try making new snaps.
-	for (UBrick* brick : bricks) {
+	for (UBrick* brick : overlappedBricks) {
 		// Test all local tubes with overlapped bricks studs.
 		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
 			for (int studind = 0; studind < brick->studs.size(); ++studind)
