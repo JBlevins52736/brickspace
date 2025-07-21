@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+class UBrick;
+
 #include "SnapBase.generated.h"
 
 
@@ -20,6 +22,9 @@ public:
 	void TrySnap(USnapBase*);
 	bool ApplySnap(USceneComponent* clientComponent, FTransform &pivot, int snapcnt);
 	bool IsSnapped() { return (snappedTo != nullptr); }
+
+	// Note: Storing brick is a load time efficiency to improve walking through snap graph recursively.
+	UBrick* brick = nullptr;	// The UBrick that this USnapBase (Stud/Tube) is attached to.
 
 protected:
 	// Called when the game starts

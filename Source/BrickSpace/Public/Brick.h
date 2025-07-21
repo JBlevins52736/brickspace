@@ -27,8 +27,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = "VAR")
 	FString shortName;
 
-	//void FindLayer(int layerind, UBrick* brick);
-
+	void FindLayerBricks(int layerind);
+	int layer = 0;
 
 protected:
 	virtual void BeginPlay() override;

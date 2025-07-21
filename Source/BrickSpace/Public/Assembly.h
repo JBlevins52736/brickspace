@@ -21,17 +21,16 @@ public:
 	void LoadAssembly(FString fname);
 	void SaveAssembly(FString fname);
 
-	static bool PlayMode();
-	static bool TryAddBrick(UBrick* brick);
-	static bool TryRemoveBrick(UBrick* brick);
+	bool PlayMode();
+	bool TryAddBrick(UBrick* brick);
+	bool TryRemoveBrick(UBrick* brick);
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 public:	
-	int AddLayer(int layerind, UBrick*brick);
-
 	static UAssembly* _Instance;
-	TArray<UBrick*> bricks;	
+	TArray<UBrick*> groundPlateBricks;
+	std::vector<UBrick*> assembledBricks;
 };

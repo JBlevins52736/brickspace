@@ -15,11 +15,14 @@ void UBrick::BeginPlay()
 		UTube* tube = Cast<UTube>(clientComponent->GetChildComponent(i));
 		if (tube != nullptr) {
 			tubes.push_back(tube);
+			tube->brick = this;
 		}
 		else {
 			UStud* stud = Cast<UStud>(clientComponent->GetChildComponent(i));
-			if (stud != nullptr)
+			if (stud != nullptr) {
+				stud->brick = this;
 				studs.push_back(stud);
+			}
 		}
 	}
 
@@ -57,7 +60,7 @@ void UBrick::ForePinch(USelector* selector, bool state)
 		}
 	}
 
-	if (UAssembly::PlayMode() && !state) {
+	if (UAssembly::_Instance->PlayMode() && !state) {
 
 		int snapCnt = 0;
 		// On release, if brick is rigidly snapped, we attempt to add this brick to the main assembly.
@@ -72,7 +75,7 @@ void UBrick::ForePinch(USelector* selector, bool state)
 		if (snapCnt > 0) {
 			// When target brick only had one snap, the full pose cannot be tested, only the pivot.
 			// Best to avoid non-rigidly snapped bricks when authoring the target assembly.
-			if (!UAssembly::TryAddBrick(this)) 
+			if (!UAssembly::_Instance->TryAddBrick(this)) 
 			{
 				// This brick will be destroyed in a flash of glory when it doesn't match the existing assembly.
 			}
@@ -162,4 +165,10 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 				++snapcnt;
 		}
 	}
+}
+
+// Recursive method initiated from Assembly groundPlateBricks.
+// We use Vodget::selectionFilter UInt16 high order bit, 0x1000
+void UBrick::FindLayerBricks(int layerind)
+{
 }

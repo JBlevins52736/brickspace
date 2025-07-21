@@ -24,26 +24,27 @@ void UAssembly::BeginPlay()
 	Super::BeginPlay();
 
 	// Find the groundplate bricks before snapped bricks might be added to the hierarchy.
-	GetOwner()->GetComponents<UBrick>(bricks);
+	GetOwner()->GetComponents<UBrick>(groundPlateBricks);
 }
 
 void UAssembly::LoadAssembly(FString fname)
 {
 }
 
-int UAssembly::AddLayer(int layerind, UBrick* brick)
-{
-	return 0;
-}
-
 void UAssembly::SaveAssembly(FString fname)
 {
+	//{
+	//	// 
+	//	for (int i = 0; i < groundPlateBricks.Num(); ++i)
+	//		groundPlateBricks[i]->selectionFilter = 0xFF;
+	//}
+
 	int layer = 0;
 	int bricksAdded = 0;
 	do {
 		bricksAdded = 0;
-		for (int i = 0; i < bricks.Num(); ++i)
-			bricksAdded += AddLayer(layer, bricks[i] );
+		for (int i = 0; i < groundPlateBricks.Num(); ++i)
+			groundPlateBricks[i]->FindLayerBricks(layer);
 	} while (bricksAdded > 0);
 }
 
