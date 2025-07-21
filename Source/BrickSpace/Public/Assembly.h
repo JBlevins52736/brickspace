@@ -18,13 +18,12 @@ public:
 	// Sets default values for this component's properties
 	UAssembly();
 
-	static void LoadAssembly(FString fname);
-	static void SaveAssembly(FString fname);
+	void LoadAssembly(FString fname);
+	void SaveAssembly(FString fname);
 
 	static bool PlayMode();
 	static bool TryAddBrick(UBrick* brick);
 	static bool TryRemoveBrick(UBrick* brick);
-
 
 protected:
 	// Called when the game starts
@@ -34,5 +33,5 @@ public:
 	int AddLayer(int layerind, UBrick*brick);
 
 	static UAssembly* _Instance;
-	static TArray<UBrick*> bricks;	
+	TArray<UBrick*> bricks;	
 };
