@@ -52,12 +52,14 @@ void USnapBase::TryBreakSnap()
 
 bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, int snapcnt)
 {
-	if (trySnappedTo == nullptr)
-		return false;
+	if (trySnappedTo != nullptr) {
+		snappedTo = trySnappedTo;
+		snappedTo->snappedTo = this;
+		trySnappedTo = nullptr;
+	}
 
-	snappedTo = trySnappedTo;
-	snappedTo->snappedTo = this;
-	trySnappedTo = nullptr;
+	if (snappedTo == nullptr)
+		return false;
 
 	if (snapcnt == 0) {
 
@@ -87,7 +89,7 @@ bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, i
 			// Diagonal or irregular snap detected.
 			snappedTo->snappedTo = nullptr;
 			snappedTo = nullptr;
-			UE_LOG(LogTemp, Warning, TEXT("Diagonal snap detected:%f not 19.5"), len );
+			//UE_LOG(LogTemp, Warning, TEXT("Diagonal snap detected:%f not 19.5"), len );
 			return false;
 		}
 		toDir /= len;

@@ -16,14 +16,15 @@ UAssembly::UAssembly()
 	// THERE CAN BE ONLY ONE
 	_Instance = this;
 
-	// Find the groundplate bricks before snapped bricks might be added to the hierarchy.
-	GetOwner()->GetComponents<UBrick>(bricks);
 }
 
 // Called when the game starts
 void UAssembly::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// Find the groundplate bricks before snapped bricks might be added to the hierarchy.
+	GetOwner()->GetComponents<UBrick>(bricks);
 }
 
 void UAssembly::LoadAssembly(FString fname)

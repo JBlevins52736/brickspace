@@ -134,17 +134,19 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	if (overlappedBricks.size() == 0)
 		return;
 
-	// Try making new snaps.
-	for (UBrick* brick : overlappedBricks) {
-		// Test all local tubes with overlapped bricks studs.
-		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
-			for (int studind = 0; studind < brick->studs.size(); ++studind)
-				tubes[tubeind]->TrySnap(brick->studs[studind]);
-		}
-		// Test all local studs with overlapped bricks tubes.
-		for (int studind = 0; studind < studs.size(); ++studind) {
-			for (int tubeind = 0; tubeind < brick->tubes.size(); ++tubeind)
-				studs[studind]->TrySnap(brick->tubes[tubeind]);
+	{
+		// Try making new snaps.
+		for (UBrick* brick : overlappedBricks) {
+			// Test all local tubes with overlapped bricks studs.
+			for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
+				for (int studind = 0; studind < brick->studs.size(); ++studind)
+					tubes[tubeind]->TrySnap(brick->studs[studind]);
+			}
+			// Test all local studs with overlapped bricks tubes.
+			for (int studind = 0; studind < studs.size(); ++studind) {
+				for (int tubeind = 0; tubeind < brick->tubes.size(); ++tubeind)
+					studs[studind]->TrySnap(brick->tubes[tubeind]);
+			}
 		}
 	}
 
