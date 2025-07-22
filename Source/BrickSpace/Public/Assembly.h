@@ -30,7 +30,6 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	static UAssembly* _Instance;
 	TArray<UBrick*> groundPlateBricks;
 	std::vector<UBrick*> assembledBricks;
 };

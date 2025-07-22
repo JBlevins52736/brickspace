@@ -27,8 +27,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "VAR")
 	FString shortName;
 
-	void FindLayerBricks(int layerind);
-	int layer = 0;
+	FVector GetLocation();
+	FQuat GetQuat();
+	FString GetMaterialPathName();
+
+	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
 
 protected:
 	virtual void BeginPlay() override;

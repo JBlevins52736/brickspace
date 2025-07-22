@@ -60,30 +60,6 @@ void UBrick::ForePinch(USelector* selector, bool state)
 		}
 	}
 
-	if (UAssembly::_Instance->PlayMode() && !state) {
-
-		int snapCnt = 0;
-		// On release, if brick is rigidly snapped, we attempt to add this brick to the main assembly.
-		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
-			if ( tubes[tubeind]->IsSnapped() )
-				++snapCnt;
-		for (int studind = 0; studind < studs.size(); ++studind)
-			if (studs[studind]->IsSnapped())
-				++snapCnt;
-
-		// Bricks that are released but not snapped will not be tested against the assembly.
-		if (snapCnt > 0) {
-			// When target brick only had one snap, the full pose cannot be tested, only the pivot.
-			// Best to avoid non-rigidly snapped bricks when authoring the target assembly.
-			if (!UAssembly::_Instance->TryAddBrick(this)) 
-			{
-				// This brick will be destroyed in a flash of glory when it doesn't match the existing assembly.
-			}
-			else {
-				// This brick will be silently destroyed and the brick in the existing assembly made visible.
-			}
-		}
-	}
 }
 
 void UBrick::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -167,8 +143,37 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	}
 }
 
+FVector UBrick::GetLocation()
+{
+	return clientComponent->GetComponentLocation();
+}
+
+FQuat UBrick::GetQuat()
+{
+	return clientComponent->GetComponentQuat();
+}
+
+FString UBrick::GetMaterialPathName()
+{
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	if (mesh != nullptr)
+		return mesh->GetMaterial(0)->GetPathName();
+	FString retval;
+	return retval;
+}
+
 // Recursive method initiated from Assembly groundPlateBricks.
 // We use Vodget::selectionFilter UInt16 high order bit, 0x1000
-void UBrick::FindLayerBricks(int layerind)
+void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*> &layerBricks)
 {
+	// Return if already added.
+	if (clientComponent->GetAttachParent() == pnt)
+		return;
+
+	clientComponent->AttachToComponent(pnt, FAttachmentTransformRules::KeepWorldTransform);
+
+	// Changing clientComponent to new parent redirects grabber to move assembly.
+	clientComponent = pnt;
+
+	layerBricks.push_back(this);
 }
