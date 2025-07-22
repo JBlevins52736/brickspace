@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
-class UBrick;
+#include "Brick.h"
 
 #include "Assembly.generated.h"
 
