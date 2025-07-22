@@ -5,7 +5,6 @@
 #include "Engine/DataTable.h"
 #include "VodgetSpawner.generated.h"
 
-// Simple data structure for spawnable items
 USTRUCT(BlueprintType)
 struct FSpawnableData : public FTableRowBase
 {
@@ -15,13 +14,7 @@ struct FSpawnableData : public FTableRowBase
 	TSubclassOf<AActor> ActorBlueprint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawnable")
-	FText DisplayName;
-
-	FSpawnableData()
-	{
-		ActorBlueprint = nullptr;
-		DisplayName = FText::FromString("Unnamed Item");
-	}
+	FString ShortName = "UnnamedBrick";
 };
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -32,19 +25,15 @@ class BRICKSPACE_API UVodgetSpawner : public UVodget
 public:
 	UVodgetSpawner();
 
-	// Data table reference
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
 	UDataTable* SpawnDataTable = nullptr;
 
-	// Current selected item index
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
 	int32 CurrentIndex = 0;
 
-	// Spawn distance in cm
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner", meta = (ClampMin = "10", ClampMax = "100"))
-	float SpawnDistance = 30.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Conveyor")
+	TMap<FName, USceneComponent*> NamedSpawnPoints;
 
-	// Spawning functions
 	UFUNCTION(BlueprintCallable, Category = "Spawner")
 	AActor* SpawnByIndex(int32 Index);
 
@@ -52,12 +41,37 @@ public:
 	AActor* SpawnCurrent();
 
 	UFUNCTION(BlueprintCallable, Category = "Spawner")
+	AActor* SpawnByName(const FString& ShortName);
+
+	UFUNCTION(BlueprintCallable, Category = "Spawner")
+	AActor* SpawnAtNamedPoint(FName PointName);
+
+	UFUNCTION(BlueprintCallable, Category = "Spawner")
+	AActor* SpawnAtTransform(const FTransform& SpawnTransform);
+
+	UFUNCTION(BlueprintCallable, Category = "Spawner")
+	AActor* SpawnByNameAtTransform(const FString& ShortName, const FTransform& SpawnTransform);
+
 	void SetCurrentIndex(int32 Index);
+	void NextBrick();
+	void PreviousBrick();
+
+	int32 GetBrickCount() const { return CachedRowNames.Num(); }
+	TArray<FString> GetAllShortNames() const;
+	FString GetCurrentBrickName() const;
+	bool IsValidIndex(int32 Index) const;
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	TArray<FName> CachedRowNames;
+	TMap<FString, FName> ShortNameToRowNameMap;
+
+	AActor* SpawnBrick(const FSpawnableData* Data, const FTransform& Transform);
+	const FSpawnableData* GetBrickDataByIndex(int32 Index) const;
+	const FSpawnableData* GetBrickDataByName(const FString& ShortName) const;
 	void CacheRowNames();
+	void CacheShortNames();
+	FTransform GetNamedSpawnTransform(FName SlotName) const;
 };
