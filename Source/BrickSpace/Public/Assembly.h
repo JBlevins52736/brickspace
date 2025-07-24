@@ -8,18 +8,47 @@
 
 #include "Assembly.generated.h"
 
+USTRUCT()
+struct FAssemblyBrick {
+	GENERATED_USTRUCT_BODY()
 
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+	UPROPERTY()
+	int layerInd;
+
+	UPROPERTY()
+	FString shortName;
+
+	UPROPERTY()
+	FVector position;
+
+	UPROPERTY()
+	FQuat rotation;
+
+	UPROPERTY()
+	FString materialPathName;
+};
+
+USTRUCT()
+struct FAssemblyBrickList {
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	TArray<FAssemblyBrick> bricks;
+};
+
+UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API UAssembly : public USceneComponent
 {
 	GENERATED_BODY()
 
-public:	
+public:
 	// Sets default values for this component's properties
 	UAssembly();
 
-	void LoadAssembly(FString fname);
-	void SaveAssembly(FString fname);
+	void LoadAssembly();
+
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void SaveAssembly(const int Value);
 
 	bool PlayMode();
 	bool TryAddBrick(UBrick* brick);
@@ -29,7 +58,7 @@ protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	TArray<UBrick*> groundPlateBricks;
 	std::vector<UBrick*> assembledBricks;
 };

@@ -22,6 +22,7 @@ public:
 	void TrySnap(USnapBase*);
 	bool ApplySnap(USceneComponent* clientComponent, FTransform &pivot, int snapcnt);
 	bool IsSnapped() { return (snappedTo != nullptr); }
+	USnapBase* snappedTo = nullptr;
 
 	// Note: Storing brick is a load time efficiency to improve walking through snap graph recursively.
 	UBrick* brick = nullptr;	// The UBrick that this USnapBase (Stud/Tube) is attached to.
@@ -38,7 +39,6 @@ private:
 	// It would be best if we removed blueprint scaling by re-imported all bricks at the correct size.
 	const float SnapDistSq = 225.0;	// 60.0f squared == 3600  at 25% 15 squared == 225.0
 	const float UnsnapDistSq = 900.0; // 120.0f squared == 14,400 at 25% 30.0 squared == 900.0
-	USnapBase* snappedTo = nullptr;
 	float trySnapDistSq;
 	USnapBase* trySnappedTo = nullptr;
 };

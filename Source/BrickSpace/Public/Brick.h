@@ -31,6 +31,7 @@ public:
 	FQuat GetQuat();
 	FString GetMaterialPathName();
 
+	bool TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks);
 	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
 
 protected:

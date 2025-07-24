@@ -15,6 +15,7 @@ public class BrickSpace : ModuleRules
                 "Engine",
                 "InputCore",
                 "Json",
+				"JsonUtilities",
                 "AndroidPermission",
                 "Sockets",
                 "UMG",

@@ -145,12 +145,12 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 
 FVector UBrick::GetLocation()
 {
-	return clientComponent->GetComponentLocation();
+	return clientComponent->GetRelativeLocation();
 }
 
 FQuat UBrick::GetQuat()
 {
-	return clientComponent->GetComponentQuat();
+	return clientComponent->GetRelativeRotation().Quaternion();
 }
 
 FString UBrick::GetMaterialPathName()
@@ -162,18 +162,27 @@ FString UBrick::GetMaterialPathName()
 	return retval;
 }
 
-// Recursive method initiated from Assembly groundPlateBricks.
-// We use Vodget::selectionFilter UInt16 high order bit, 0x1000
-void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*> &layerBricks)
+bool UBrick::TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks)
 {
-	// Return if already added.
-	if (clientComponent->GetAttachParent() == pnt)
-		return;
+	if (clientComponent->Mobility != EComponentMobility::Movable || clientComponent->GetAttachParent() == pnt)
+		return false;
 
 	clientComponent->AttachToComponent(pnt, FAttachmentTransformRules::KeepWorldTransform);
-
-	// Changing clientComponent to new parent redirects grabber to move assembly.
-	clientComponent = pnt;
-
 	layerBricks.push_back(this);
+	return true;
+}
+
+// Recursive method initiated from Assembly groundPlateBricks.
+// We use Vodget::selectionFilter UInt16 high order bit, 0x1000
+void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*>& layerBricks)
+{
+	// Note: This brick is either already in the assembly or it is an unmovable groundplane brick.
+	// Unmovable bricks are immediatly rejected in the TryReparent(...) method.
+	int snapcnt = 0;
+	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
+		if (tubes[tubeind]->snappedTo != nullptr)
+			tubes[tubeind]->snappedTo->brick->TryReparent(pnt, layerBricks);
+	for (int studind = 0; studind < studs.size(); ++studind)
+		if (studs[studind]->snappedTo != nullptr)
+			studs[studind]->snappedTo->brick->TryReparent(pnt, layerBricks);
 }

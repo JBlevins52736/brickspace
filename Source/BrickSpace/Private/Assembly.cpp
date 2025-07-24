@@ -3,26 +3,11 @@
 
 #include "Assembly.h"
 #include "Brick.h"
+#include "Json.h"
+#include "JsonUtilities.h"
+#include "Misc/FileHelper.h"
+#include "CoreMinimal.h"
 
-USTRUCT()
-struct FBrick {
-public:
-
-	UPROPERTY()
-	int layerInd;
-
-	UPROPERTY()
-	FString shortName;
-
-	UPROPERTY()
-	FVector position;
-
-	UPROPERTY()
-	FQuat rotation;
-
-	UPROPERTY()
-	FString materialPathName;
-};
 
 // Sets default values for this component's properties
 UAssembly::UAssembly()
@@ -41,13 +26,32 @@ void UAssembly::BeginPlay()
 	GetOwner()->GetComponents<UBrick>(groundPlateBricks);
 }
 
-void UAssembly::LoadAssembly(FString fname)
+void UAssembly::LoadAssembly()
 {
+	// Load a file into an FString
+	FString jsonFilePath;
+
+	FString FileContent;
+	if (FFileHelper::LoadFileToString(FileContent, *jsonFilePath))
+	{
+		TArray<FAssemblyBrick> data;
+		FJsonObjectConverter::JsonArrayStringToUStruct(FileContent, &data, 0, 0);
+
+		UE_LOG(LogTemp, Warning, TEXT("File content: %s"), *FileContent);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("Failed to load file."));
+	}
+
 }
 
-void UAssembly::SaveAssembly(FString fname)
+void UAssembly::SaveAssembly(const int Value)
 {
-	std::vector<FBrick> bricks;
+	//if (!Value)
+	//	return;
+
+	FAssemblyBrickList brickList;
 
 	// Populate layerBricks with ground plate bricks as first (untracked) layer.
 	std::vector<UBrick*> layerBricks;
@@ -62,23 +66,48 @@ void UAssembly::SaveAssembly(FString fname)
 		for (int i = 0; i < layerBricks.size(); ++i)
 			layerBricks[i]->ReparentConnectedBricks(this, reparentedBricks);
 
-		// Add all reparented bricks to FBrick list to be saved/serialized as JSON.
+		// Add all reparented bricks to FAssemblyBrick list to be saved/serialized as JSON.
 		for (int i = 0; i < reparentedBricks.size(); ++i) {
-			FBrick brick;
-			brick.layerInd = layer;
-			brick.shortName = layerBricks[i]->shortName;
-			brick.position = layerBricks[i]->GetLocation();
-			brick.rotation = layerBricks[i]->GetQuat();
-			brick.materialPathName = layerBricks[i]->GetMaterialPathName();
-			bricks.push_back(brick);
+
+			brickList.bricks.Add(FAssemblyBrick{ 
+				layer,
+				reparentedBricks[i]->shortName,
+				reparentedBricks[i]->GetLocation(),
+				reparentedBricks[i]->GetQuat(),
+				reparentedBricks[i]->GetMaterialPathName() });
 		}
 
 		layerBricks = reparentedBricks;
+		reparentedBricks.clear();
 		++layer;
 	};
 
 	// Save bricks vector to json file.
+	TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(brickList);
+	if (JsonObject != nullptr)
+	{
+		FString JsonString;
+		if (!FJsonSerializer::Serialize(JsonObject.ToSharedRef(), TJsonWriterFactory<>::Create(&JsonString, 0)))
+		{
+			// ERROR
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("JSON:%s"), *JsonString);
 
+#ifdef BLAH
+			FString jsonFilePath;
+			if (FFileHelper::SaveStringToFile(JsonString, *jsonFilePath))
+			{
+				UE_LOG(LogTemp, Warning, TEXT("String saved to file successfully."));
+			}
+			else
+			{
+				UE_LOG(LogTemp, Error, TEXT("Failed to save string to file."));
+			}
+#endif
+		}
+
+	}
 }
 
 bool UAssembly::PlayMode()
