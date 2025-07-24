@@ -166,11 +166,11 @@ bool UBrick::TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks
 {
 	// Note: After the initial clientComponent (brick) is reparented to pnt(Assembly),
 	// clientComponent is set to pnt(Assembly) so that Grabber now grabs entire group instead of a single brick.
-	if (clientComponent->Mobility != EComponentMobility::Movable || clientComponent->GetAttachParent() == pnt)
+	if (clientComponent->Mobility != EComponentMobility::Movable || clientComponent == pnt)
 		return false;
 
 	clientComponent->AttachToComponent(pnt, FAttachmentTransformRules::KeepWorldTransform);
-	//clientComponent = pnt;
+	clientComponent = pnt;
 	layerBricks.push_back(this);
 	return true;
 }
