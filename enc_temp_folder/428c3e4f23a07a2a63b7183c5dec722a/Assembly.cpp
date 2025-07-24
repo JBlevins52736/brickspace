@@ -120,26 +120,19 @@ void UAssembly::SaveAssembly(const int Value)
 		for (int i = 0; i < layerBricks.size(); ++i)
 			layerBricks[i]->ReparentConnectedBricks(this, reparentedBricks);
 
-		if (SpawnDataTable != nullptr )
-		{
-			//const FName* RowName = ShortNameToRowNameMap.Find(ShortName);
-			//return RowName ? SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName")) : nullptr;
+		// Add all reparented bricks to FAssemblyBrick list to be saved/serialized as JSON.
+		for (int i = 0; i < reparentedBricks.size(); ++i) {
+
+			brickList.bricks.Add(FAssemblyBrick{
+				layer,
+				reparentedBricks[i]->shortName,
+				reparentedBricks[i]->GetLocation(),
+				reparentedBricks[i]->GetQuat(),
+				reparentedBricks[i]->GetMaterialPathName() });
 
 
-			// Add all reparented bricks to FAssemblyBrick list to be saved/serialized as JSON.
-			for (int i = 0; i < reparentedBricks.size(); ++i) {
+			//AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint, Transform);
 
-				brickList.bricks.Add(FAssemblyBrick{
-					layer,
-					reparentedBricks[i]->shortName,
-					reparentedBricks[i]->GetLocation(),
-					reparentedBricks[i]->GetQuat(),
-					reparentedBricks[i]->GetMaterialPathName() });
-
-				//SpawnDataTable->
-				//AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint, Transform);
-
-			}
 		}
 
 		layerBricks = reparentedBricks;

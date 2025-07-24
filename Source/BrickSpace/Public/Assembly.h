@@ -50,6 +50,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void SaveAssembly(const int Value);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
+	UDataTable* SpawnDataTable = nullptr;
+
 	bool PlayMode();
 	bool TryAddBrick(UBrick* brick);
 	bool TryRemoveBrick(UBrick* brick);
