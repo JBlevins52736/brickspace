@@ -1,0 +1,76 @@
+{
+	"bricks": [
+		{
+			"layerInd": 0,
+			"shortName": "OneBySix",
+			"position":
+			{
+				"x": 78,
+				"y": 468,
+				"z": 96
+			},
+			"rotation":
+			{
+				"x": -0,
+				"y": 0,
+				"z": -0.70710678118654757,
+				"w": 0.70710678118654768
+			},
+			"materialPathName": "/Game/Models/Plastic_Red.Plastic_Red"
+		},
+		{
+			"layerInd": 1,
+			"shortName": "TwoByThree",
+			"position":
+			{
+				"x": 233.9999999999998,
+				"y": 233.99999999999989,
+				"z": 127.99999999999997
+			},
+			"rotation":
+			{
+				"x": 1.1044937774325495e-16,
+				"y": -1.1333581760629095e-17,
+				"z": 0.99999999999999978,
+				"w": 2.8327694488239888e-16
+			},
+			"materialPathName": "/Game/Maps/UEDPIE_0_BrickSpace.BrickSpace:PersistentLevel.BP_2x3_C_1.StaticMesh.MID_ArrowMaterial_0"
+		},
+		{
+			"layerInd": 2,
+			"shortName": "TwoBySix",
+			"position":
+			{
+				"x": 156,
+				"y": 467.99999999999994,
+				"z": 159.99999999999997
+			},
+			"rotation":
+			{
+				"x": -1.0687282523569845e-16,
+				"y": 7.4729605618110957e-17,
+				"z": -0.70710678118654779,
+				"w": 0.70710678118654713
+			},
+			"materialPathName": "/Game/Maps/UEDPIE_0_BrickSpace.BrickSpace:PersistentLevel.BP_2x5_C_4.StaticMesh.MID_VertexColorViewMode_RedOnly_0"
+		},
+		{
+			"layerInd": 3,
+			"shortName": "OneByThree",
+			"position":
+			{
+				"x": 234,
+				"y": 467.99999999999989,
+				"z": 255.99999999999994
+			},
+			"rotation":
+			{
+				"x": -2.1072650218715239e-17,
+				"y": 1.0453138896698538e-32,
+				"z": -4.9605240860567199e-16,
+				"w": 0.99999999999999978
+			},
+			"materialPathName": "/Game/Models/Plastic_Blue.Plastic_Blue"
+		}
+	]
+}
