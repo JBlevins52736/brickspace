@@ -166,7 +166,6 @@ void UAssembly::SaveAssembly(const int Value)
 		}
 	}
 
-#ifdef BLAH
 	// Clear assembly and try to reload.
 	TArray<USceneComponent*> ChildSceneComponents;
 	GetChildrenComponents(false, ChildSceneComponents);
@@ -178,7 +177,6 @@ void UAssembly::SaveAssembly(const int Value)
 			Child->GetOwner()->Destroy(true, true); //  Destroy();
 		}
 	}
-#endif
 
 	LoadAssembly();
 }
