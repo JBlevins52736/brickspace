@@ -64,4 +64,10 @@ protected:
 public:
 	TArray<UBrick*> groundPlateBricks;
 	std::vector<UBrick*> assembledBricks;
+
+private:
+	// HACK: Until table uses shortname as key
+	void CacheShortNames();
+	TMap<FString, FName> ShortNameToRowNameMap;
+
 };

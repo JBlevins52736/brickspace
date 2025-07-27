@@ -7,6 +7,9 @@
 #include "JsonUtilities.h"
 #include "Misc/FileHelper.h"
 #include "CoreMinimal.h"
+#include "AssetRegistry/AssetRegistryModule.h"
+
+#include "VodgetSpawner.h" // FSpawnableData
 
 
 // Sets default values for this component's properties
@@ -22,8 +25,30 @@ void UAssembly::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CacheShortNames(); // HACK: Until table uses shortname as key
+
 	// Find the groundplate bricks before snapped bricks might be added to the hierarchy.
 	GetOwner()->GetComponents<UBrick>(groundPlateBricks);
+
+	LoadAssembly();
+}
+
+// HACK: Until table uses shortname as key
+void UAssembly::CacheShortNames()
+{
+	ShortNameToRowNameMap.Empty();
+	if (!SpawnDataTable) return;
+
+	TArray<FName> CachedRowNames = SpawnDataTable->GetRowNames();
+	for (const FName& RowName : CachedRowNames)
+	{
+		const FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(RowName, TEXT("CacheShortNames"));
+		if (Data && !Data->ShortName.IsEmpty())
+		{
+			ShortNameToRowNameMap.Add(Data->ShortName, RowName);
+		}
+	}
+	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
 }
 
 void UAssembly::LoadAssembly()
@@ -67,13 +92,69 @@ void UAssembly::LoadAssembly()
 					//UE_LOG(LogTemp, Warning, TEXT("Name: %s, Age: %d"), *MyConvertedData.Name, MyConvertedData.Age);
 
 					for (FAssemblyBrick brick : bricklist.bricks)
-					{ 
-						UE_LOG(LogTemp, Warning, TEXT("Layer: %d"), brick.layerInd );
+					{
+						UE_LOG(LogTemp, Warning, TEXT("Layer: %d"), brick.layerInd);
 						UE_LOG(LogTemp, Warning, TEXT("ShortName: %s"), *brick.shortName);
 						UE_LOG(LogTemp, Warning, TEXT("Pos: %f %f %f"), brick.position.X, brick.position.Y, brick.position.Z);
 						UE_LOG(LogTemp, Warning, TEXT("Rot: %f %f %f %f"), brick.rotation.X, brick.rotation.Y, brick.rotation.Z, brick.rotation.W);
 						UE_LOG(LogTemp, Warning, TEXT("Material: %s"), *brick.materialPathName);
 
+						if (SpawnDataTable != nullptr)
+						{
+							const FName* RowName = ShortNameToRowNameMap.Find(brick.shortName);
+							if (RowName != nullptr)
+							{
+								UE_LOG(LogTemp, Warning, TEXT("ROW Name found:"));
+
+								FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName"));
+
+								if (Data != nullptr) {
+
+									UE_LOG(LogTemp, Warning, TEXT("TABLE Data found: Spawning") );
+
+									AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint);
+									FTransform Transform(brick.rotation, brick.position );
+									SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
+									SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+									// Full path including asset name and extension
+									// e.g. materialPathName: "/Game/Models/Plastic_Green.Plastic_Green"
+									FString MaterialPath = *(brick.materialPathName);
+									FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+									FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(MaterialPath));
+
+									if (AssetData.IsValid())
+									{
+										UE_LOG(LogTemp, Warning, TEXT("Matrial AssetData valid: Spawning"));
+
+										UMaterialInterface* BrickMaterial = Cast<UMaterialInterface>(AssetData.GetAsset());
+										if (BrickMaterial)
+										{
+											UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
+											if (mesh != nullptr)
+											{
+												// Add overlap with bricks.
+												mesh->SetMaterial(0, BrickMaterial);
+											}
+										}
+									}
+									else {
+										UE_LOG(LogTemp, Error, TEXT("MATERIAL ASSET NOT FOUND"));
+
+									}
+								}
+								else {
+									UE_LOG(LogTemp, Error, TEXT("Table ROW NOT FOUND"));
+
+								}
+
+							}
+							else {
+								UE_LOG(LogTemp, Error, TEXT("ROW NAME NOT FOUND"));
+
+							}
+
+						}
 					}
 
 				}
@@ -103,8 +184,14 @@ void UAssembly::LoadAssembly()
 	}
 }
 
+bool AlreadySaved = false;
+
 void UAssembly::SaveAssembly(const int Value)
 {
+	if (AlreadySaved)
+		return;
+	AlreadySaved = true;
+
 	FAssemblyBrickList brickList;
 
 	// Populate layerBricks with ground plate bricks as first (untracked) layer.
@@ -120,7 +207,7 @@ void UAssembly::SaveAssembly(const int Value)
 		for (int i = 0; i < layerBricks.size(); ++i)
 			layerBricks[i]->ReparentConnectedBricks(this, reparentedBricks);
 
-		if (SpawnDataTable != nullptr )
+		if (SpawnDataTable != nullptr)
 		{
 			//const FName* RowName = ShortNameToRowNameMap.Find(ShortName);
 			//return RowName ? SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName")) : nullptr;

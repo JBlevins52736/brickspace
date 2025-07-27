@@ -84,9 +84,16 @@ bool USnapBase::ApplySnap(USceneComponent* clientComponent, FTransform& pivot, i
 		// Any subsequent snap must be to locations exactly on the LUnit grid to avoid diagonal snapping.
 		// If distance between snapto location and pivot is not 78 then reject it as a false diagonal snap.
 		// Inter-stud spacing is 78 in modelling space but 19.5 when scaled 25% in blueprint.
+		// Pythagorean theorem has sqrt( 78*78 + 78*78) == 110.3 for the diagonal or 27.58 when scaled 25%
+		// So, scaled, the pivot distance should be a multiple of 19.5 and not a diagonal multiple of 27.58.
+		// The difference is 8.08. Therefore... dividing by 19.5 we get the number of stud difference by rounding to the nearest int.
+		// If abs( (stud difference * 19.5) - len ) is less than 4.038 its probabably not a diagonal. 
+		// To be certain, we shave the error in half to 2.0 as a final test.
 		FVector toDir = snappedTo->GetComponentLocation() - pivot.GetLocation();
 		float len = toDir.Length();
-		if ( len < 19.0 || len > 20.0 ) {
+		int knobsAway = (int)roundf(len / 19.5);
+		float knobDist = (float)knobsAway * 19.5;
+		if ( abs(knobDist - len) > 2.0 ) {
 			// Diagonal or irregular snap detected.
 			snappedTo->snappedTo = nullptr;
 			snappedTo = nullptr;
