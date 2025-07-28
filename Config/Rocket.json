@@ -2,111 +2,111 @@
 	"bricks": [
 		{
 			"layerInd": 0,
-			"shortName": "B2x4S",
+			"shortName": "B2x8S",
 			"position":
 			{
-				"x": 0,
-				"y": 468,
-				"z": 32
+				"x": 312.00000000000011,
+				"y": 546,
+				"z": 31.999999999999972
 			},
 			"rotation":
 			{
-				"x": 0,
-				"y": -0,
-				"z": 1.387778780781446e-17,
-				"w": 0.99999999999999989
+				"x": -2.1854179108990996e-17,
+				"y": -2.1854179108990999e-17,
+				"z": -0.70710678118654746,
+				"w": 0.70710678118654757
 			},
-			"materialPathName": "/Game/Models/Plastic_Red.Plastic_Red"
+			"materialPathName": "/Game/Models/Plastic_Black.Plastic_Black"
 		},
 		{
 			"layerInd": 1,
-			"shortName": "B1x3T",
+			"shortName": "B2x8S",
 			"position":
 			{
-				"x": 78,
-				"y": 468,
-				"z": 127.99999999999999
+				"x": 467.99608719687092,
+				"y": 313.10488880268247,
+				"z": 64.000000000000014
 			},
 			"rotation":
 			{
-				"x": 6.3156711827545727e-17,
-				"y": -6.5671387346507623e-17,
-				"z": 0.70710678118654746,
-				"w": 0.70710678118654724
+				"x": -1.1605978277254752e-19,
+				"y": 3.2772708002869534e-17,
+				"z": -0.99999372946250475,
+				"w": 0.0035413324710660463
 			},
-			"materialPathName": "/Game/Models/Plastic_Blue.Plastic_Blue"
-		},
-		{
-			"layerInd": 1,
-			"shortName": "B1x4T",
-			"position":
-			{
-				"x": 156,
-				"y": 390.00000000000006,
-				"z": 127.99999999999999
-			},
-			"rotation":
-			{
-				"x": 5.3882379394128228e-17,
-				"y": -7.8376901697347372e-17,
-				"z": 0.70710678118654746,
-				"w": 0.70710678118654724
-			},
-			"materialPathName": "/Game/Models/Plastic_Red.Plastic_Red"
+			"materialPathName": "/Game/Models/Plastic_Black.Plastic_Black"
 		},
 		{
 			"layerInd": 2,
 			"shortName": "B2x3S",
 			"position":
 			{
-				"x": 234.00000000000006,
-				"y": 546,
-				"z": 160.00000000000006
+				"x": 467.44364279552963,
+				"y": 391.10293240111781,
+				"z": 96.000000000000014
 			},
 			"rotation":
 			{
-				"x": -3.1040436370338509e-32,
-				"y": -1.0957628896776189e-16,
-				"z": 0.99999999999999989,
-				"w": 2.8327694488239893e-16
+				"x": -8.4331760090642707e-18,
+				"y": 8.3736570521928014e-18,
+				"z": -0.70459824704223595,
+				"w": 0.7096064474516901
 			},
-			"materialPathName": "/Game/Models/Plastic_Black.Plastic_Black"
+			"materialPathName": "/Game/Models/Plastic_Yellow.Plastic_Yellow"
 		},
 		{
 			"layerInd": 2,
 			"shortName": "B2x5S",
 			"position":
 			{
-				"x": 390,
-				"y": 390.00000000000006,
-				"z": 159.99999999999994
+				"x": -0.54461879508232869,
+				"y": 387.7882659930703,
+				"z": 96.000000000000014
 			},
 			"rotation":
 			{
-				"x": 3.0196289203415018e-17,
-				"y": -5.5437739489908192e-17,
-				"z": 0.99999999999999967,
-				"w": 6.1232339957367636e-17
+				"x": -6.9580924184387541e-18,
+				"y": 6.9089841818603123e-18,
+				"z": -0.70459824704223595,
+				"w": 0.7096064474516901
 			},
-			"materialPathName": "/Game/Models/Plastic_Green.Plastic_Green"
+			"materialPathName": "/Game/Maps/UEDPIE_0_BrickSpace.BrickSpace:PersistentLevel.BP_2x5_C_0.StaticMesh.MID_VertexColorViewMode_RedOnly_0"
+		},
+		{
+			"layerInd": 2,
+			"shortName": "S3x4T",
+			"position":
+			{
+				"x": 1.6651588102828327,
+				"y": 75.796091599328861,
+				"z": 166
+			},
+			"rotation":
+			{
+				"x": -3.5157801339496358e-17,
+				"y": -1.2450624421592836e-19,
+				"z": -0.99999372946250475,
+				"w": 0.0035413324710662684
+			},
+			"materialPathName": "/Game/Models/Plastic_Yellow.Plastic_Yellow"
 		},
 		{
 			"layerInd": 3,
-			"shortName": "B1x2T",
+			"shortName": "B2x4S",
 			"position":
 			{
-				"x": 390,
-				"y": 312.00000000000017,
-				"z": 255.99999999999994
+				"x": 389.44559919709428,
+				"y": 390.55048799977658,
+				"z": 128
 			},
 			"rotation":
 			{
-				"x": 1.3388513811497706e-16,
-				"y": -1.5475494402740496e-16,
-				"z": 0.70710678118654735,
-				"w": 0.70710678118654757
+				"x": -6.7156479685213844e-20,
+				"y": -6.76338199432528e-20,
+				"z": -0.70459824704223617,
+				"w": 0.70960644745168966
 			},
-			"materialPathName": "/Game/Models/Plastic_Blue.Plastic_Blue"
+			"materialPathName": "/Game/Models/Plastic_Yellow.Plastic_Yellow"
 		}
 	]
 }

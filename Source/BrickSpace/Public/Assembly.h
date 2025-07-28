@@ -48,6 +48,9 @@ public:
 	void LoadAssembly();
 
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void CreateAssembly(const int Value);
+
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void SaveAssembly(const int Value);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
@@ -69,5 +72,7 @@ private:
 	// HACK: Until table uses shortname as key
 	void CacheShortNames();
 	TMap<FString, FName> ShortNameToRowNameMap;
+	void SpawnBrick(const FAssemblyBrick &brick);
+	void ClearAssembly();
 
 };

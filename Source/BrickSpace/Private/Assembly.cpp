@@ -51,9 +51,72 @@ void UAssembly::CacheShortNames()
 	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
 }
 
+
+void UAssembly::SpawnBrick(const FAssemblyBrick& brick)
+{
+	if (SpawnDataTable == nullptr)
+		return ;
+
+	const FName* RowName = ShortNameToRowNameMap.Find(brick.shortName);
+	if (RowName == nullptr) {
+		UE_LOG(LogTemp, Error, TEXT("ROW NAME NOT FOUND"));
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("ROW Name found:"));
+
+	FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName"));
+	if (Data == nullptr) {
+		UE_LOG(LogTemp, Error, TEXT("Table ROW NOT FOUND"));
+		return;
+	}
+	UE_LOG(LogTemp, Warning, TEXT("TABLE Data found: Spawning"));
+
+	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint);
+	FTransform Transform(brick.rotation, brick.position);
+	SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
+	SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+	// Full path including asset name and extension
+	// e.g. materialPathName: "/Game/Models/Plastic_Green.Plastic_Green"
+	FString MaterialPath = *(brick.materialPathName);
+	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
+	FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(MaterialPath));
+
+	if (AssetData.IsValid())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Material AssetData valid: Spawning"));
+
+		UMaterialInterface* BrickMaterial = Cast<UMaterialInterface>(AssetData.GetAsset());
+		if (BrickMaterial)
+		{
+			UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
+			if (mesh != nullptr)
+			{
+				// Add overlap with bricks.
+				mesh->SetMaterial(0, BrickMaterial);
+			}
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("Material asset not found"));
+	}
+}
+
+bool GameModeActive = true;
 void UAssembly::LoadAssembly()
 {
-	/// HACK: Still loading from PC... must load from game content folder.
+	GameModeActive = true;
+
+	// The Rocket.json file may be created either running in link mode on the PC or in a headset build.
+	// When running in link mode the assembly is saved directly in the projects Config folder.
+	// When running in a build the saved assembly can be accessed by allowing the Quest3 to be mounted as a USB drive and  
+	// can be downloaded from This PC\Quest 3\Internal shared storage\Android\data\com.mixeduprealities.BrickSpace\files\UnrealGame\BrickSpace\BrickSpace\Config
+	// The Rocket.json that exists in the projects Config folder at the time of a build becomes the project default that is 
+	// loaded during BeginPlay().
+	// There are two developer buttons to be used to design alternate assemblies. CreateAssembly and SaveAssembly.
+	// CreateAssembly removes all bricks attached to the ground plate and initiates free building mode.
+	// SaveAssembly saves all bricks attached to the ground plate overwriting Rocket.json, exits free building mode, 
+	// and reloads Rocket.json initiating game play mode.
 
 	// Load a file into an FString
 	FString file = FPaths::ProjectConfigDir();
@@ -81,10 +144,6 @@ void UAssembly::LoadAssembly()
 			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 			{
 				// Successfully deserialized the JSON string into JsonObject
-				// You can now access the fields of the JsonObject
-				//FString Name = JsonObject->GetStringField(TEXT("name"));
-				//FString Version = JsonObject->GetStringField(TEXT("version"));
-
 				FAssemblyBrickList bricklist;
 				if (FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &bricklist, 0, 0))
 				{
@@ -99,62 +158,7 @@ void UAssembly::LoadAssembly()
 						UE_LOG(LogTemp, Warning, TEXT("Rot: %f %f %f %f"), brick.rotation.X, brick.rotation.Y, brick.rotation.Z, brick.rotation.W);
 						UE_LOG(LogTemp, Warning, TEXT("Material: %s"), *brick.materialPathName);
 
-						if (SpawnDataTable != nullptr)
-						{
-							const FName* RowName = ShortNameToRowNameMap.Find(brick.shortName);
-							if (RowName != nullptr)
-							{
-								UE_LOG(LogTemp, Warning, TEXT("ROW Name found:"));
-
-								FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName"));
-
-								if (Data != nullptr) {
-
-									UE_LOG(LogTemp, Warning, TEXT("TABLE Data found: Spawning") );
-
-									AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint);
-									FTransform Transform(brick.rotation, brick.position );
-									SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
-									SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
-
-									// Full path including asset name and extension
-									// e.g. materialPathName: "/Game/Models/Plastic_Green.Plastic_Green"
-									FString MaterialPath = *(brick.materialPathName);
-									FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-									FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(MaterialPath));
-
-									if (AssetData.IsValid())
-									{
-										UE_LOG(LogTemp, Warning, TEXT("Matrial AssetData valid: Spawning"));
-
-										UMaterialInterface* BrickMaterial = Cast<UMaterialInterface>(AssetData.GetAsset());
-										if (BrickMaterial)
-										{
-											UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
-											if (mesh != nullptr)
-											{
-												// Add overlap with bricks.
-												mesh->SetMaterial(0, BrickMaterial);
-											}
-										}
-									}
-									else {
-										UE_LOG(LogTemp, Error, TEXT("MATERIAL ASSET NOT FOUND"));
-
-									}
-								}
-								else {
-									UE_LOG(LogTemp, Error, TEXT("Table ROW NOT FOUND"));
-
-								}
-
-							}
-							else {
-								UE_LOG(LogTemp, Error, TEXT("ROW NAME NOT FOUND"));
-
-							}
-
-						}
+						SpawnBrick(brick);
 					}
 
 				}
@@ -184,13 +188,36 @@ void UAssembly::LoadAssembly()
 	}
 }
 
-bool AlreadySaved = false;
+void UAssembly::ClearAssembly()
+{
+	// Clear all children attached to current assembly.
+	TArray<USceneComponent*> ChildSceneComponents;
+	GetChildrenComponents(false, ChildSceneComponents);
+	for (USceneComponent* Child : ChildSceneComponents)
+	{
+		if (Child)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("  - %s (Class: %s)"), *Child->GetName(), *Child->GetClass()->GetName());
+			// Note: We must delete the actor blueprint that is the owner of each child brick scenecomponent.
+			Child->GetOwner()->Destroy(true, true); //  Destroy();
+		}
+	}
+}
+
+void UAssembly::CreateAssembly(const int Value)
+{
+	if (!GameModeActive)
+		return;
+	GameModeActive = false;
+
+	ClearAssembly();
+}
 
 void UAssembly::SaveAssembly(const int Value)
 {
-	if (AlreadySaved)
+	// Assembly cannot be saved when game mode is active. Developer must call CreateAssembly first.
+	if (GameModeActive)
 		return;
-	AlreadySaved = true;
 
 	FAssemblyBrickList brickList;
 
@@ -209,10 +236,6 @@ void UAssembly::SaveAssembly(const int Value)
 
 		if (SpawnDataTable != nullptr)
 		{
-			//const FName* RowName = ShortNameToRowNameMap.Find(ShortName);
-			//return RowName ? SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName")) : nullptr;
-
-
 			// Add all reparented bricks to FAssemblyBrick list to be saved/serialized as JSON.
 			for (int i = 0; i < reparentedBricks.size(); ++i) {
 
@@ -222,10 +245,6 @@ void UAssembly::SaveAssembly(const int Value)
 					reparentedBricks[i]->GetLocation(),
 					reparentedBricks[i]->GetQuat(),
 					reparentedBricks[i]->GetMaterialPathName() });
-
-				//SpawnDataTable->
-				//AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint, Transform);
-
 			}
 		}
 
@@ -264,18 +283,8 @@ void UAssembly::SaveAssembly(const int Value)
 		}
 	}
 
-	// Clear assembly and try to reload.
-	TArray<USceneComponent*> ChildSceneComponents;
-	GetChildrenComponents(false, ChildSceneComponents);
-	for (USceneComponent* Child : ChildSceneComponents)
-	{
-		if (Child)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("  - %s (Class: %s)"), *Child->GetName(), *Child->GetClass()->GetName());
-			Child->GetOwner()->Destroy(true, true); //  Destroy();
-		}
-	}
-
+	// Clear assembly and reload to restart in game play mode.
+	ClearAssembly();
 	LoadAssembly();
 }
 
