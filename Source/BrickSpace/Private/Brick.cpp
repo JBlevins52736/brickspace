@@ -25,15 +25,6 @@ void UBrick::BeginPlay()
 			}
 		}
 	}
-
-	//UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	//if (mesh != nullptr)
-	//{
-	//	// Add overlap with other bricks.
-	//	mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
-	//	mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
-	//}
-
 }
 
 void UBrick::ForePinch(USelector* selector, bool state)
@@ -57,9 +48,30 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			// Remove overlap with other bricks.
 			mesh->OnComponentBeginOverlap.RemoveAll(this);
 			mesh->OnComponentEndOverlap.RemoveAll(this);
+
+			// Check to see if we match any non active (revealed) bricks we overlapped
+			for (UBrick* brick : overlappedBricks) {
+				if (!brick->isActive) {
+					if (TryMatch(brick)) {
+
+					}
+					else {
+						DoExplodeMismatchedEffect();
+					}
+					GetOwner()->Destroy(true, true); //  Destroy();
+				}
+			}
 		}
 	}
 
+}
+
+void UBrick::DoExplodeMismatchedEffect()
+{
+}
+
+void UBrick::DoAcceptMatchWithRevealedBrick()
+{
 }
 
 void UBrick::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -116,15 +128,18 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	{
 		// Try making new snaps.
 		for (UBrick* brick : overlappedBricks) {
-			// Test all local tubes with overlapped bricks studs.
-			for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
-				for (int studind = 0; studind < brick->studs.size(); ++studind)
-					tubes[tubeind]->TrySnap(brick->studs[studind]);
-			}
-			// Test all local studs with overlapped bricks tubes.
-			for (int studind = 0; studind < studs.size(); ++studind) {
-				for (int tubeind = 0; tubeind < brick->tubes.size(); ++tubeind)
-					studs[studind]->TrySnap(brick->tubes[tubeind]);
+
+			if (brick->isActive) {
+				// Test all local tubes with overlapped bricks studs.
+				for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
+					for (int studind = 0; studind < brick->studs.size(); ++studind)
+						tubes[tubeind]->TrySnap(brick->studs[studind]);
+				}
+				// Test all local studs with overlapped bricks tubes.
+				for (int studind = 0; studind < studs.size(); ++studind) {
+					for (int tubeind = 0; tubeind < brick->tubes.size(); ++tubeind)
+						studs[studind]->TrySnap(brick->tubes[tubeind]);
+				}
 			}
 		}
 	}
@@ -153,13 +168,12 @@ FQuat UBrick::GetQuat()
 	return clientComponent->GetRelativeRotation().Quaternion();
 }
 
-FString UBrick::GetMaterialPathName()
+UMaterialInterface* UBrick::GetMaterial()
 {
 	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
 	if (mesh != nullptr)
-		return mesh->GetMaterial(0)->GetPathName();
-	FString retval;
-	return retval;
+		return mesh->GetMaterial(0);
+	return nullptr;
 }
 
 bool UBrick::TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks)
@@ -188,4 +202,54 @@ void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*>&
 	for (int studind = 0; studind < studs.size(); ++studind)
 		if (studs[studind]->snappedTo != nullptr)
 			studs[studind]->snappedTo->brick->TryReparent(pnt, layerBricks);
+}
+
+// The architect touches bricks to reveal them.
+void UBrick::Reveal(UMaterialInterface* revealMaterial)
+{
+	// studs and tubes will not be checked when inactive (revealed)
+	isActive = false;
+
+	// Only stationary bricks can be revealed
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	if (mesh != nullptr)
+	{
+		// Add overlap with bricks.
+		mesh->SetMaterial(0, revealMaterial);
+		mesh->Mobility = EComponentMobility::Stationary;	// Grabber cannot grab.
+	}
+}
+
+// When the assembler snaps a matching brick over a revealed brick it is made real and the snapped brick is destroyed.
+// If the snapped brick doesn't match it is destroyed in an explosion and the revealed brick remains unchanged.
+bool UBrick::TryMatch(UBrick* assemblerBrick)
+{
+	UStaticMeshComponent* othMesh = Cast<UStaticMeshComponent>(assemblerBrick->clientComponent);
+	if (othMesh == nullptr)
+		return false;
+
+
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	if (mesh == nullptr )
+		return false;
+
+	//if (mesh->GetMaterial(0)->GetMaterial() != othMesh->GetMaterial(0)->GetMaterial())
+	//	return false;
+
+	FTransform pose = clientComponent->GetComponentTransform();
+	FTransform othpose = assemblerBrick->clientComponent->GetComponentTransform();
+	if (!FTransform::AreRotationsEqual(pose, othpose) || !FTransform::AreTranslationsEqual(pose, othpose))
+		return false;
+
+	// We have a full match.
+	
+	// Make assemblerBrick active and solid.
+	assemblerBrick->isActive = true;
+	othMesh->SetMaterial(0, mesh->GetMaterial(0));
+
+	UAssembly* assembly = Cast<UAssembly>(assemblerBrick->clientComponent->GetAttachParent() );
+	if (assembly != nullptr) {
+		assembly->TryAdvanceLayer();
+	}
+	return true;
 }

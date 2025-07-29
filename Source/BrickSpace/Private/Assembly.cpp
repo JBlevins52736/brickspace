@@ -26,6 +26,7 @@ void UAssembly::BeginPlay()
 	Super::BeginPlay();
 
 	CacheShortNames(); // HACK: Until table uses shortname as key
+	InitMaterialMap();
 
 	// Find the groundplate bricks before snapped bricks might be added to the hierarchy.
 	GetOwner()->GetComponents<UBrick>(groundPlateBricks);
@@ -51,55 +52,52 @@ void UAssembly::CacheShortNames()
 	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
 }
 
+void UAssembly::InitMaterialMap()
+{
+	if (!MaterialTable) return;
 
-void UAssembly::SpawnBrick(const FAssemblyBrick& brick)
+	TArray<FName> CachedRowNames = MaterialTable->GetRowNames();
+	for (const FName& RowName : CachedRowNames)
+	{
+		const FMaterialData* Data = MaterialTable->FindRow<FMaterialData>(RowName, TEXT("InitMaterialMaps"));
+		UE_LOG(LogTemp, Log, TEXT("Color: %s"), *(RowName.ToString()) );
+		if (Data != nullptr)
+		{
+			solidToReveal.Add(Data->SolidMaterial, Data->RevealMaterial);
+		}
+	}
+	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
+}
+
+UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 {
 	if (SpawnDataTable == nullptr)
-		return ;
+		return nullptr;
 
 	const FName* RowName = ShortNameToRowNameMap.Find(brick.shortName);
 	if (RowName == nullptr) {
 		UE_LOG(LogTemp, Error, TEXT("ROW NAME NOT FOUND"));
-		return;
+		return nullptr;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("ROW Name found:"));
 
 	FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName"));
 	if (Data == nullptr) {
 		UE_LOG(LogTemp, Error, TEXT("Table ROW NOT FOUND"));
-		return;
+		return nullptr;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("TABLE Data found: Spawning"));
 
 	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint);
+	UBrick* SpawnedBrick = SpawnedActor->FindComponentByClass<UBrick>();
+
 	FTransform Transform(brick.rotation, brick.position);
 	SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
 	SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
-	// Full path including asset name and extension
-	// e.g. materialPathName: "/Game/Models/Plastic_Green.Plastic_Green"
-	FString MaterialPath = *(brick.materialPathName);
-	FAssetRegistryModule& AssetRegistryModule = FModuleManager::LoadModuleChecked<FAssetRegistryModule>("AssetRegistry");
-	FAssetData AssetData = AssetRegistryModule.Get().GetAssetByObjectPath(FSoftObjectPath(MaterialPath));
-
-	if (AssetData.IsValid())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Material AssetData valid: Spawning"));
-
-		UMaterialInterface* BrickMaterial = Cast<UMaterialInterface>(AssetData.GetAsset());
-		if (BrickMaterial)
-		{
-			UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(SpawnedActor->GetRootComponent());
-			if (mesh != nullptr)
-			{
-				// Add overlap with bricks.
-				mesh->SetMaterial(0, BrickMaterial);
-			}
-		}
-	}
-	else {
-		UE_LOG(LogTemp, Error, TEXT("Material asset not found"));
-	}
+	UMaterialInterface* RevealMaterial = *(solidToReveal.Find(brick.material));
+	SpawnedBrick->Reveal(RevealMaterial);
+	return SpawnedBrick;
 }
 
 bool GameModeActive = true;
@@ -144,21 +142,15 @@ void UAssembly::LoadAssembly()
 			if (FJsonSerializer::Deserialize(Reader, JsonObject) && JsonObject.IsValid())
 			{
 				// Successfully deserialized the JSON string into JsonObject
-				FAssemblyBrickList bricklist;
+				//FAssemblyBrickList bricklist;
 				if (FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &bricklist, 0, 0))
 				{
 					// MyConvertedData now contains the data from the FJsonObject
 					//UE_LOG(LogTemp, Warning, TEXT("Name: %s, Age: %d"), *MyConvertedData.Name, MyConvertedData.Age);
-
-					for (FAssemblyBrick brick : bricklist.bricks)
-					{
-						UE_LOG(LogTemp, Warning, TEXT("Layer: %d"), brick.layerInd);
-						UE_LOG(LogTemp, Warning, TEXT("ShortName: %s"), *brick.shortName);
-						UE_LOG(LogTemp, Warning, TEXT("Pos: %f %f %f"), brick.position.X, brick.position.Y, brick.position.Z);
-						UE_LOG(LogTemp, Warning, TEXT("Rot: %f %f %f %f"), brick.rotation.X, brick.rotation.Y, brick.rotation.Z, brick.rotation.W);
-						UE_LOG(LogTemp, Warning, TEXT("Material: %s"), *brick.materialPathName);
-
-						SpawnBrick(brick);
+					
+					currLayer = -1;
+					if (!LoadNextLayer()) {
+						UE_LOG(LogTemp, Warning, TEXT("bricklist initialzed but empty"));
 					}
 
 				}
@@ -186,6 +178,40 @@ void UAssembly::LoadAssembly()
 		UE_LOG(LogTemp, Warning, TEXT("FileManipulation: ERROR: Can not read the file because it was not found."));
 		UE_LOG(LogTemp, Warning, TEXT("FileManipulation: Expected file location: %s"), *file);
 	}
+}
+
+bool UAssembly::TryAdvanceLayer()
+{
+	for (int i = 0; i < layerBricks.size(); i++ )
+	{
+		UBrick* brick = layerBricks[i];
+		if (!brick->IsSolved())
+			return false;
+	}
+	LoadNextLayer();
+	return true;
+}
+
+bool UAssembly::LoadNextLayer()
+{
+	++currLayer;
+	layerBricks.clear();
+
+	for (FAssemblyBrick brick : bricklist.bricks)
+	{
+		if (brick.layerInd == currLayer) {
+			UE_LOG(LogTemp, Warning, TEXT("Layer: %d"), brick.layerInd);
+			UE_LOG(LogTemp, Warning, TEXT("ShortName: %s"), *brick.shortName);
+			UE_LOG(LogTemp, Warning, TEXT("Pos: %f %f %f"), brick.position.X, brick.position.Y, brick.position.Z);
+			UE_LOG(LogTemp, Warning, TEXT("Rot: %f %f %f %f"), brick.rotation.X, brick.rotation.Y, brick.rotation.Z, brick.rotation.W);
+			UE_LOG(LogTemp, Warning, TEXT("Material: %s"), *brick.material->GetPathName());
+
+			UBrick* spawnedBrick = SpawnBrick(brick);
+			if (spawnedBrick != nullptr)
+				layerBricks.push_back(spawnedBrick);
+		}
+	}
+	return (layerBricks.size() > 0);
 }
 
 void UAssembly::ClearAssembly()
@@ -221,18 +247,18 @@ void UAssembly::SaveAssembly(const int Value)
 
 	FAssemblyBrickList brickList;
 
-	// Populate layerBricks with ground plate bricks as first (untracked) layer.
-	std::vector<UBrick*> layerBricks;
+	// Populate currLayerBricks with ground plate bricks as first (untracked) layer.
+	std::vector<UBrick*> currLayerBricks;
 	for (int i = 0; i < groundPlateBricks.Num(); ++i)
-		layerBricks.push_back(groundPlateBricks[i]);
+		currLayerBricks.push_back(groundPlateBricks[i]);
 	int layer = 0;
-	while (layerBricks.size() > 0)
+	while (currLayerBricks.size() > 0)
 	{
 		// Change all connected bricks parent to the assembly sceneComponent.
 		// Returns only the connected bricks that were reparented as the next assembly layer.
 		std::vector<UBrick*> reparentedBricks;
-		for (int i = 0; i < layerBricks.size(); ++i)
-			layerBricks[i]->ReparentConnectedBricks(this, reparentedBricks);
+		for (int i = 0; i < currLayerBricks.size(); ++i)
+			currLayerBricks[i]->ReparentConnectedBricks(this, reparentedBricks);
 
 		if (SpawnDataTable != nullptr)
 		{
@@ -244,11 +270,11 @@ void UAssembly::SaveAssembly(const int Value)
 					reparentedBricks[i]->shortName,
 					reparentedBricks[i]->GetLocation(),
 					reparentedBricks[i]->GetQuat(),
-					reparentedBricks[i]->GetMaterialPathName() });
+					reparentedBricks[i]->GetMaterial() });
 			}
 		}
 
-		layerBricks = reparentedBricks;
+		currLayerBricks = reparentedBricks;
 		reparentedBricks.clear();
 		++layer;
 	};

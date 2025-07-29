@@ -1,0 +1,112 @@
+{
+	"bricks": [
+		{
+			"layerInd": 0,
+			"shortName": "B2x8S",
+			"position":
+			{
+				"x": 312.00000000000011,
+				"y": 546,
+				"z": 31.999999999999972
+			},
+			"rotation":
+			{
+				"x": -2.1854179108990996e-17,
+				"y": -2.1854179108990999e-17,
+				"z": -0.70710678118654746,
+				"w": 0.70710678118654757
+			},
+			"materialPathName": "/Game/Models/Plastic_Black.Plastic_Black"
+		},
+		{
+			"layerInd": 1,
+			"shortName": "B2x8S",
+			"position":
+			{
+				"x": 467.99608719687092,
+				"y": 313.10488880268247,
+				"z": 64.000000000000014
+			},
+			"rotation":
+			{
+				"x": -1.1605978277254752e-19,
+				"y": 3.2772708002869534e-17,
+				"z": -0.99999372946250475,
+				"w": 0.0035413324710660463
+			},
+			"materialPathName": "/Game/Models/Plastic_Black.Plastic_Black"
+		},
+		{
+			"layerInd": 2,
+			"shortName": "B2x3S",
+			"position":
+			{
+				"x": 467.44364279552963,
+				"y": 391.10293240111781,
+				"z": 96.000000000000014
+			},
+			"rotation":
+			{
+				"x": -8.4331760090642707e-18,
+				"y": 8.3736570521928014e-18,
+				"z": -0.70459824704223595,
+				"w": 0.7096064474516901
+			},
+			"materialPathName": "/Game/Models/Plastic_Yellow.Plastic_Yellow"
+		},
+		{
+			"layerInd": 2,
+			"shortName": "B2x5S",
+			"position":
+			{
+				"x": -0.54461879508232869,
+				"y": 387.7882659930703,
+				"z": 96.000000000000014
+			},
+			"rotation":
+			{
+				"x": -6.9580924184387541e-18,
+				"y": 6.9089841818603123e-18,
+				"z": -0.70459824704223595,
+				"w": 0.7096064474516901
+			},
+			"materialPathName": "/Game/Maps/UEDPIE_0_BrickSpace.BrickSpace:PersistentLevel.BP_2x5_C_0.StaticMesh.MID_VertexColorViewMode_RedOnly_0"
+		},
+		{
+			"layerInd": 2,
+			"shortName": "S3x4T",
+			"position":
+			{
+				"x": 1.6651588102828327,
+				"y": 75.796091599328861,
+				"z": 166
+			},
+			"rotation":
+			{
+				"x": -3.5157801339496358e-17,
+				"y": -1.2450624421592836e-19,
+				"z": -0.99999372946250475,
+				"w": 0.0035413324710662684
+			},
+			"materialPathName": "/Game/Models/Plastic_Yellow.Plastic_Yellow"
+		},
+		{
+			"layerInd": 3,
+			"shortName": "B2x4S",
+			"position":
+			{
+				"x": 389.44559919709428,
+				"y": 390.55048799977658,
+				"z": 128
+			},
+			"rotation":
+			{
+				"x": -6.7156479685213844e-20,
+				"y": -6.76338199432528e-20,
+				"z": -0.70459824704223617,
+				"w": 0.70960644745168966
+			},
+			"materialPathName": "/Game/Models/Plastic_Yellow.Plastic_Yellow"
+		}
+	]
+}

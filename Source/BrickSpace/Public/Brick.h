@@ -18,7 +18,6 @@ class BRICKSPACE_API UBrick : public UGrabber
 	GENERATED_BODY()
 
 public:
-
 	virtual void ForePinch(USelector* selector, bool state) override;
 
 	std::vector<USnapBase*> studs; // 78cm spacing.
@@ -29,10 +28,14 @@ public:
 
 	FVector GetLocation();
 	FQuat GetQuat();
-	FString GetMaterialPathName();
+	UMaterialInterface* GetMaterial();
 
 	bool TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks);
 	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
+
+	void Reveal(UMaterialInterface* revealMaterial);
+	bool TryMatch( UBrick *assemblerBrick );
+	bool IsSolved() { return isActive; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,6 +49,11 @@ private:
 	/** called when something leaves the sphere component */
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	void DoExplodeMismatchedEffect();
+	void DoAcceptMatchWithRevealedBrick();
+
+	bool isActive = true;
 
 	std::list<UBrick *> overlappedBricks;	// Note: Assumes no bricks are actually deleted.
 };
