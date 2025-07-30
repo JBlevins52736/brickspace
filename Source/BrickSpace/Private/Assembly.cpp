@@ -96,7 +96,7 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 	UMaterialInterface* RevealMaterial = *(solidToReveal.Find(brick.material));
-	SpawnedBrick->Reveal(RevealMaterial);
+	SpawnedBrick->Reveal(RevealMaterial, brick.material);
 	return SpawnedBrick;
 }
 
@@ -149,6 +149,8 @@ void UAssembly::LoadAssembly()
 					//UE_LOG(LogTemp, Warning, TEXT("Name: %s, Age: %d"), *MyConvertedData.Name, MyConvertedData.Age);
 					
 					currLayer = -1;
+
+					//while (LoadNextLayer());
 					if (!LoadNextLayer()) {
 						UE_LOG(LogTemp, Warning, TEXT("bricklist initialzed but empty"));
 					}

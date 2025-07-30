@@ -45,6 +45,13 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
 		}
 		else {
+			// This attempts to resolve error noticed on release that could be due to an
+			// additional grabber base class application that has not been followed by SolveSnaps().
+			// While this, in theory, should never happen... treat this as a test.
+			// If error still is observed it is in the actual snap solution
+			// and the following line can be removed.
+			SolveSnaps();
+
 			// Remove overlap with other bricks.
 			mesh->OnComponentBeginOverlap.RemoveAll(this);
 			mesh->OnComponentEndOverlap.RemoveAll(this);
@@ -83,7 +90,7 @@ void UBrick::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AAc
 		if (enteringBrick != nullptr)
 		{
 			overlappedBricks.push_back(enteringBrick);
-			UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin enteringBrick:%s"), *FString(enteringBrick->ClientName()));
+			//UE_LOG(LogTemp, Warning, TEXT("OnOverlapBegin enteringBrick:%s"), *FString(enteringBrick->ClientName()));
 			break;
 		}
 	}
@@ -96,9 +103,55 @@ void UBrick::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActo
 		if (exitingBrick != nullptr)
 		{
 			overlappedBricks.remove(exitingBrick);
-			UE_LOG(LogTemp, Warning, TEXT("OnOverlapEnd exitingBrick:%s"), *FString(exitingBrick->ClientName()));
+			//UE_LOG(LogTemp, Warning, TEXT("OnOverlapEnd exitingBrick:%s"), *FString(exitingBrick->ClientName()));
 			break;
 		}
+	}
+}
+
+void UBrick::TryBreakSnaps()
+{
+	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
+		tubes[tubeind]->TryBreakSnap();
+	for (int studind = 0; studind < studs.size(); ++studind)
+		studs[studind]->TryBreakSnap();
+}
+
+void UBrick::FindSnaps()
+{
+	// If no bricks are overlapped then there can be no additional snaps.
+	if (overlappedBricks.size() == 0)
+		return;
+
+	// Try making new snaps.
+	for (UBrick* brick : overlappedBricks) {
+
+		if (brick->isActive) {
+			// Test all local tubes with overlapped bricks studs.
+			for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
+				for (int studind = 0; studind < brick->studs.size(); ++studind)
+					tubes[tubeind]->TrySnap(brick->studs[studind]);
+			}
+			// Test all local studs with overlapped bricks tubes.
+			for (int studind = 0; studind < studs.size(); ++studind) {
+				for (int tubeind = 0; tubeind < brick->tubes.size(); ++tubeind)
+					studs[studind]->TrySnap(brick->tubes[tubeind]);
+			}
+		}
+	}
+}
+
+void UBrick::SolveSnaps()
+{
+	int snapcnt = 0;
+	FTransform pivot;
+	for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
+		if (tubes[tubeind]->ApplySnap(clientComponent, pivot, snapcnt))
+			++snapcnt;
+	}
+	for (int studind = 0; studind < studs.size(); ++studind) {
+		if (studs[studind]->ApplySnap(clientComponent, pivot, snapcnt))
+			++snapcnt;
 	}
 }
 
@@ -114,48 +167,11 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// Try breaking any existing snaps.
-	{
-		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind)
-			tubes[tubeind]->TryBreakSnap();
-		for (int studind = 0; studind < studs.size(); ++studind)
-			studs[studind]->TryBreakSnap();
-	}
+	TryBreakSnaps();
 
-	// If no bricks are overlapped then there can be no additional snaps.
-	if (overlappedBricks.size() == 0)
-		return;
+	FindSnaps();
 
-	{
-		// Try making new snaps.
-		for (UBrick* brick : overlappedBricks) {
-
-			if (brick->isActive) {
-				// Test all local tubes with overlapped bricks studs.
-				for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
-					for (int studind = 0; studind < brick->studs.size(); ++studind)
-						tubes[tubeind]->TrySnap(brick->studs[studind]);
-				}
-				// Test all local studs with overlapped bricks tubes.
-				for (int studind = 0; studind < studs.size(); ++studind) {
-					for (int tubeind = 0; tubeind < brick->tubes.size(); ++tubeind)
-						studs[studind]->TrySnap(brick->tubes[tubeind]);
-				}
-			}
-		}
-	}
-
-	{
-		int snapcnt = 0;
-		FTransform pivot;
-		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
-			if (tubes[tubeind]->ApplySnap(clientComponent, pivot, snapcnt))
-				++snapcnt;
-		}
-		for (int studind = 0; studind < studs.size(); ++studind) {
-			if (studs[studind]->ApplySnap(clientComponent, pivot, snapcnt))
-				++snapcnt;
-		}
-	}
+	SolveSnaps();
 }
 
 FVector UBrick::GetLocation()
@@ -205,7 +221,7 @@ void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*>&
 }
 
 // The architect touches bricks to reveal them.
-void UBrick::Reveal(UMaterialInterface* revealMaterial)
+void UBrick::Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial)
 {
 	// studs and tubes will not be checked when inactive (revealed)
 	isActive = false;
@@ -215,6 +231,7 @@ void UBrick::Reveal(UMaterialInterface* revealMaterial)
 	if (mesh != nullptr)
 	{
 		// Add overlap with bricks.
+		solidMatchMaterial = brickMaterial;
 		mesh->SetMaterial(0, revealMaterial);
 		mesh->Mobility = EComponentMobility::Stationary;	// Grabber cannot grab.
 	}
@@ -230,24 +247,96 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 
 
 	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	if (mesh == nullptr )
+	if (mesh == nullptr)
 		return false;
 
-	//if (mesh->GetMaterial(0)->GetMaterial() != othMesh->GetMaterial(0)->GetMaterial())
+	if (mesh->GetMaterial(0)->GetMaterial() != assemblerBrick->solidMatchMaterial) {
+
+		UE_LOG(LogTemp, Warning, TEXT("Failed Materials equal: %s %s"), 
+			*(mesh->GetMaterial(0)->GetMaterial()->GetPathName()), *(assemblerBrick->solidMatchMaterial->GetPathName()));
+		return false;
+	}
+
+	// The following succeeds less than half the time in practice as its typically possible to orient the brick
+	// in two different poses and it looks the same. If the brick is square there will be 4 possible pos-rot solutions
+	// that all look the same.
+	// If a brick is only snapped once 
+	//FTransform pose = clientComponent->GetComponentTransform();
+	//FTransform othpose = assemblerBrick->clientComponent->GetComponentTransform();
+	//if (!FTransform::AreRotationsEqual(pose, othpose, 0.01)) || !FTransform::AreTranslationsEqual(pose, othpose, 0.01))
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Failed AreTranslationsEqual:"));   // 
 	//	return false;
+	//}
 
-	FTransform pose = clientComponent->GetComponentTransform();
-	FTransform othpose = assemblerBrick->clientComponent->GetComponentTransform();
-	if (!FTransform::AreRotationsEqual(pose, othpose) || !FTransform::AreTranslationsEqual(pose, othpose))
-		return false;
+
+	//// There are 2 valid quaternions for any rotation. 
+	//// Possibly 4 actually since W can be either positive or negative.
+	//// We cancel the issue with W since W is just the normalizing component for XYZ.
+	//// and test only XYZ
+
+	{
+		int tubecnt = 0;
+		int tubessnapped = 0;
+		FTransform pivot;
+		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
+			if (tubes[tubeind]->IsSnapped())
+			{
+				++tubessnapped;
+				FVector pos = tubes[tubeind]->GetComponentLocation();
+				for (int othtubeind = 0; othtubeind < assemblerBrick->tubes.size(); ++othtubeind) {
+					FVector othpos = assemblerBrick->tubes[othtubeind]->GetComponentLocation();
+					if (pos.Equals(othpos, 2.1)) // WHY ARE THEY OFF 2.1cm in world space when snapped in the opposite direction?!
+					{
+						++tubecnt;
+						break;
+					}
+				}
+			}
+		}
+		int studcnt = 0;
+		int studssnapped = 0;
+		for (int studind = 0; studind < studs.size(); ++studind) {
+			if (studs[studind]->IsSnapped())
+			{
+				++studssnapped;
+				FVector pos = studs[studind]->GetComponentLocation();
+				for (int othstudind = 0; othstudind < assemblerBrick->studs.size(); ++othstudind) {
+					FVector othpos = assemblerBrick->studs[othstudind]->GetComponentLocation();
+					if (pos.Equals(othpos, 2.1)) // WHY ARE THEY OFF 2.1cm in world space when snapped in the opposite direction?!
+					{
+						++studcnt;
+						break;
+					}
+				}
+			}
+		}
+
+		if (studcnt != studssnapped || tubecnt != tubessnapped)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed pose: studs: %d of %d tubes: %d of %d"), studcnt, studssnapped, tubecnt, tubessnapped);
+
+			return false;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Passed pose: studs: %d of %d tubes: %d of %d"), studcnt, studssnapped, tubecnt, tubessnapped);
+
+
+		if (studssnapped == 1 || tubessnapped == 1) {
+			// Consider special case where only one snap exists.
+			// Orientation could be tested but requireing perfect orientation would be an impossible user challenge.
+			// So we ignore it (grin)
+		}
+	}
+
+
 
 	// We have a full match.
-	
+
 	// Make assemblerBrick active and solid.
 	assemblerBrick->isActive = true;
 	othMesh->SetMaterial(0, mesh->GetMaterial(0));
 
-	UAssembly* assembly = Cast<UAssembly>(assemblerBrick->clientComponent->GetAttachParent() );
+	UAssembly* assembly = Cast<UAssembly>(assemblerBrick->clientComponent->GetAttachParent());
 	if (assembly != nullptr) {
 		assembly->TryAdvanceLayer();
 	}

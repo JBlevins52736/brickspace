@@ -33,7 +33,7 @@ public:
 	bool TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks);
 	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
 
-	void Reveal(UMaterialInterface* revealMaterial);
+	void Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial);
 	bool TryMatch( UBrick *assemblerBrick );
 	bool IsSolved() { return isActive; }
 
@@ -50,10 +50,14 @@ private:
 	UFUNCTION()
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+	void TryBreakSnaps();
+	void FindSnaps();
+	void SolveSnaps();
+
 	void DoExplodeMismatchedEffect();
 	void DoAcceptMatchWithRevealedBrick();
 
 	bool isActive = true;
-
+	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
 	std::list<UBrick *> overlappedBricks;	// Note: Assumes no bricks are actually deleted.
 };
