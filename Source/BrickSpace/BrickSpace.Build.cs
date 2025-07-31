@@ -19,6 +19,7 @@ public class BrickSpace : ModuleRules
                 "AndroidPermission",
                 "Sockets",
                 "UMG",
+				"OculusXRScene",
                 "OculusXRHMD",
                 "OculusXRAnchors",
                 "OculusXRColocation"
