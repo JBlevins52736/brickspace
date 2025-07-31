@@ -82,6 +82,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
 	UDataTable* MaterialTable = nullptr;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
+	float velocityCmPerSec = 100.0;
+
 	bool PlayMode();
 	bool TryAddBrick(UBrick* brick);
 	bool TryRemoveBrick(UBrick* brick);
@@ -90,6 +93,10 @@ public:
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
+
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	FVector startPos;
 
 public:
 	TArray<UBrick*> groundPlateBricks;

@@ -2,111 +2,291 @@
 	"bricks": [
 		{
 			"layerInd": 0,
-			"shortName": "B2x8S",
+			"shortName": "S3x4T",
 			"position":
 			{
-				"x": 234,
-				"y": 546,
-				"z": 32
+				"x": 390,
+				"y": 156,
+				"z": 70.000000000000014
 			},
 			"rotation":
 			{
-				"x": -2.4887825217441231e-17,
-				"y": 2.4887825217441256e-17,
-				"z": -0.70710678118654779,
-				"w": 0.70710678118654713
+				"x": -0,
+				"y": 0,
+				"z": -0.70710678118654757,
+				"w": 0.70710678118654768
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Black.Plastic_Black'"
+		},
+		{
+			"layerInd": 0,
+			"shortName": "S3x4T",
+			"position":
+			{
+				"x": 156,
+				"y": 468,
+				"z": 70.000000000000014
+			},
+			"rotation":
+			{
+				"x": 0,
+				"y": -0,
+				"z": 0.70710678118654746,
+				"w": 0.70710678118654768
 			},
 			"material": "/Script/Engine.Material'/Game/Models/Plastic_Black.Plastic_Black'"
 		},
 		{
 			"layerInd": 1,
-			"shortName": "B1x4T",
+			"shortName": "B2x5S",
 			"position":
 			{
-				"x": 233.99999999999989,
-				"y": 390,
-				"z": 127.99999999999999
+				"x": 312,
+				"y": 467.99999999999989,
+				"z": 128
 			},
 			"rotation":
 			{
-				"x": -5.0584772196020663e-17,
-				"y": 5.0584772196020713e-17,
-				"z": -0.70710678118654779,
-				"w": 0.70710678118654713
+				"x": -1.3824778172593248e-17,
+				"y": -1.1340633664052975e-17,
+				"z": -0.70710678118654735,
+				"w": 0.70710678118654746
 			},
-			"material": "/Script/Engine.Material'/Game/Models/Plastic_Green.Plastic_Green'"
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Black.Plastic_Black'"
+		},
+		{
+			"layerInd": 1,
+			"shortName": "B2x5S",
+			"position":
+			{
+				"x": 156.00000000000003,
+				"y": 468,
+				"z": 128
+			},
+			"rotation":
+			{
+				"x": -2.4042111992371382e-17,
+				"y": -1.8900587732313049e-17,
+				"z": -0.70710678118654735,
+				"w": 0.70710678118654746
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Black.Plastic_Black'"
 		},
 		{
 			"layerInd": 2,
-			"shortName": "B2x3S",
+			"shortName": "B1x4T",
 			"position":
 			{
-				"x": 156,
-				"y": 468,
-				"z": 160
+				"x": 312.00000000000006,
+				"y": 389.99999999999994,
+				"z": 224
 			},
 			"rotation":
 			{
-				"x": -4.5791974517269625e-17,
-				"y": 4.5791974517269668e-17,
-				"z": -0.70710678118654779,
-				"w": 0.70710678118654713
+				"x": -7.0861420601175433e-18,
+				"y": -3.5807802879742148e-33,
+				"z": -0.99999999999999978,
+				"w": 5.0532154980743019e-16
 			},
 			"material": "/Script/Engine.Material'/Game/Models/Plastic_Yellow.Plastic_Yellow'"
+		},
+		{
+			"layerInd": 2,
+			"shortName": "B1x4T",
+			"position":
+			{
+				"x": 234.00000000000011,
+				"y": 234.00000000000017,
+				"z": 224
+			},
+			"rotation":
+			{
+				"x": -6.8081426734190415e-17,
+				"y": -2.5690317862492556e-17,
+				"z": 3.677613769070831e-16,
+				"w": 0.99999999999999967
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Green.Plastic_Green'"
 		},
 		{
 			"layerInd": 3,
 			"shortName": "B1x3T",
 			"position":
 			{
-				"x": 233.99999999999991,
+				"x": 390.00000000000006,
 				"y": 312,
-				"z": 256.00000000000006
-			},
-			"rotation":
-			{
-				"x": 0,
-				"y": -0,
-				"z": 0.99999999999999989,
-				"w": 5.0532154980743029e-16
-			},
-			"material": "/Script/Engine.Material'/Game/Models/Plastic_Blue.Plastic_Blue'"
-		},
-		{
-			"layerInd": 4,
-			"shortName": "B2x5S",
-			"position":
-			{
-				"x": 233.99999999999983,
-				"y": 234,
-				"z": 288.00000000000006
-			},
-			"rotation":
-			{
-				"x": -8.9614784395457602e-18,
-				"y": -3.0668604520443177e-18,
-				"z": -4.9605240860567189e-16,
-				"w": 0.99999999999999967
-			},
-			"material": "/Script/Engine.Material'/Game/Models/Plastic_Yellow.Plastic_Yellow'"
-		},
-		{
-			"layerInd": 5,
-			"shortName": "B2x4S",
-			"position":
-			{
-				"x": 467.99999999999989,
-				"y": 311.99999999999977,
-				"z": 320.00000000000006
+				"z": 320
 			},
 			"rotation":
 			{
 				"x": -0,
 				"y": 0,
-				"z": -0.70710678118654791,
-				"w": 0.70710678118654724
+				"z": -0.70710678118654724,
+				"w": 0.70710678118654791
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Blue.Plastic_Blue'"
+		},
+		{
+			"layerInd": 3,
+			"shortName": "B1x3T",
+			"position":
+			{
+				"x": 156.00000000000014,
+				"y": 311.99999999999977,
+				"z": 320
+			},
+			"rotation":
+			{
+				"x": -1.5593055294305564e-18,
+				"y": -1.5593055294305548e-18,
+				"z": -0.70710678118654779,
+				"w": 0.70710678118654713
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Blue.Plastic_Blue'"
+		},
+		{
+			"layerInd": 4,
+			"shortName": "B1x4T",
+			"position":
+			{
+				"x": 234.0000000000002,
+				"y": 389.99999999999989,
+				"z": 416
+			},
+			"rotation":
+			{
+				"x": -3.7099052257550028e-17,
+				"y": -2.0222264416065974e-32,
+				"z": 5.4470317145671723e-16,
+				"w": 0.99999999999999967
 			},
 			"material": "/Script/Engine.Material'/Game/Models/Plastic_Green.Plastic_Green'"
+		},
+		{
+			"layerInd": 4,
+			"shortName": "B1x4T",
+			"position":
+			{
+				"x": 312.00000000000011,
+				"y": 233.99999999999994,
+				"z": 416
+			},
+			"rotation":
+			{
+				"x": -0,
+				"y": 0,
+				"z": -0.99999999999999989,
+				"w": 5.0532154980743029e-16
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Green.Plastic_Green'"
+		},
+		{
+			"layerInd": 5,
+			"shortName": "B2x8S",
+			"position":
+			{
+				"x": 156.00000000000014,
+				"y": 545.99999999999977,
+				"z": 448
+			},
+			"rotation":
+			{
+				"x": -2.8163193606533758e-17,
+				"y": -2.7094812452218966e-17,
+				"z": -0.70710678118654735,
+				"w": 0.70710678118654746
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Green.Plastic_Green'"
+		},
+		{
+			"layerInd": 5,
+			"shortName": "B2x8S",
+			"position":
+			{
+				"x": 312.00000000000023,
+				"y": 545.99999999999989,
+				"z": 448
+			},
+			"rotation":
+			{
+				"x": -2.8155391158899349e-17,
+				"y": -2.8155391158899356e-17,
+				"z": -0.70710678118654735,
+				"w": 0.70710678118654746
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Black.Plastic_Black'"
+		},
+		{
+			"layerInd": 6,
+			"shortName": "sB1x1T",
+			"position":
+			{
+				"x": 234.00000000000023,
+				"y": 311.99999999999983,
+				"z": 544
+			},
+			"rotation":
+			{
+				"x": -4.3446180452029526e-17,
+				"y": 2.6154494123142396e-17,
+				"z": -0.58544841907543343,
+				"w": 0.81070965740027734
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Red.Plastic_Red'"
+		},
+		{
+			"layerInd": 6,
+			"shortName": "sB1x1T",
+			"position":
+			{
+				"x": 234.00000000000028,
+				"y": 233.99999999999991,
+				"z": 544
+			},
+			"rotation":
+			{
+				"x": -4.5343307717235453e-17,
+				"y": -1.1013714841951942e-16,
+				"z": -0.3806975232848791,
+				"w": 0.92469962461588495
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Red.Plastic_Red'"
+		},
+		{
+			"layerInd": 6,
+			"shortName": "sB1x1T",
+			"position":
+			{
+				"x": 312.00000000000034,
+				"y": 311.99999999999994,
+				"z": 544
+			},
+			"rotation":
+			{
+				"x": -3.0374172773745022e-17,
+				"y": -2.0922545389908616e-17,
+				"z": -0.82353147357320378,
+				"w": 0.56727058097026961
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Red.Plastic_Red'"
+		},
+		{
+			"layerInd": 6,
+			"shortName": "sB1x1T",
+			"position":
+			{
+				"x": 312.00000000000045,
+				"y": 234,
+				"z": 544
+			},
+			"rotation":
+			{
+				"x": -2.5376942149499009e-17,
+				"y": -1.2891672117515227e-17,
+				"z": -0.89155337947293256,
+				"w": 0.45291563403176155
+			},
+			"material": "/Script/Engine.Material'/Game/Models/Plastic_Red.Plastic_Red'"
 		}
 	]
 }

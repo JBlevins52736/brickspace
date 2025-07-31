@@ -18,6 +18,7 @@ UAssembly::UAssembly()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 // Called when the game starts
@@ -190,7 +191,11 @@ bool UAssembly::TryAdvanceLayer()
 		if (!brick->IsSolved())
 			return false;
 	}
-	LoadNextLayer();
+	if (!LoadNextLayer()) {
+		// Take off!
+		startPos = GetComponentLocation();
+		PrimaryComponentTick.SetTickFunctionEnable(true);
+	}
 	return true;
 }
 
@@ -329,4 +334,20 @@ bool UAssembly::TryAddBrick(UBrick* brick)
 bool UAssembly::TryRemoveBrick(UBrick* brick)
 {
 	return false;
+}
+
+void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	// Fly upward at velocityCmPerSec until well over the ceiling (about 10m or 1000cm)
+	FVector pos = GetComponentLocation();
+	if (pos.Z > 500.0) {
+		PrimaryComponentTick.SetTickFunctionEnable(false);
+		ClearAssembly();
+		SetWorldLocation(startPos);
+		LoadAssembly();
+		return;
+	}
+
+	pos += FVector::UpVector * velocityCmPerSec * DeltaTime;
+	SetWorldLocation(pos);
 }
