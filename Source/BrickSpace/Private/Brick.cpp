@@ -241,6 +241,11 @@ void UBrick::Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* bric
 // If the snapped brick doesn't match it is destroyed in an explosion and the revealed brick remains unchanged.
 bool UBrick::TryMatch(UBrick* assemblerBrick)
 {
+	// First test: The bricks should be the same type.
+	if (shortName != assemblerBrick->shortName)
+		return false;
+
+	// Second test: The bricks client meshes should have the same color.
 	UStaticMeshComponent* othMesh = Cast<UStaticMeshComponent>(assemblerBrick->clientComponent);
 	if (othMesh == nullptr)
 		return false;
@@ -252,85 +257,53 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 
 	if (mesh->GetMaterial(0)->GetMaterial() != assemblerBrick->solidMatchMaterial) {
 
-		UE_LOG(LogTemp, Warning, TEXT("Failed Materials equal: %s %s"), 
+		UE_LOG(LogTemp, Warning, TEXT("Failed Materials equal: %s %s"),
 			*(mesh->GetMaterial(0)->GetMaterial()->GetPathName()), *(assemblerBrick->solidMatchMaterial->GetPathName()));
 		return false;
 	}
 
-	// The following succeeds less than half the time in practice as its typically possible to orient the brick
-	// in two different poses and it looks the same. If the brick is square there will be 4 possible pos-rot solutions
-	// that all look the same.
-	// If a brick is only snapped once 
-	//FTransform pose = clientComponent->GetComponentTransform();
-	//FTransform othpose = assemblerBrick->clientComponent->GetComponentTransform();
-	//if (!FTransform::AreRotationsEqual(pose, othpose, 0.01)) || !FTransform::AreTranslationsEqual(pose, othpose, 0.01))
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Failed AreTranslationsEqual:"));   // 
-	//	return false;
-	//}
+	// Final test: The bricks should have the same position and orientation
 
-
-	//// There are 2 valid quaternions for any rotation. 
-	//// Possibly 4 actually since W can be either positive or negative.
-	//// We cancel the issue with W since W is just the normalizing component for XYZ.
-	//// and test only XYZ
-
+	if (poseIsUnique)
 	{
-		int tubecnt = 0;
-		int tubessnapped = 0;
-		FTransform pivot;
+		// For bricks where only one valid orientation is possible, matching tubes must also have the same index. 
 		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
-			if (tubes[tubeind]->IsSnapped())
+			FVector pos = tubes[tubeind]->GetComponentLocation();
+			FVector othpos = assemblerBrick->tubes[tubeind]->GetComponentLocation();
+			if (!pos.Equals(othpos, 2.1)) // WHY ARE THEY OFF 2.1cm in world space when snapped in the opposite direction?!
 			{
-				++tubessnapped;
-				FVector pos = tubes[tubeind]->GetComponentLocation();
-				for (int othtubeind = 0; othtubeind < assemblerBrick->tubes.size(); ++othtubeind) {
-					FVector othpos = assemblerBrick->tubes[othtubeind]->GetComponentLocation();
-					if (pos.Equals(othpos, 2.1)) // WHY ARE THEY OFF 2.1cm in world space when snapped in the opposite direction?!
-					{
-						++tubecnt;
-						break;
-					}
-				}
+				UE_LOG(LogTemp, Warning, TEXT("Failed tubeIndexMustMatch:"));
+				return false;
 			}
-		}
-		int studcnt = 0;
-		int studssnapped = 0;
-		for (int studind = 0; studind < studs.size(); ++studind) {
-			if (studs[studind]->IsSnapped())
-			{
-				++studssnapped;
-				FVector pos = studs[studind]->GetComponentLocation();
-				for (int othstudind = 0; othstudind < assemblerBrick->studs.size(); ++othstudind) {
-					FVector othpos = assemblerBrick->studs[othstudind]->GetComponentLocation();
-					if (pos.Equals(othpos, 2.1)) // WHY ARE THEY OFF 2.1cm in world space when snapped in the opposite direction?!
-					{
-						++studcnt;
-						break;
-					}
-				}
-			}
-		}
-
-		if (studcnt != studssnapped || tubecnt != tubessnapped)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed pose: studs: %d of %d tubes: %d of %d"), studcnt, studssnapped, tubecnt, tubessnapped);
-
-			return false;
-		}
-		UE_LOG(LogTemp, Warning, TEXT("Passed pose: studs: %d of %d tubes: %d of %d"), studcnt, studssnapped, tubecnt, tubessnapped);
-
-
-		if (studssnapped == 1 || tubessnapped == 1) {
-			// Consider special case where only one snap exists.
-			// Orientation could be tested but requireing perfect orientation would be an impossible user challenge.
-			// So we ignore it (grin)
 		}
 	}
+	else {
+		// For simple bricks, there might be multiple ways a brick is placed that looks identical.
+		// All tubes should find matching tubes just not with the same tubes vector index.
 
+		int matched = 0;
+		int tubesSnapped = 0;
+		for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
+			if (assemblerBrick->tubes[tubeind]->IsSnapped())
+				++tubesSnapped;
+			FVector pos = tubes[tubeind]->GetComponentLocation();
+			for (int othtubeind = 0; othtubeind < assemblerBrick->tubes.size(); ++othtubeind) {
+				FVector othpos = assemblerBrick->tubes[othtubeind]->GetComponentLocation();
+				if (pos.Equals(othpos, 2.1)) // WHY ARE THEY OFF 2.1cm in world space when snapped in the opposite direction?!
+					++matched;
+			}
+		}
 
+		// If only one tube is snapped then possible orientations are infinite.
+		if (tubesSnapped > 1 && matched != tubes.size())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Failed pose: Not all tubes matched"));
+			return false;
+		}
 
-	// We have a full match.
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Bricks match:"));
 
 	// Make assemblerBrick active and solid.
 	assemblerBrick->isActive = true;

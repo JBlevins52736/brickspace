@@ -26,6 +26,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "VAR")
 	FString shortName;
 
+	UPROPERTY(EditAnywhere, Category = "VAR")
+	bool poseIsUnique = true;
+
 	FVector GetLocation();
 	FQuat GetQuat();
 	UMaterialInterface* GetMaterial();
