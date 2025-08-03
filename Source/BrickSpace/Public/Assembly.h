@@ -21,7 +21,7 @@ enum class EColorState : uint8 // E prefix is a common Unreal naming convention 
 	Black UMETA(DisplayName = "Black Plastic")
 };
 
-USTRUCT(BlueprintType)
+USTRUCT()
 struct FMaterialData : public FTableRowBase
 {
 	GENERATED_BODY()
@@ -51,7 +51,7 @@ struct FAssemblyBrick {
 	UMaterialInterface* material;
 };
 
-USTRUCT()
+USTRUCT(BlueprintType)
 struct FAssemblyBrickList {
 	GENERATED_USTRUCT_BODY()
 
@@ -76,13 +76,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void SaveAssembly(const int Value);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assembler")
 	UDataTable* SpawnDataTable = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assembler")
 	UDataTable* MaterialTable = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawner")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assembler")
+	TArray<FString> JSONTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assembler")
 	float velocityCmPerSec = 100.0;
 
 	bool PlayMode();
@@ -109,11 +112,15 @@ private:
 	void InitMaterialMap();
 	TMap<UMaterialInterface*, UMaterialInterface*> solidToReveal;
 
+	void InitAssemblyArray();
+	TArray<FAssemblyBrickList> assemblyTable;
+	int assemblyTableInd = -1;
+
 	void ClearAssembly();
 
 	UBrick* SpawnBrick(const FAssemblyBrick &brick);
 	int currLayer = -1;
 	std::vector<UBrick*> layerBricks;
 	bool LoadNextLayer();
-	FAssemblyBrickList bricklist;
+	//FAssemblyBrickList bricklist;
 };
