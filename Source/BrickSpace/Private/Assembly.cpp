@@ -339,7 +339,7 @@ void UAssembly::SaveAssembly(const int Value)
 		// Note: Unless Rabbit.json text is added to the assemblers JSONTable property
 		// in the ground plate blueprint, it will not be part of the next build.
 		assemblyTable.Add(brickList);
-		assemblyTableInd = assemblyTable.Num() - 1;
+		assemblyTableInd = assemblyTable.Num() - 2;
 
 		// Save bricks vector to json file.
 		TSharedPtr<FJsonObject> JsonObject = FJsonObjectConverter::UStructToJsonObject(brickList);
