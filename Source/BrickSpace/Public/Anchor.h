@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Vodget.h"
+#include "Components/ActorComponent.h"
 #include "Anchor.generated.h"
 
 /**
  * 
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BRICKSPACE_API UAnchor : public UVodget
+class BRICKSPACE_API UAnchor : public UActorComponent
 {
 	GENERATED_BODY()
 	
@@ -18,16 +18,18 @@ class BRICKSPACE_API UAnchor : public UVodget
 protected:
 
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-public:
-	/** called when something enters the sphere component */
-	UFUNCTION()
-	void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION(Server, Reliable)
+	void Server_OrientToAnchor(const FVector& NewLocation, const FRotator& NewRotation);
 
-	/** called when something leaves the sphere component */
-	UFUNCTION()
-	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ApplyAnchorTransform(const FVector& NewLocation, const FRotator& NewRotation);
+public:
+	
+	UFUNCTION(BlueprintCallable, Category = "Anchor")
+	void OrientToAnchor(AActor* AnchorActor);
+
+
 private:
 
-	class USphereComponent* pinDock = nullptr;
 };

@@ -2,43 +2,54 @@
 
 
 #include "Anchor.h"
-#include "Components/SphereComponent.h"
-#include "Components/StaticMeshComponent.h"
-#include "Engine/StaticMeshSocket.h"
+#include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+
+
+
 void UAnchor::BeginPlay()
 {
-	Super::BeginPlay();
-	pinDock = Cast<USphereComponent>(GetOwner()->FindComponentByClass<USphereComponent>());
-	if (pinDock)
-	{
-
-		pinDock->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-		pinDock->SetGenerateOverlapEvents(true);
-		pinDock->SetCollisionObjectType(ECC_WorldDynamic);
-		pinDock->SetCollisionResponseToAllChannels(ECR_Overlap);
-		pinDock->OnComponentBeginOverlap.AddDynamic(this, &UAnchor::OnOverlapBegin);
-	}
-}
-
-void UAnchor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
+    Super::BeginPlay();
 }
 
 
 
-void UAnchor::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	
-		
 
-		if (OtherActor->ActorHasTag("Test"))
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Overlapped with Anchor!"));
-		}
-	
+void UAnchor::OrientToAnchor(AActor* AnchorActor)
+{
+    if (!AnchorActor) return;
+
+    FTransform AnchorTransform = AnchorActor->GetActorTransform();
+    FTransform ActorTransform = GetOwner()->GetActorTransform();
+
+  
+    FTransform RelativeTransform = AnchorTransform.Inverse() * ActorTransform;
+
+    FVector RelativeLocation = RelativeTransform.GetLocation();
+    FRotator RelativeRotation = RelativeTransform.Rotator();
+
+    
+    Server_OrientToAnchor(RelativeLocation, RelativeRotation);
 }
 
-void UAnchor::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+void UAnchor::Server_OrientToAnchor_Implementation(const FVector& NewLocation, const FRotator& NewRotation)
 {
+    if (AActor* Owner = GetOwner())
+    {
+        Owner->SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
+        Owner->SetActorRotation(NewRotation, ETeleportType::TeleportPhysics);
 
+        Multicast_ApplyAnchorTransform(NewLocation, NewRotation);
+    }
+
+}
+
+void UAnchor::Multicast_ApplyAnchorTransform_Implementation(const FVector& NewLocation, const FRotator& NewRotation)
+{
+    if (AActor* Owner = GetOwner())
+    {
+        Owner->SetActorLocation(NewLocation, false, nullptr, ETeleportType::TeleportPhysics);
+        Owner->SetActorRotation(NewRotation, ETeleportType::TeleportPhysics);
+    }
 }
