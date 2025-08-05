@@ -6,6 +6,8 @@
 #include "Components/SceneComponent.h"
 #include "Brick.h"
 #include "Engine/DataTable.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 
 #include "Assembly.generated.h"
 
@@ -87,6 +89,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assembler")
 	float velocityCmPerSec = 100.0;
+
+	UPROPERTY(EditAnywhere, Category = "Niagara")
+	class UNiagaraSystem* niagraBrickExplode;
 
 	bool PlayMode();
 	bool TryAddBrick(UBrick* brick);
