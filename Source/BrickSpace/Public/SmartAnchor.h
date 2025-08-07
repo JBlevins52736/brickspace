@@ -28,12 +28,21 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, Category = "SmartAnchor")
 	USceneComponent* Controller;
-
+	UPROPERTY(BlueprintReadWrite)
+	USceneComponent* Marker;
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "SmartAnchor")
 	UStaticMesh* AnchorMesh;
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	//UOculusXRAnchorComponent* Anchor;
+	bool isAddAnchor = false;
+
+	FVector fromVec;
+	FVector toVec;
+	FVector dir; 
+
 
 private:
 	UPROPERTY()

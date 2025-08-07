@@ -5,7 +5,7 @@
 
 USmartAnchor::USmartAnchor()
 {
-	//PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void USmartAnchor::BeginPlay()
@@ -14,6 +14,24 @@ void USmartAnchor::BeginPlay()
 
 	//LoadAnchors();
 }
+
+void USmartAnchor::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	if (isAddAnchor)
+	{
+		Marker->AddLocalOffset(dir * DeltaTime * 25);
+		if (dir.Z > 0.0 && Marker->GetComponentLocation().Z > toVec.Z)
+		{
+			dir = FVector::DownVector;
+		}
+		else if (dir.Z < 0.0 && Marker->GetComponentLocation().Z < fromVec.Z)
+		{
+			dir = FVector::UpVector;
+		}
+	}
+}
+
+
 
 void USmartAnchor::CreateAnchor(const bool Value)
 {
@@ -27,6 +45,9 @@ void USmartAnchor::CreateAnchor(const bool Value)
 	AnchorSceneComponent->RegisterComponent();
 
 	UStaticMeshComponent* MeshComponent = NewObject<UStaticMeshComponent>(AnchorSceneComponent, UStaticMeshComponent::StaticClass(), TEXT("AnchorMesh"));
+	
+	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MeshComponent->SetNotifyRigidBodyCollision(false);
 	if (AnchorMesh)
 	{
 		MeshComponent->SetStaticMesh(AnchorMesh);
@@ -58,6 +79,21 @@ void USmartAnchor::CreateAnchor(const bool Value)
 			}),
 		OutResult
 	);
+
+
+
+	Marker->SetWorldLocation(Controller->GetComponentLocation());
+
+	/*FTransform GetActor = anch->GetActorTransform();
+	FTransform MyActorTransform = GetOwner()->GetActorTransform();*/
+	isAddAnchor = true;
+	fromVec = Marker->GetComponentLocation();
+	toVec = fromVec + (FVector::UpVector * 50.0f);
+	dir = FVector::UpVector;
+
+	Marker->AttachToComponent(AnchorSceneComponent,FAttachmentTransformRules::KeepRelativeTransform);
+	Marker->SetRelativeLocation(FVector(0, 0, 0));
+
 }
 
 void USmartAnchor::LoadAnchors()
