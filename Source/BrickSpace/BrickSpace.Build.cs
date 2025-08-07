@@ -14,16 +14,21 @@ public class BrickSpace : ModuleRules
                 "CoreUObject",
                 "Engine",
                 "InputCore",
+                "XRBase",                
+                "OnlineSubsystem",
+                "OnlineSubsystemEOS",
                 "Json",
 				"JsonUtilities",
                 "AndroidPermission",
                 "Sockets",
                 "UMG",
 				"Niagara",
-				"OculusXRScene",
-                "OculusXRHMD",
+                "OculusXRHMD",	
+                "OculusXRScene",
                 "OculusXRAnchors",
-                "OculusXRColocation"
+                "OculusXRColocation",
+              
+
            });
 
 
@@ -31,7 +36,8 @@ public class BrickSpace : ModuleRules
             {
                 "Slate",
                 "SlateCore",
-                "OnlineSubsystem"
+                "OnlineSubsystem",
+                "OnlineSubsystemUtils",
             });
 
         if (Target.Platform != UnrealTargetPlatform.Android)
