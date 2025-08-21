@@ -26,7 +26,8 @@ void UAssembly::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CacheShortNames(); // HACK: Until table uses shortname as key
+	//CacheRowNames();
+	//CacheShortNames(); // HACK: Until table uses shortname as key
 	InitMaterialMap();
 	InitAssemblyArray();
 
@@ -36,23 +37,35 @@ void UAssembly::BeginPlay()
 	LoadAssembly();
 }
 
-// HACK: Until table uses shortname as key
-void UAssembly::CacheShortNames()
-{
-	ShortNameToRowNameMap.Empty();
-	if (!SpawnDataTable) return;
 
-	TArray<FName> CachedRowNames = SpawnDataTable->GetRowNames();
-	for (const FName& RowName : CachedRowNames)
-	{
-		const FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(RowName, TEXT("CacheShortNames"));
-		if (Data && !Data->ShortName.IsEmpty())
-		{
-			ShortNameToRowNameMap.Add(Data->ShortName, RowName);
-		}
-	}
-	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
-}
+//void UAssembly::CacheRowNames()
+//{
+//	CachedRowNames.Empty();
+//	if (SpawnDataTable)
+//	{
+//		CachedRowNames = SpawnDataTable->GetRowNames();
+//		UE_LOG(LogTemp, Log, TEXT("Assembly: Cached %d items from data table"), CachedRowNames.Num());
+//	}
+//}
+
+// HACK: Until table uses shortname as key
+
+//void UAssembly::CacheShortNames()
+//{
+//	ShortNameToRowNameMap.Empty();
+//	if (!SpawnDataTable) return;
+//
+//	TArray<FName> CachedRowNames = SpawnDataTable->GetRowNames();
+//	for (const FName& RowName : CachedRowNames)
+//	{
+//		const FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(RowName, TEXT("CacheShortNames"));
+//		if (Data && !Data->ShortName.IsEmpty())
+//		{
+//			ShortNameToRowNameMap.Add(Data->ShortName, RowName);
+//		}
+//	}
+//	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
+//}
 
 void UAssembly::InitMaterialMap()
 {
@@ -68,7 +81,7 @@ void UAssembly::InitMaterialMap()
 			solidToReveal.Add(Data->SolidMaterial, Data->RevealMaterial);
 		}
 	}
-	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
+	//UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
 }
 
 void UAssembly::InitAssemblyArray()
@@ -176,7 +189,7 @@ void UAssembly::InitAssemblyArray()
 			UE_LOG(LogTemp, Error, TEXT("Failed to deserialize JSON string."));
 		}
 	}
-	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
+	//UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
 }
 
 UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
@@ -184,14 +197,19 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	if (SpawnDataTable == nullptr)
 		return nullptr;
 
-	const FName* RowName = ShortNameToRowNameMap.Find(brick.shortName);
-	if (RowName == nullptr) {
+	//const FName* RowName = ShortNameToRowNameMap.Find(brick.shortName);
+
+	/*if (RowName == nullptr) {
 		UE_LOG(LogTemp, Error, TEXT("ROW NAME NOT FOUND"));
 		return nullptr;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("ROW Name found:"));
+	UE_LOG(LogTemp, Warning, TEXT("ROW Name found:"));*/
 
-	FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName"));
+
+	// FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName"));
+	
+	FName RowName(*brick.shortName);
+	FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(RowName, TEXT("SpawnBrick"));
 	if (Data == nullptr) {
 		UE_LOG(LogTemp, Error, TEXT("Table ROW NOT FOUND"));
 		return nullptr;

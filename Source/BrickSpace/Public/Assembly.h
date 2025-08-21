@@ -110,9 +110,13 @@ public:
 	TArray<UBrick*> groundPlateBricks;
 
 private:
-	// HACK: Until table uses shortname as key
-	void CacheShortNames();
-	TMap<FString, FName> ShortNameToRowNameMap;
+	
+	
+	//void CacheRowNames();
+	//TArray<FName> CachedRowNames;
+
+	//void CacheShortNames();
+	//TMap<FString, FName> ShortNameToRowNameMap;
 
 	void InitMaterialMap();
 	TMap<UMaterialInterface*, UMaterialInterface*> solidToReveal;

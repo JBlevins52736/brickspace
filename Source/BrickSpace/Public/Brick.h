@@ -23,7 +23,7 @@ public:
 	std::vector<USnapBase*> studs; // 78cm spacing.
 	std::vector<USnapBase*> tubes; // Thin spacing -32cm (Z) from studs.
 
-	UPROPERTY(EditAnywhere, Category = "VAR")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
 	FString shortName;
 
 	UPROPERTY(EditAnywhere, Category = "VAR")
