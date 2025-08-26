@@ -24,16 +24,12 @@ void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor
 
 void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
 {
-	//UStaticMeshComponent* MeshComp = TargetActor->FindComponentByClass<UStaticMeshComponent>();
-	//if (MeshComp)
-	//{
-	//	MeshComp->SetMaterial(0, material);
-		UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-		if (brick != nullptr) {
-			brick->brickMaterial = material;
-			brick->isSolid = brickIsSolid;
-		}
-	//}
+	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
+	if (brick != nullptr) {
+		brick->brickMaterial = material;
+		brick->isSolid = brickIsSolid;
+		brick->OnRep_Material();
+	}
 }
 
 void ABrickSpacePlayerState::Server_ChangeGrabbable_Implementation(AActor* TargetActor, bool isGrabbable)
@@ -41,5 +37,6 @@ void ABrickSpacePlayerState::Server_ChangeGrabbable_Implementation(AActor* Targe
 	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
 	if (brick != nullptr) {
 		brick->isGrabbable = isGrabbable;
+		brick->OnRep_Grabbable();
 	}
 }

@@ -32,7 +32,7 @@ public:
 	UPROPERTY(EditAnywhere, Replicated)
 	bool isSolid = true;
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Grabbable)
 	bool isGrabbable = true;
 
 	UFUNCTION()
