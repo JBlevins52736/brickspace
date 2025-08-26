@@ -2,6 +2,7 @@
 
 
 #include "Paintbrush.h"
+#include <Kismet/GameplayStatics.h>
 
 void UPaintbrush::BeginPlay()
 {
@@ -11,10 +12,12 @@ void UPaintbrush::BeginPlay()
 
 void UPaintbrush::ChangeBrickTouched()
 {
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
-	if (mesh != nullptr && mesh->Mobility == EComponentMobility::Movable )
-	{
-		// Add overlap with bricks.
-		mesh->SetMaterial(0, brushMaterial);
+	if (playerState != nullptr && GetOwner() != nullptr && brickTouched != nullptr ) {
+		UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
+		if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
+		{
+			//MeshComp->SetMaterial(0, brushMaterial);
+			playerState->Server_ChangeMaterial(brickTouched->GetOwner(), brushMaterial, true );
+		}
 	}
 }

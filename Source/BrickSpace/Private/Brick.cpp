@@ -1,11 +1,16 @@
- // Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Brick.h"
 #include "Assembly.h"
+#include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
 void UBrick::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+	if (mesh != nullptr)
+		brickMaterial = mesh->GetMaterial(0);
 
 	selectionFilter = 0x01; // Only Assembler can grab bricks
 
@@ -58,7 +63,7 @@ void UBrick::ForePinch(USelector* selector, bool state)
 
 			// Check to see if we match any non active (revealed) bricks we overlapped
 			for (UBrick* brick : overlappedBricks) {
-				if (!brick->isActive) {
+				if (!brick->isSolid) {
 					if (TryMatch(brick)) {
 
 					}
@@ -126,7 +131,7 @@ void UBrick::FindSnaps()
 	// Try making new snaps.
 	for (UBrick* brick : overlappedBricks) {
 
-		if (brick->isActive) {
+		if (brick->isSolid) {
 			// Test all local tubes with overlapped bricks studs.
 			for (int tubeind = 0; tubeind < tubes.size(); ++tubeind) {
 				for (int studind = 0; studind < brick->studs.size(); ++studind)
@@ -172,6 +177,9 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	FindSnaps();
 
 	SolveSnaps();
+
+	// Apply final brick location to server. 
+	playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
 }
 
 FVector UBrick::GetLocation()
@@ -186,10 +194,7 @@ FQuat UBrick::GetQuat()
 
 UMaterialInterface* UBrick::GetMaterial()
 {
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	if (mesh != nullptr)
-		return mesh->GetMaterial(0);
-	return nullptr;
+	return brickMaterial;
 }
 
 bool UBrick::TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks)
@@ -220,22 +225,22 @@ void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*>&
 			studs[studind]->snappedTo->brick->TryReparent(pnt, layerBricks);
 }
 
-// The architect touches bricks to reveal them.
-void UBrick::Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial)
-{
-	// studs and tubes will not be checked when inactive (revealed)
-	isActive = false;
-
-	// Only stationary bricks can be revealed
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	if (mesh != nullptr)
-	{
-		// Add overlap with bricks.
-		solidMatchMaterial = brickMaterial;
-		mesh->SetMaterial(0, revealMaterial);
-		mesh->Mobility = EComponentMobility::Stationary;	// Grabber cannot grab.
-	}
-}
+//// The architect touches bricks to reveal them.
+//void UBrick::Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial)
+//{
+//	// studs and tubes will not be checked when inactive (revealed)
+//	isSolid = false;
+//
+//	// Only stationary bricks can be revealed
+//	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+//	if (mesh != nullptr)
+//	{
+//		// Add overlap with bricks.
+//		solidMatchMaterial = brickMaterial;
+//		mesh->SetMaterial(0, revealMaterial);
+//		mesh->Mobility = EComponentMobility::Stationary;	// Grabber cannot grab.
+//	}
+//}
 
 // When the assembler snaps a matching brick over a revealed brick it is made real and the snapped brick is destroyed.
 // If the snapped brick doesn't match it is destroyed in an explosion and the revealed brick remains unchanged.
@@ -246,8 +251,8 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		return false;
 
 	// Second test: The bricks client meshes should have the same color.
-	UStaticMeshComponent* othMesh = Cast<UStaticMeshComponent>(assemblerBrick->clientComponent);
-	if (othMesh == nullptr)
+	UStaticMeshComponent* assemblerBrickMesh = Cast<UStaticMeshComponent>(assemblerBrick->clientComponent);
+	if (assemblerBrickMesh == nullptr)
 		return false;
 
 
@@ -306,12 +311,41 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	UE_LOG(LogTemp, Warning, TEXT("Bricks match:"));
 
 	// Make assemblerBrick active and solid.
-	assemblerBrick->isActive = true;
-	othMesh->SetMaterial(0, mesh->GetMaterial(0));
+	assemblerBrick->isSolid = true;
+	//othMesh->SetMaterial(0, mesh->GetMaterial(0));
+
+	if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
+		playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
+	}
 
 	UAssembly* assembly = Cast<UAssembly>(assemblerBrick->clientComponent->GetAttachParent());
 	if (assembly != nullptr) {
 		assembly->TryAdvanceLayer();
 	}
 	return true;
+}
+
+void UBrick::OnRep_Material()
+{
+	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(clientComponent);
+	if (MeshComp != nullptr) {
+		MeshComp->SetMaterial(0, brickMaterial);
+	}
+}
+
+void UBrick::OnRep_Grabbable()
+{
+	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(clientComponent);
+	if (MeshComp != nullptr) {
+		MeshComp->Mobility = (isGrabbable) ? EComponentMobility::Movable : EComponentMobility::Stationary;
+	}
+}
+
+void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UBrick, brickMaterial);
+	DOREPLIFETIME(UBrick, isSolid);
+	DOREPLIFETIME(UBrick, isGrabbable);
 }

@@ -8,6 +8,7 @@
 #include "Engine/DataTable.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+#include "BrickSpacePlayerState.h"
 
 #include "Assembly.generated.h"
 
@@ -111,12 +112,7 @@ public:
 
 private:
 	
-	
-	//void CacheRowNames();
-	//TArray<FName> CachedRowNames;
-
-	//void CacheShortNames();
-	//TMap<FString, FName> ShortNameToRowNameMap;
+	ABrickSpacePlayerState* playerState = nullptr;
 
 	void InitMaterialMap();
 	TMap<UMaterialInterface*, UMaterialInterface*> solidToReveal;

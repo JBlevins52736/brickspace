@@ -13,6 +13,9 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning", meta = (ClampMin = "0.0"))
     float DistanceThreshold = 100.0f;
 
+    UPROPERTY(EditAnywhere, Replicated)
+    bool bThresholdReached = false;  // only bool we need
+
 protected:
     virtual void BeginPlay() override;
     virtual void ForePinch(USelector* selector, bool state) override;
@@ -21,11 +24,11 @@ protected:
 
 private:
     FTransform InitialTransform = FTransform::Identity;
-    bool bThresholdReached = false;  // only bool we need
 
     void OnThresholdReached();
-    void SpawnReplacementAtHome(USceneComponent* AttachParentIfAny);
-    void DecoupleFromParent();
 
-    USceneComponent* FindSpawnWallAncestor() const;
+    //void SpawnReplacement();
+    //void SpawnReplacementAtHome(USceneComponent* AttachParentIfAny);
+    //void DecoupleFromParent();
+    //USceneComponent* FindSpawnWallAncestor() const;
 };

@@ -8,6 +8,7 @@
 #include "Misc/FileHelper.h"
 #include "CoreMinimal.h"
 #include "AssetRegistry/AssetRegistryModule.h"
+#include <Kismet/GameplayStatics.h>
 
 #include "VodgetSpawner.h" // FSpawnableData
 
@@ -25,6 +26,18 @@ UAssembly::UAssembly()
 void UAssembly::BeginPlay()
 {
 	Super::BeginPlay();
+
+	ENetMode CurrentNetMode = GetNetMode();
+	if (CurrentNetMode != NM_ListenServer)
+	{
+		// This instance is not the server
+		return;
+	}
+
+	APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+	playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+	if (!playerState)
+		return;
 
 	//CacheRowNames();
 	//CacheShortNames(); // HACK: Until table uses shortname as key
@@ -224,7 +237,27 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 	UMaterialInterface* RevealMaterial = *(solidToReveal.Find(brick.material));
-	SpawnedBrick->Reveal(RevealMaterial, brick.material);
+
+	if (playerState) {
+		playerState->Server_ChangeMaterial(SpawnedBrick->GetOwner(), RevealMaterial, false);
+		playerState->Server_ChangeGrabbable(SpawnedBrick->GetOwner(), false);
+	}
+
+	//SpawnedBrick->Reveal(RevealMaterial, brick.material);
+	//	// studs and tubes will not be checked when inactive (revealed)
+//	isSolid = false;
+//
+//	// Only stationary bricks can be revealed
+//	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+//	if (mesh != nullptr)
+//	{
+//		// Add overlap with bricks.
+//		solidMatchMaterial = brickMaterial;
+//		mesh->SetMaterial(0, revealMaterial);
+//		mesh->Mobility = EComponentMobility::Stationary;	// Grabber cannot grab.
+//	}
+
+
 	return SpawnedBrick;
 }
 
@@ -245,6 +278,13 @@ void UAssembly::LoadAssembly()
 
 bool UAssembly::TryAdvanceLayer()
 {
+	ENetMode CurrentNetMode = GetNetMode();
+	if (CurrentNetMode != NM_ListenServer)
+	{
+		// This instance is not the server
+		return false;
+	}
+
 	for (int i = 0; i < layerBricks.size(); i++)
 	{
 		UBrick* brick = layerBricks[i];

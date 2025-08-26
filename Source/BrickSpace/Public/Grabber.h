@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Vodget.h"
+#include "BrickSpacePlayerState.h"
+
 #include "Grabber.generated.h"
 
 /**
@@ -25,4 +27,5 @@ protected:
 
 	USelector* grabbingSelector = nullptr;
 	FTransform childsrt;
+	ABrickSpacePlayerState* playerState;
 };

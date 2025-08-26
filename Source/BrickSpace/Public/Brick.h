@@ -29,6 +29,21 @@ public:
 	UPROPERTY(EditAnywhere, Category = "VAR")
 	bool poseIsUnique = true;
 
+	UPROPERTY(EditAnywhere, Replicated)
+	bool isSolid = true;
+
+	UPROPERTY(Replicated)
+	bool isGrabbable = true;
+
+	UFUNCTION()
+	virtual void OnRep_Grabbable();
+
+	UPROPERTY(ReplicatedUsing = OnRep_Material)
+	UMaterialInterface* brickMaterial;
+
+	UFUNCTION()
+	virtual void OnRep_Material();
+
 	FVector GetLocation();
 	FQuat GetQuat();
 	UMaterialInterface* GetMaterial();
@@ -36,9 +51,11 @@ public:
 	bool TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks);
 	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
 
-	void Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial);
+	//void Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial);
 	bool TryMatch( UBrick *assemblerBrick );
-	bool IsSolved() { return isActive; }
+	bool IsSolved() { return isSolid; }
+
+
 
 protected:
 	virtual void BeginPlay() override;
@@ -60,7 +77,6 @@ private:
 	void DoExplodeMismatchedEffect();
 	void DoAcceptMatchWithRevealedBrick();
 
-	bool isActive = true;
 	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
 	std::list<UBrick *> overlappedBricks;	// Note: Assumes no bricks are actually deleted.
 };
