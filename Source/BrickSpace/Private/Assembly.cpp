@@ -239,8 +239,8 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	UMaterialInterface* RevealMaterial = *(solidToReveal.Find(brick.material));
 
 	if (playerState) {
-		playerState->Server_ChangeMaterial(SpawnedBrick->GetOwner(), RevealMaterial, false);
-		playerState->Server_ChangeGrabbable(SpawnedBrick->GetOwner(), false);
+		playerState->Server_ChangeMaterial(SpawnedActor, RevealMaterial, false);
+		playerState->Server_ChangeGrabbable(SpawnedActor, false);
 	}
 
 	//SpawnedBrick->Reveal(RevealMaterial, brick.material);
