@@ -28,15 +28,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (Bitmask), Category = "VAR")
 	UTextRenderComponent* log;
 
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (Bitmask), Category = "VAR")
-	UStaticMeshComponent* getMesh;
-
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (Bitmask), Category = "VAR")
 	UStaticMeshComponent* feedbackUI;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (Bitmask), Category = "VAR")
-	AActor* getMyFeed;
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	TArray<UStaticMeshComponent*> MeshComponents;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	TArray<UTextRenderComponent*> TextComponent; 
 
 	void LogMessage(FString errorMsg);
 

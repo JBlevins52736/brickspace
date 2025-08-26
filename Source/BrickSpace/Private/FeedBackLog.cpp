@@ -20,10 +20,21 @@ void UFeedBackLog::BeginPlay()
 void UFeedBackLog::EnterAsync()
 {
 
-	// when enter here turn off the menu
-	getMesh->SetVisibility(false);
+	for (UStaticMeshComponent* mesh : MeshComponents)
+	{
+		if (mesh)
+		{
+			mesh->SetVisibility(false);
+		}
+	}
 	
-	
+	for (UTextRenderComponent* text : TextComponent)
+	{
+		if (text)
+		{
+			text->SetVisibility(false);
+		}
+	}
 
 	/*DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), colorAsync);*/
 	//textRender->SetText(FText::FromString("PLEASE WAIT"));
