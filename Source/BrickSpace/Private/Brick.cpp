@@ -234,14 +234,16 @@ void UBrick::OnRep_Parent()
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent clientComponent null"));
 		clientComponent = GetAttachParent();
 	}
-
-	if ( parentComponent == nullptr )
+	
+	if (groundplateActor == nullptr )
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: is null"));
 
-	if (clientComponent != nullptr && parentComponent != nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: changing parent"));
-
-		clientComponent->AttachToComponent(parentComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	if (clientComponent != nullptr && groundplateActor != nullptr) {
+		UAssembly* assembly = groundplateActor->FindComponentByClass<UAssembly>();
+		if (assembly != nullptr) {
+			UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: changing parent"));
+			clientComponent->AttachToComponent(assembly, FAttachmentTransformRules::KeepRelativeTransform);
+		}
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: attach failed"));
@@ -355,9 +357,9 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	}
 
 	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
-	AActor* groundplateActor = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
-	if (playerState != nullptr && groundplateActor != nullptr) {
-		playerState->Server_TryAdvanceLayer(groundplateActor);
+	AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
+	if (playerState != nullptr && groundplate != nullptr) {
+		playerState->Server_TryAdvanceLayer(groundplate);
 	}
 
 	return true;
@@ -403,6 +405,6 @@ void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 	DOREPLIFETIME(UBrick, solidMatchMaterial);
 	DOREPLIFETIME(UBrick, isSolid);
 	DOREPLIFETIME(UBrick, isGrabbable);
-	DOREPLIFETIME(UBrick, parentComponent);
+	DOREPLIFETIME(UBrick, groundplateActor);
 
 }

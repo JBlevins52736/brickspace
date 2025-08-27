@@ -194,7 +194,7 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	FTransform Transform(brick.rotation, brick.position);
 	SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
 
-	SpawnedBrick->parentComponent = this;
+	SpawnedBrick->groundplateActor = this->GetOwner();
 	//SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 	// Reveal material is a translucent version of the solidMatchMaterial

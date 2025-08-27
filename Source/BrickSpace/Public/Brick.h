@@ -48,7 +48,7 @@ public:
 	virtual void OnRep_Material();
 
 	UPROPERTY(ReplicatedUsing = OnRep_Parent)
-	USceneComponent* parentComponent = nullptr;
+	AActor* groundplateActor = nullptr;
 
 	UFUNCTION()
 	virtual void OnRep_Parent();
