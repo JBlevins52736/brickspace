@@ -231,12 +231,22 @@ void UBrick::OnRep_Parent()
 		// WTF: Why wasn't this initialized in Vodget base class? 
 		// This only occurs when spawned on a remote client from the listen server client.
 
-		UE_LOG(LogTemp, Warning, TEXT("OnRep_Material clientComponent null"));
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent clientComponent null"));
 		clientComponent = GetAttachParent();
 	}
 
-	if ( clientComponent != nullptr && parentComponent != nullptr )
+	if ( parentComponent == nullptr )
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: is null"));
+
+	if (clientComponent != nullptr && parentComponent != nullptr) {
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: changing parent"));
+
 		clientComponent->AttachToComponent(parentComponent, FAttachmentTransformRules::KeepRelativeTransform);
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: attach failed"));
+
+	}
 }
 
 // Recursive method initiated from Assembly groundPlateBricks.
@@ -393,4 +403,6 @@ void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 	DOREPLIFETIME(UBrick, solidMatchMaterial);
 	DOREPLIFETIME(UBrick, isSolid);
 	DOREPLIFETIME(UBrick, isGrabbable);
+	DOREPLIFETIME(UBrick, parentComponent);
+
 }
