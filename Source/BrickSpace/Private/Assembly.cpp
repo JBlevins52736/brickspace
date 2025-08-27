@@ -40,8 +40,6 @@ void UAssembly::BeginPlay()
 	if (!playerState)
 		return;
 
-	//CacheRowNames();
-	//CacheShortNames(); // HACK: Until table uses shortname as key
 	InitMaterialMap();
 	InitAssemblyArray();
 
@@ -50,36 +48,6 @@ void UAssembly::BeginPlay()
 
 	LoadAssembly();
 }
-
-
-//void UAssembly::CacheRowNames()
-//{
-//	CachedRowNames.Empty();
-//	if (SpawnDataTable)
-//	{
-//		CachedRowNames = SpawnDataTable->GetRowNames();
-//		UE_LOG(LogTemp, Log, TEXT("Assembly: Cached %d items from data table"), CachedRowNames.Num());
-//	}
-//}
-
-// HACK: Until table uses shortname as key
-
-//void UAssembly::CacheShortNames()
-//{
-//	ShortNameToRowNameMap.Empty();
-//	if (!SpawnDataTable) return;
-//
-//	TArray<FName> CachedRowNames = SpawnDataTable->GetRowNames();
-//	for (const FName& RowName : CachedRowNames)
-//	{
-//		const FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(RowName, TEXT("CacheShortNames"));
-//		if (Data && !Data->ShortName.IsEmpty())
-//		{
-//			ShortNameToRowNameMap.Add(Data->ShortName, RowName);
-//		}
-//	}
-//	UE_LOG(LogTemp, Log, TEXT("VodgetSpawner: Cached %d short names"), ShortNameToRowNameMap.Num());
-//}
 
 void UAssembly::InitMaterialMap()
 {
@@ -233,8 +201,10 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 
 	SpawnedBrick->solidMatchMaterial = brick.material;
 	SpawnedBrick->isSolid = false;
+	SpawnedBrick->isGrabbable = false;
 	SpawnedBrick->brickMaterial = RevealMaterial;
 	SpawnedBrick->OnRep_Material();
+	SpawnedBrick->OnRep_Grabbable();
 
 
 	//if (playerState) {

@@ -126,5 +126,4 @@ private:
 	int currLayer = -1;
 	std::vector<UBrick*> layerBricks;
 	bool LoadNextLayer();
-	//FAssemblyBrickList bricklist;
 };

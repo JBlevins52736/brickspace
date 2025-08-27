@@ -63,30 +63,30 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			mesh->OnComponentEndOverlap.RemoveAll(this);
 
 			// Check to see if we match any non active (revealed) bricks we overlapped
-			bool foundMatch = false;
+			bool attemptOverlapWithTranslucent = false;
+			bool overlapMatchFound = false;
 			for (UBrick* brick : overlappedBricks) {
-				if (!brick->isSolid && TryMatch(brick)) {
-					foundMatch = true;
-					break;
+				if (!brick->isSolid) {
+					attemptOverlapWithTranslucent = true;
+					if (TryMatch(brick))
+						overlapMatchFound = true;
 				}
 			}
 
-			if ( ! foundMatch )
-				DoExplodeMismatchedEffect();
+			if (attemptOverlapWithTranslucent) {
+				if (!overlapMatchFound)
+					DoExplodeMismatchedEffect();
 
-			// Bricks off the wall are always deleted.
-			// When matched the translucent brick is made solid and one brick in the layer has been solved.
-			if (playerState && GetOwner()) {
-				playerState->Server_DeleteActor(GetOwner());
+				// Bricks off the wall are always deleted.
+				// When matched the translucent brick is made solid and one brick in the layer has been solved.
+				if (playerState && GetOwner()) {
+					playerState->Server_DeleteActor(GetOwner());
+				}
+				else {
+					UE_LOG(LogTemp, Error, TEXT("playerState or owner null when deleting."));
+				}
+				//GetOwner()->Destroy(true, true); //  Destroy();	
 			}
-			else {
-				if (playerState == nullptr)
-					UE_LOG(LogTemp, Error, TEXT("playerState null when deleting."));
-				if (GetOwner() == nullptr)
-					UE_LOG(LogTemp, Error, TEXT("owner null when deleting."));
-
-			}
-			//GetOwner()->Destroy(true, true); //  Destroy();			}
 		}
 	}
 
@@ -340,6 +340,8 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 
 void UBrick::OnRep_Material()
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_Material"));
+
 	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(clientComponent);
 	if (MeshComp != nullptr) {
 		MeshComp->SetMaterial(0, brickMaterial);
@@ -348,6 +350,8 @@ void UBrick::OnRep_Material()
 
 void UBrick::OnRep_Grabbable()
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable"));
+
 	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(clientComponent);
 	if (MeshComp != nullptr) {
 		MeshComp->Mobility = (isGrabbable) ? EComponentMobility::Movable : EComponentMobility::Stationary;
