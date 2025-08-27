@@ -3,6 +3,8 @@
 
 #include "Grabber.h"
 #include "Selector.h"
+#include "BrickSpacePlayerState.h"
+
 #include <Kismet/GameplayStatics.h>
 
 void UGrabber::Focus(USelector* selector, bool state)

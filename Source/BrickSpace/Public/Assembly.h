@@ -8,7 +8,6 @@
 #include "Engine/DataTable.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
-#include "BrickSpacePlayerState.h"
 
 #include "Assembly.generated.h"
 

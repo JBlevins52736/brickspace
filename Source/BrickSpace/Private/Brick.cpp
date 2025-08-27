@@ -3,6 +3,7 @@
 #include "Brick.h"
 #include "Assembly.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
+#include "BrickSpacePlayerState.h"
 
 void UBrick::BeginPlay()
 {
@@ -70,7 +71,9 @@ void UBrick::ForePinch(USelector* selector, bool state)
 					else {
 						DoExplodeMismatchedEffect();
 					}
-					GetOwner()->Destroy(true, true); //  Destroy();
+
+					playerState->Server_DeleteActor(GetOwner());
+					//GetOwner()->Destroy(true, true); //  Destroy();
 				}
 			}
 		}
@@ -311,17 +314,16 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	UE_LOG(LogTemp, Warning, TEXT("Bricks match:"));
 
 	// Make assemblerBrick active and solid.
-	assemblerBrick->isSolid = true;
-	//othMesh->SetMaterial(0, mesh->GetMaterial(0));
-
 	if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
 		playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
 	}
 
-	UAssembly* assembly = Cast<UAssembly>(assemblerBrick->clientComponent->GetAttachParent());
-	if (assembly != nullptr) {
-		assembly->TryAdvanceLayer();
+	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
+	AActor* groundplateActor = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
+	if (playerState != nullptr && groundplateActor != nullptr) {
+		playerState->Server_TryAdvanceLayer(groundplateActor);
 	}
+
 	return true;
 }
 
@@ -346,6 +348,7 @@ void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UBrick, brickMaterial);
+	DOREPLIFETIME(UBrick, solidMatchMaterial);
 	DOREPLIFETIME(UBrick, isSolid);
 	DOREPLIFETIME(UBrick, isGrabbable);
 }

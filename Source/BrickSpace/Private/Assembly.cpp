@@ -10,6 +10,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include <Kismet/GameplayStatics.h>
 
+#include "BrickSpacePlayerState.h"
 #include "VodgetSpawner.h" // FSpawnableData
 
 
@@ -210,17 +211,6 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	if (SpawnDataTable == nullptr)
 		return nullptr;
 
-	//const FName* RowName = ShortNameToRowNameMap.Find(brick.shortName);
-
-	/*if (RowName == nullptr) {
-		UE_LOG(LogTemp, Error, TEXT("ROW NAME NOT FOUND"));
-		return nullptr;
-	}
-	UE_LOG(LogTemp, Warning, TEXT("ROW Name found:"));*/
-
-
-	// FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(*RowName, TEXT("GetBrickDataByName"));
-	
 	FName RowName(*brick.shortName);
 	FSpawnableData* Data = SpawnDataTable->FindRow<FSpawnableData>(RowName, TEXT("SpawnBrick"));
 	if (Data == nullptr) {
@@ -229,6 +219,7 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	}
 	UE_LOG(LogTemp, Warning, TEXT("TABLE Data found: Spawning"));
 
+	// When spawned from default blueprint pos, rot, solidMatchMaterial, and brickMaterial need to be changed.
 	AActor* SpawnedActor = GetWorld()->SpawnActor<AActor>(Data->ActorBlueprint);
 	UBrick* SpawnedBrick = SpawnedActor->FindComponentByClass<UBrick>();
 
@@ -236,12 +227,20 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
 	SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
+	// Reveal material is a translucent version of the solidMatchMaterial
 	UMaterialInterface* RevealMaterial = *(solidToReveal.Find(brick.material));
 
-	if (playerState) {
-		playerState->Server_ChangeMaterial(SpawnedActor, RevealMaterial, false);
-		playerState->Server_ChangeGrabbable(SpawnedActor, false);
-	}
+
+	SpawnedBrick->solidMatchMaterial = brick.material;
+	SpawnedBrick->isSolid = false;
+	SpawnedBrick->brickMaterial = RevealMaterial;
+	SpawnedBrick->OnRep_Material();
+
+
+	//if (playerState) {
+	//	playerState->Server_ChangeMaterial(SpawnedActor, RevealMaterial, false);
+	//	playerState->Server_ChangeGrabbable(SpawnedActor, false);
+	//}
 
 	//SpawnedBrick->Reveal(RevealMaterial, brick.material);
 	//	// studs and tubes will not be checked when inactive (revealed)

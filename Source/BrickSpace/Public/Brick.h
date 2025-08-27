@@ -41,6 +41,9 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;
 
+	UPROPERTY(Replicated)
+	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
+
 	UFUNCTION()
 	virtual void OnRep_Material();
 
@@ -77,6 +80,5 @@ private:
 	void DoExplodeMismatchedEffect();
 	void DoAcceptMatchWithRevealedBrick();
 
-	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
 	std::list<UBrick *> overlappedBricks;	// Note: Assumes no bricks are actually deleted.
 };

@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "Assembly.h"
+
 #include "BrickSpacePlayerState.generated.h"
 
 /**
@@ -22,8 +24,14 @@ public:
 	void Server_MoveActor(AActor* TargetActor, const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
+	void Server_DeleteActor(AActor* TargetActor);
+
+	UFUNCTION(Server, Reliable)
 	void Server_ChangeMaterial(AActor* TargetActor, UMaterialInterface* material, bool isSolid );
 
 	UFUNCTION(Server, Reliable)
 	void Server_ChangeGrabbable(AActor* TargetActor, bool isGrabbable);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TryAdvanceLayer(AActor* GroundplateActor);
 };

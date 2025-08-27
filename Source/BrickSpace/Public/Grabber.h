@@ -4,7 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Vodget.h"
-#include "BrickSpacePlayerState.h"
+
+class ABrickSpacePlayerState;
 
 #include "Grabber.generated.h"
 

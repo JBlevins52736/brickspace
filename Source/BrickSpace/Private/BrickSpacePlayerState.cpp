@@ -22,6 +22,11 @@ void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor
 	TargetActor->SetActorTransform(InitialTransform);
 }
 
+void ABrickSpacePlayerState::Server_DeleteActor_Implementation(AActor* TargetActor)
+{
+	TargetActor->Destroy(true, true);
+}
+
 void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
 {
 	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
@@ -38,5 +43,13 @@ void ABrickSpacePlayerState::Server_ChangeGrabbable_Implementation(AActor* Targe
 	if (brick != nullptr) {
 		brick->isGrabbable = isGrabbable;
 		brick->OnRep_Grabbable();
+	}
+}
+
+void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AActor* GroundplateActor)
+{
+	UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
+	if (assembly != nullptr) {
+		assembly->TryAdvanceLayer();
 	}
 }
