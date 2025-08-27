@@ -47,6 +47,12 @@ public:
 	UFUNCTION()
 	virtual void OnRep_Material();
 
+	UPROPERTY(ReplicatedUsing = OnRep_Parent)
+	USceneComponent* parentComponent = nullptr;
+
+	UFUNCTION()
+	virtual void OnRep_Parent();
+
 	FVector GetLocation();
 	FQuat GetQuat();
 	UMaterialInterface* GetMaterial();

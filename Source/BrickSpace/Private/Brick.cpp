@@ -4,6 +4,7 @@
 #include "Assembly.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
+#include <Kismet/GameplayStatics.h>
 
 void UBrick::BeginPlay()
 {
@@ -224,6 +225,20 @@ bool UBrick::TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks
 	return true;
 }
 
+void UBrick::OnRep_Parent()
+{
+	if (clientComponent == nullptr) {
+		// WTF: Why wasn't this initialized in Vodget base class? 
+		// This only occurs when spawned on a remote client from the listen server client.
+
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_Material clientComponent null"));
+		clientComponent = GetAttachParent();
+	}
+
+	if ( clientComponent != nullptr && parentComponent != nullptr )
+		clientComponent->AttachToComponent(parentComponent, FAttachmentTransformRules::KeepRelativeTransform);
+}
+
 // Recursive method initiated from Assembly groundPlateBricks.
 // We use Vodget::selectionFilter UInt16 high order bit, 0x1000
 void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*>& layerBricks)
@@ -340,21 +355,33 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 
 void UBrick::OnRep_Material()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_Material"));
+	if (clientComponent == nullptr) {
+		// WTF: Why wasn't this initialized in Vodget base class? 
+		// This only occurs when spawned on a remote client from the listen server client.
 
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_Material clientComponent null"));
+		clientComponent = GetAttachParent();
+	}
 	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(clientComponent);
 	if (MeshComp != nullptr) {
 		MeshComp->SetMaterial(0, brickMaterial);
+		//UE_LOG(LogTemp, Warning, TEXT("OnRep_Material: setting material %s"), *(brickMaterial->GetFName()).ToString());
 	}
 }
 
 void UBrick::OnRep_Grabbable()
 {
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable"));
+	if (clientComponent == nullptr) 
+	{
+		// See OnRep_Material comments above
+		UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable clientComponent null"));
+		clientComponent = GetAttachParent();
+	}
 
 	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(clientComponent);
 	if (MeshComp != nullptr) {
 		MeshComp->Mobility = (isGrabbable) ? EComponentMobility::Movable : EComponentMobility::Stationary;
+		//UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable"));
 	}
 }
 

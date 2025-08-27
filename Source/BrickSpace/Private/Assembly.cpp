@@ -193,11 +193,12 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 
 	FTransform Transform(brick.rotation, brick.position);
 	SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
-	SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
+
+	SpawnedBrick->parentComponent = this;
+	//SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 	// Reveal material is a translucent version of the solidMatchMaterial
 	UMaterialInterface* RevealMaterial = *(solidToReveal.Find(brick.material));
-
 
 	SpawnedBrick->solidMatchMaterial = brick.material;
 	SpawnedBrick->isSolid = false;
@@ -205,28 +206,8 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	SpawnedBrick->brickMaterial = RevealMaterial;
 	SpawnedBrick->OnRep_Material();
 	SpawnedBrick->OnRep_Grabbable();
-
-
-	//if (playerState) {
-	//	playerState->Server_ChangeMaterial(SpawnedActor, RevealMaterial, false);
-	//	playerState->Server_ChangeGrabbable(SpawnedActor, false);
-	//}
-
-	//SpawnedBrick->Reveal(RevealMaterial, brick.material);
-	//	// studs and tubes will not be checked when inactive (revealed)
-//	isSolid = false;
-//
-//	// Only stationary bricks can be revealed
-//	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-//	if (mesh != nullptr)
-//	{
-//		// Add overlap with bricks.
-//		solidMatchMaterial = brickMaterial;
-//		mesh->SetMaterial(0, revealMaterial);
-//		mesh->Mobility = EComponentMobility::Stationary;	// Grabber cannot grab.
-//	}
-
-
+	SpawnedBrick->OnRep_Parent();
+	
 	return SpawnedBrick;
 }
 
