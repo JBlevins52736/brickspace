@@ -63,30 +63,28 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			mesh->OnComponentEndOverlap.RemoveAll(this);
 
 			// Check to see if we match any non active (revealed) bricks we overlapped
-			bool foundMatch = false;
 			for (UBrick* brick : overlappedBricks) {
-				if (!brick->isSolid && TryMatch(brick)) {
-					foundMatch = true;
-					break;
+				if (!brick->isSolid) {
+					if (TryMatch(brick)) {
+
+					}
+					else {
+						DoExplodeMismatchedEffect();
+					}
+
+					if (playerState && GetOwner()) {
+						playerState->Server_DeleteActor(GetOwner());
+					}
+					else {
+						if (playerState == nullptr )
+							UE_LOG(LogTemp, Error, TEXT("playerState null when deleting."));
+						if (GetOwner() == nullptr )
+							UE_LOG(LogTemp, Error, TEXT("owner null when deleting."));
+
+					}
+					//GetOwner()->Destroy(true, true); //  Destroy();
 				}
 			}
-
-			if ( ! foundMatch )
-				DoExplodeMismatchedEffect();
-
-			// Bricks off the wall are always deleted.
-			// When matched the translucent brick is made solid and one brick in the layer has been solved.
-			if (playerState && GetOwner()) {
-				playerState->Server_DeleteActor(GetOwner());
-			}
-			else {
-				if (playerState == nullptr)
-					UE_LOG(LogTemp, Error, TEXT("playerState null when deleting."));
-				if (GetOwner() == nullptr)
-					UE_LOG(LogTemp, Error, TEXT("owner null when deleting."));
-
-			}
-			//GetOwner()->Destroy(true, true); //  Destroy();			}
 		}
 	}
 
