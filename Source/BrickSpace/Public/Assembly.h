@@ -93,6 +93,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Niagara")
 	class UNiagaraSystem* niagraBrickExplode;
 
+	UPROPERTY(ReplicatedUsing = OnRep_RocketPos)
+	FVector rocketPos;
+	UFUNCTION()
+	virtual void OnRep_RocketPos();
+
 	bool PlayMode();
 	bool TryAddBrick(UBrick* brick);
 	bool TryRemoveBrick(UBrick* brick);

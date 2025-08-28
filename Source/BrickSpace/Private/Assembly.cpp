@@ -257,11 +257,11 @@ bool UAssembly::LoadNextLayer()
 	for (FAssemblyBrick brick : bricklist.bricks)
 	{
 		if (brick.layerInd == currLayer) {
-			UE_LOG(LogTemp, Warning, TEXT("Layer: %d"), brick.layerInd);
-			UE_LOG(LogTemp, Warning, TEXT("ShortName: %s"), *brick.shortName);
-			UE_LOG(LogTemp, Warning, TEXT("Pos: %f %f %f"), brick.position.X, brick.position.Y, brick.position.Z);
-			UE_LOG(LogTemp, Warning, TEXT("Rot: %f %f %f %f"), brick.rotation.X, brick.rotation.Y, brick.rotation.Z, brick.rotation.W);
-			UE_LOG(LogTemp, Warning, TEXT("Material: %s"), *brick.material->GetPathName());
+			//UE_LOG(LogTemp, Warning, TEXT("Layer: %d"), brick.layerInd);
+			//UE_LOG(LogTemp, Warning, TEXT("ShortName: %s"), *brick.shortName);
+			//UE_LOG(LogTemp, Warning, TEXT("Pos: %f %f %f"), brick.position.X, brick.position.Y, brick.position.Z);
+			//UE_LOG(LogTemp, Warning, TEXT("Rot: %f %f %f %f"), brick.rotation.X, brick.rotation.Y, brick.rotation.Z, brick.rotation.W);
+			//UE_LOG(LogTemp, Warning, TEXT("Material: %s"), *brick.material->GetPathName());
 
 			UBrick* spawnedBrick = SpawnBrick(brick);
 			if (spawnedBrick != nullptr)
@@ -401,6 +401,11 @@ bool UAssembly::TryRemoveBrick(UBrick* brick)
 	return false;
 }
 
+void UAssembly::OnRep_RocketPos()
+{
+	SetWorldLocation(rocketPos);
+}
+
 void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	// Fly upward at velocityCmPerSec until well over the ceiling (about 10m or 1000cm)
@@ -414,5 +419,9 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	}
 
 	pos += FVector::UpVector * velocityCmPerSec * DeltaTime;
-	SetWorldLocation(pos);
+
+	rocketPos = pos;
+	OnRep_RocketPos();
+
+	//SetWorldLocation(pos);
 }
