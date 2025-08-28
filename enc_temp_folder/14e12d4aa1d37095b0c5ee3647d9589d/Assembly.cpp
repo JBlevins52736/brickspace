@@ -94,7 +94,7 @@ void UAssembly::InitAssemblyArray()
 		FString JsonString;
 
 		// Always first check if the file that you want to manipulate exist.
-		if (false && FileManager.FileExists(*file))
+		if (FileManager.FileExists(*file))
 		{
 			// We use the LoadFileToString to load the file into
 			if (FFileHelper::LoadFileToString(JsonString, *file, FFileHelper::EHashOptions::None))
@@ -411,8 +411,7 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		ClearAssembly();
 		SetWorldLocation(startPos);
 
-		FVector scalevec = FVector::OneVector * 0.25f;
-		FTransform posrot(FQuat::Identity, startPos, scalevec);
+		FTransform posrot(FQuat::Identity, startPos, FVector::OneVector);
 		playerState->Server_MoveActor(this->GetOwner(), posrot);
 		LoadAssembly();
 		return;
@@ -428,8 +427,7 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	}
 
 	{
-		FVector scalevec = FVector::OneVector * 0.25f;
-		FTransform posrot(FQuat::Identity, pos, scalevec);
+		FTransform posrot(FQuat::Identity, pos, FVector::OneVector);
 		playerState->Server_MoveActor(this->GetOwner(), posrot);
 		//SetWorldLocation(pos);
 	}
