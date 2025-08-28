@@ -12,6 +12,7 @@
 
 #include "BrickSpacePlayerState.h"
 #include "VodgetSpawner.h" // FSpawnableData
+#include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
 
 // Sets default values for this component's properties
@@ -424,4 +425,11 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	OnRep_RocketPos();
 
 	//SetWorldLocation(pos);
+}
+
+void UAssembly::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UAssembly, rocketPos);
 }
