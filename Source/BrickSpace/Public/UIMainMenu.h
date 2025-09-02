@@ -3,7 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/Engine.h"
 #include "VodgetButton.h"
+#include "Camera/CameraComponent.h"
 #include "UIMainMenu.generated.h"
 
 /**
@@ -25,4 +27,17 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 	AActor* ActorUi;
+
+	UFUNCTION(BlueprintCallable = Category = "UI Location")
+	void UpdateUIScreenComp();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs")
+	float distanceFromFace = 0.0;
+
+	void BeginPlay() override;
+
+	
+private:
+
+	UCameraComponent* camera = nullptr;
 };

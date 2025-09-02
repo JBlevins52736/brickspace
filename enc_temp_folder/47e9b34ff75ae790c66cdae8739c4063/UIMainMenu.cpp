@@ -38,12 +38,10 @@ void UUIMainMenu::UpdateUIScreenComp()
 	{
 		//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Orange, FString::Printf(TEXT("Dot: %f"), dot));
 		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Orange, FString::Printf(TEXT("x: %f, y: %f, z: %f"), UIPos.X, UIPos.Y, UIPos.Z));
-		FVector updatePosition = cameraPos + (camera->GetForwardVector() * distanceFromFace);
+		FVector updatePosition = cameraPos + camera->GetForwardVector() * distanceFromFace;
 		updatePosition.Z += 50;
-		GetOwner()->SetActorLocation(FMath::Lerp(cameraPos, updatePosition, GetWorld()->GetDeltaSeconds() * 1.5f));
-		FQuat rotation = FQuat::FindBetweenVectors( cameraPos, direction);
-		FQuat newRot = GetOwner()->GetActorRotation().Quaternion() * rotation;
-		GetOwner()->SetActorRotation(newRot);
+		GetOwner()->SetActorLocation(FMath::Lerp(cameraPos, updatePosition, GetWorld()->GetDeltaSeconds() * 0.5f));
+
 	}
 	else return;
 }
@@ -52,7 +50,7 @@ void UUIMainMenu::BeginPlay()
 {
 	Super::BeginPlay();
 	camera = GetWorld()->GetFirstPlayerController()->GetPawn()->FindComponentByClass<UCameraComponent>();
-	FVector startPos = camera->GetComponentTransform().GetLocation() + (camera->GetForwardVector() * distanceFromFace);
+	FVector startPos = camera->GetComponentTransform().GetLocation() + camera->GetForwardVector() * distanceFromFace;
 	startPos.Z += 50;
 	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Orange, FString::Printf(TEXT("Begin play x: %f, y: %f, z: %f"), startPos.X, startPos.Y, startPos.Z));
 	this->GetOwner()->SetActorLocation(startPos);
