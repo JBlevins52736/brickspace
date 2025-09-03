@@ -28,12 +28,15 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	AActor* ActorUi;
 
-	UFUNCTION(BlueprintCallable = Category = "UI Location")
+	UFUNCTION(BlueprintCallable, Category = "UI Location")
 	void UpdateUIScreenComp();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs")
 	float distanceFromFace = 0.0;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Configs")
+	float UIFovUpdate = 0.10f;
+	
 	void BeginPlay() override;
 
 	
