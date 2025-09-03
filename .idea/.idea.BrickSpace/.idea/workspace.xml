@@ -13,10 +13,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bc38ca21-88ce-4421-a8cd-177ac010c560" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BrickSpace/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BrickSpace/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Content/BluePrint/Components/BP_SessionManager.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/BluePrint/Components/BP_SessionManager.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/BluePrint/UI/BP_Start.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/BluePrint/UI/BP_Start.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Private/UIMainMenu.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Private/UIMainMenu.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Public/UIMainMenu.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Public/UIMainMenu.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/GameModes/Lobby/BP_LobbyPawn.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GameModes/Lobby/BP_LobbyPawn.uasset" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -27,7 +26,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://0" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://2" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.5/Engine/Source/Runtime/Core/Private/Math/UnrealMath.cpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/../../../UE_5.5/Engine/Source/Runtime/Core/Public/Math/Vector.h" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -164,7 +163,7 @@
       <workItem from="1756223104536" duration="6277000" />
       <workItem from="1756392695707" duration="5849000" />
       <workItem from="1756859325625" duration="1001000" />
-      <workItem from="1756860408026" duration="2775000" />
+      <workItem from="1756860408026" duration="5423000" />
     </task>
     <servers />
   </component>
