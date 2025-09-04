@@ -175,6 +175,8 @@ void UBrick::SolveSnaps()
 	}
 }
 
+//static float elapsedTick = 0.0;
+
 void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	// States: 
@@ -186,6 +188,7 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	// Move brick freely, if already snapped the brick will temporarilly be returned to unsnapped movement to allow unsnap testing.
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+
 	// Try breaking any existing snaps.
 	TryBreakSnaps();
 
@@ -193,8 +196,15 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 
 	SolveSnaps();
 
+	//elapsedTick += DeltaTime;
+
+	//if (elapsedTick > 100.0) {
+
 	// Apply final brick location to server. 
 	playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
+
+	//	elapsedTick -= 100.0;
+	//}
 }
 
 FVector UBrick::GetLocation()
@@ -234,8 +244,8 @@ void UBrick::OnRep_Parent()
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent clientComponent null"));
 		clientComponent = GetAttachParent();
 	}
-	
-	if (groundplateActor == nullptr )
+
+	if (groundplateActor == nullptr)
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: is null"));
 
 	if (clientComponent != nullptr && groundplateActor != nullptr) {
@@ -383,7 +393,7 @@ void UBrick::OnRep_Material()
 
 void UBrick::OnRep_Grabbable()
 {
-	if (clientComponent == nullptr) 
+	if (clientComponent == nullptr)
 	{
 		// See OnRep_Material comments above
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable clientComponent null"));

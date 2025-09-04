@@ -34,4 +34,11 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryAdvanceLayer(AActor* GroundplateActor);
+
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeHandColor(AActor* target, UMaterialInterface* material);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_UpdatePlayerHandPos(AActor* target, FTransform rightTransform, FTransform leftTransform);
+
 };

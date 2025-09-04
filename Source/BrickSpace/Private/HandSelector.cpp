@@ -156,6 +156,7 @@ void UHandSelector::OnRep_Material()
 	//	handMesh->SetMaterial(0, brushMaterial);
 	//	//UE_LOG(LogTemp, Warning, TEXT("OnRep_Material: setting material %s"), *(brushMaterial->GetFName()).ToString());
 	//}
+	handMesh->SetMaterial(0, handMaterial);
 }
 
 void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

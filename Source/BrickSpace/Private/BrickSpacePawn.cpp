@@ -24,10 +24,25 @@ void ABrickSpacePawn::BeginPlay()
 
 }
 
+void ABrickSpacePawn::NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material)
+{
+
+
+}
+
 // Called every frame
 void ABrickSpacePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	elapsedTickTime += DeltaTime;
+
+	if (elapsedTickTime > delayInterval) 
+	{
+		playerState->Server_UpdatePlayerHandPos(this, rightHand->GetComponentTransform(), leftHand->GetComponentTransform());
+		elapsedTickTime -= delayInterval;
+	}
+
 
 }
 

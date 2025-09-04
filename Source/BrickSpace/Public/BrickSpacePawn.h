@@ -22,12 +22,20 @@ protected:
 
 	// Create the methods to broadcast the hand color change
 	ABrickSpacePlayerState* playerState = nullptr;
-
+	float elapsedTickTime = 0.0f;
 
 public:	
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	UStaticMeshComponent* rightHand = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	UStaticMeshComponent* leftHand = nullptr;
 	
-	void OnReplicateHandMaterial();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	float delayInterval = 0.0f;
+
+	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
