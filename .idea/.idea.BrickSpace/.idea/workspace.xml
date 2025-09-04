@@ -12,11 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="bc38ca21-88ce-4421-a8cd-177ac010c560" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/.idea.BrickSpace/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BrickSpace/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/BluePrint/Components/BP_SessionManager.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/BluePrint/Components/BP_SessionManager.uasset" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Content/GameModes/Lobby/BP_LobbyPawn.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/GameModes/Lobby/BP_LobbyPawn.uasset" afterDir="false" />
-    </list>
+    <list default="true" id="bc38ca21-88ce-4421-a8cd-177ac010c560" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -163,7 +159,7 @@
       <workItem from="1756223104536" duration="6277000" />
       <workItem from="1756392695707" duration="5849000" />
       <workItem from="1756859325625" duration="1001000" />
-      <workItem from="1756860408026" duration="5423000" />
+      <workItem from="1756860408026" duration="5551000" />
     </task>
     <servers />
   </component>
