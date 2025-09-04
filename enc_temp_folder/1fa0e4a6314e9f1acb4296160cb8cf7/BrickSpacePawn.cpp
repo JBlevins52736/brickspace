@@ -2,8 +2,7 @@
 
 
 #include "BrickSpacePawn.h"
-#include <Kismet/GameplayStatics.h>
-#include "Net/UnrealNetwork.h"
+
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()
 {
@@ -18,9 +17,7 @@ ABrickSpacePawn::ABrickSpacePawn()
 void ABrickSpacePawn::BeginPlay()
 {
 	Super::BeginPlay();
-	APlayerState* playerAt0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-	if (!playerAt0) return;
-	playerState = Cast<ABrickSpacePlayerState>(playerAt0);
+	
 
 }
 
@@ -37,6 +34,4 @@ void ABrickSpacePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
-
-
 

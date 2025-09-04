@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
-#include "BrickSpacePlayerState.h"
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -21,13 +20,8 @@ protected:
 	virtual void BeginPlay() override;
 
 	// Create the methods to broadcast the hand color change
-	ABrickSpacePlayerState* playerState = nullptr;
-
 
 public:	
-
-	
-	void OnReplicateHandMaterial();
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
