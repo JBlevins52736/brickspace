@@ -21,6 +21,17 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	USceneComponent* centerEye = nullptr;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	UStaticMeshComponent* handMesh = nullptr;
+
+	UPROPERTY(ReplicatedUsing = OnRep_Material)
+	UMaterialInterface* handMaterial;
+
+	//void SetHandMaterial(UMaterialInterface* material);
+
+	UFUNCTION()
+	virtual void OnRep_Material();
+
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
@@ -39,6 +50,4 @@ private:
 
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
-
-	void SetHandColor();
 };
