@@ -4,8 +4,10 @@
 #include "HandSelector.h"
 
 #include "Vodget.h"
+#include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
+#include "BrickSpacePlayerState.h"
 
-UHandSelector::UHandSelector() 
+UHandSelector::UHandSelector()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -38,7 +40,7 @@ UVodget* UHandSelector::DoRaycast()
 			//retval = Hit.Component->GetOwner()->GetComponentByClass<UVodget>();
 			for (int i = 0; i < Hit.Component->GetNumChildrenComponents(); i++) {
 				retval = Cast<UVodget>(Hit.Component->GetChildComponent(i));
-				if (retval != nullptr && ((retval->selectionFilter & selectionFilter) > 0) )
+				if (retval != nullptr && ((retval->selectionFilter & selectionFilter) > 0))
 					break;
 			}
 			//UE_LOG(LogTemp, Warning, TEXT("Hit Somethin:%s"), *FString(Hit.Component->GetName()));
@@ -139,14 +141,26 @@ void UHandSelector::SetFilter(uint16 filter)
 	// The hand will be changed by calling this SetFilter(...) method.
 
 	Super::SetFilter(filter);
-	SetHandColor();
+	//SetHandColor();
 }
 
-void UHandSelector::SetHandColor()
+
+
+//void UHandSelector::SetHandMaterial(UMaterialInterface* material)
+//{
+//}
+
+void UHandSelector::OnRep_Material()
 {
-	// ToDo:
-	// Set based on filter where 0x01 is Assembler, 0x02 is Painter, 0x04 is Supplier, 0x08 is Architect, 0x0F is DevMode
-	// Assembler (Blue), Painter(Red), Supplier(Green), Architect(White), Dev(Yellow)
+	//if (handMesh != nullptr && brushMaterial != nullptr ) {
+	//	handMesh->SetMaterial(0, brushMaterial);
+	//	//UE_LOG(LogTemp, Warning, TEXT("OnRep_Material: setting material %s"), *(brushMaterial->GetFName()).ToString());
+	//}
+}
 
+void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(UHandSelector, handMaterial);
 }
