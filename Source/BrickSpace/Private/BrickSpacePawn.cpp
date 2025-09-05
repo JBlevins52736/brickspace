@@ -18,14 +18,15 @@ ABrickSpacePawn::ABrickSpacePawn()
 void ABrickSpacePawn::BeginPlay()
 {
 	Super::BeginPlay();
-	APlayerState* playerAt0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-	if (!playerAt0) return;
-	playerState = Cast<ABrickSpacePlayerState>(playerAt0);
+	if (APlayerController* PC = Cast<APlayerController>(GetController())) {
+		playerState = Cast<ABrickSpacePlayerState>(PC->PlayerState);
+	}
 
 }
 
 void ABrickSpacePawn::NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material)
-{	
+{
+	if (playerState)
 	playerState->Server_ChangeHandColor(this, material);
 	
 }
@@ -37,9 +38,9 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 
 	elapsedTickTime += DeltaTime;
 
-	if (elapsedTickTime > delayInterval) 
+	if (elapsedTickTime > delayInterval && playerState) 
 	{
-		playerState->Server_UpdatePlayerHandPos(this, GetOwner()->GetActorTransform());
+		playerState->Server_UpdatePlayerHandPos(this, this->GetActorTransform());
 		elapsedTickTime -= delayInterval;
 	}
 
