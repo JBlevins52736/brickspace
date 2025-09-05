@@ -12,12 +12,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cecef9c4-6718-498a-b3a5-da48b4417cf0" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Content/Maps/BrickSpace.umap" beforeDir="false" afterPath="$PROJECT_DIR$/Content/Maps/BrickSpace.umap" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePawn.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePawn.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePlayerState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePlayerState.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Public/BrickSpacePlayerState.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Public/BrickSpacePlayerState.h" afterDir="false" />
-    </list>
+    <list default="true" id="cecef9c4-6718-498a-b3a5-da48b4417cf0" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,12 +22,13 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="cidr-memory-view://1" root0="FORCE_HIGHLIGHTING" />
+    <setting file="cidr-memory-view://2" root0="FORCE_HIGHLIGHTING" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "customColor": "",
-  "associatedIndex": 6
-}]]></component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 6
+}</component>
   <component name="ProjectId" id="32G3IqyQiVNMDJDiqeSUjvwyjl5" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -43,6 +39,7 @@
     "C/C++ Project.BrickSpace.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -143,7 +140,10 @@
       <method v="2" />
     </configuration>
     <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
-      <deployment type="dockerfile" />
+      <deployment type="dockerfile">
+        <settings />
+      </deployment>
+      <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
       <method v="2" />
     </configuration>
   </component>
@@ -155,13 +155,15 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1757033005420</updated>
-      <workItem from="1757033006796" duration="4283000" />
+      <workItem from="1757033006796" duration="5046000" />
+      <workItem from="1757086466949" duration="141000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
