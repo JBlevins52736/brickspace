@@ -25,9 +25,9 @@ void ABrickSpacePawn::BeginPlay()
 }
 
 void ABrickSpacePawn::NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material)
-{
-
-
+{	
+	playerState->Server_ChangeHandColor(this, material);
+	
 }
 
 // Called every frame
@@ -39,7 +39,7 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 
 	if (elapsedTickTime > delayInterval) 
 	{
-		playerState->Server_UpdatePlayerHandPos(this, rightHand->GetComponentTransform(), leftHand->GetComponentTransform());
+		playerState->Server_UpdatePlayerHandPos(this, GetOwner()->GetActorTransform());
 		elapsedTickTime -= delayInterval;
 	}
 

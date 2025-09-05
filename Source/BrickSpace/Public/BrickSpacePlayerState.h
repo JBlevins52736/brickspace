@@ -39,6 +39,6 @@ public:
 	void Server_ChangeHandColor(AActor* target, UMaterialInterface* material);
 
 	UFUNCTION(Server, Unreliable)
-	void Server_UpdatePlayerHandPos(AActor* target, FTransform rightTransform, FTransform leftTransform);
+	void Server_UpdatePlayerHandPos(AActor* target, FTransform actorLocation);
 
 };

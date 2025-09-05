@@ -70,20 +70,8 @@ void ABrickSpacePlayerState::Server_ChangeHandColor_Implementation(AActor* targe
 	}
 }
 
-void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* target, FTransform rightTransform, FTransform leftTransform)
+void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* target, FTransform actorLocation)
 {
-	TArray<UPrimitiveComponent*> actorComps;
-	target->GetComponents(actorComps);
-	//bool firstHandFound = false;
-	for (UPrimitiveComponent* actorComp : actorComps) {
-		if (actorComp->GetName().Contains("LMotionController")) {
-			USceneComponent* hand = actorComp->GetChildComponent(0);
-			hand->SetWorldTransform(leftTransform);
-			GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, TEXT("Entered the server function"));
-		}
-		else if (actorComp->GetName().Contains("RMotionController")) {
-			USceneComponent* hand = actorComp->GetChildComponent(0);
-			hand->SetWorldTransform(rightTransform);
-		}
-	}
+
+	target->SetActorTransform(actorLocation);
 }
