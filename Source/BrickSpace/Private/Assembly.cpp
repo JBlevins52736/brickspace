@@ -2,6 +2,7 @@
 
 
 #include "Assembly.h"
+#include "AssemblyActor.h"
 #include "Brick.h"
 #include "Json.h"
 #include "JsonUtilities.h"
@@ -10,7 +11,7 @@
 #include "AssetRegistry/AssetRegistryModule.h"
 #include <Kismet/GameplayStatics.h>
 
-#include "BrickSpacePlayerState.h"
+//#include "BrickSpacePlayerState.h"
 #include "VodgetSpawner.h" // FSpawnableData
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
@@ -36,10 +37,13 @@ void UAssembly::BeginPlay()
 		return;
 	}
 
-	APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-	playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-	if (!playerState)
-		return;
+	assemblyActor = Cast<AAssemblyActor>(this->GetOwner());
+
+
+	//APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+	//playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+	//if (!playerState)
+	//	return;
 
 	InitMaterialMap();
 	InitAssemblyArray();
@@ -195,7 +199,7 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	FTransform Transform(brick.rotation, brick.position);
 	SpawnedActor->GetRootComponent()->SetRelativeTransform(Transform);
 
-	SpawnedBrick->groundplateActor = this->GetOwner();
+	SpawnedBrick->assemblyActor = assemblyActor;
 	//SpawnedActor->GetRootComponent()->AttachToComponent(this, FAttachmentTransformRules::KeepRelativeTransform);
 
 	// Reveal material is a translucent version of the solidMatchMaterial
@@ -413,24 +417,24 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 		FVector scalevec = FVector::OneVector * 0.25f;
 		FTransform posrot(FQuat::Identity, startPos, scalevec);
-		playerState->Server_MoveActor(this->GetOwner(), posrot);
+		assemblyActor->Server_Move(posrot);
 		LoadAssembly();
 		return;
 	}
 
 	pos += FVector::UpVector * velocityCmPerSec * DeltaTime;
 
-	if (playerState == nullptr) {
-		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-		if (!playerState)
-			return;
-	}
+	//if (playerState == nullptr) {
+	//	APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+	//	playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+	//	if (!playerState)
+	//		return;
+	//}
 
 	{
 		FVector scalevec = FVector::OneVector * 0.25f;
 		FTransform posrot(FQuat::Identity, pos, scalevec);
-		playerState->Server_MoveActor(this->GetOwner(), posrot);
+		assemblyActor->Server_Move(posrot);
 		//SetWorldLocation(pos);
 	}
 }

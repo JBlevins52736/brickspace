@@ -28,32 +28,23 @@ void ABrickSpacePlayerState::Server_DeleteActor_Implementation(AActor* TargetAct
 	TargetActor->Destroy(true, true);
 }
 
-void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
-{
-	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-	if (brick != nullptr) {
-		brick->brickMaterial = material;
-		brick->isSolid = brickIsSolid;
-		brick->OnRep_Material();
-	}
-}
+//void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
+//{
+//	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
+//	if (brick != nullptr) {
+//		brick->brickMaterial = material;
+//		brick->isSolid = brickIsSolid;
+//		brick->OnRep_Material();
+//	}
+//}
 
-void ABrickSpacePlayerState::Server_ChangeGrabbable_Implementation(AActor* TargetActor, bool isGrabbable)
-{
-	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-	if (brick != nullptr) {
-		brick->isGrabbable = isGrabbable;
-		brick->OnRep_Grabbable();
-	}
-}
-
-void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AActor* GroundplateActor)
-{
-	UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
-	if (assembly != nullptr) {
-		assembly->TryAdvanceLayer();
-	}
-}
+//void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AActor* GroundplateActor)
+//{
+//	UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
+//	if (assembly != nullptr) {
+//		assembly->TryAdvanceLayer();
+//	}
+//}
 
 void ABrickSpacePlayerState::Server_ChangeHandColor_Implementation(AActor* target, UMaterialInterface* material)
 {

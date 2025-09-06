@@ -2,7 +2,8 @@
 
 
 #include "Paintbrush.h"
-#include <Kismet/GameplayStatics.h>
+#include "BrickActor.h"
+//#include <Kismet/GameplayStatics.h>
 #include "BrickSpacePlayerState.h"
 
 void UPaintbrush::BeginPlay()
@@ -13,12 +14,22 @@ void UPaintbrush::BeginPlay()
 
 void UPaintbrush::ChangeBrickTouched()
 {
-	if (playerState != nullptr && GetOwner() != nullptr && brickTouched != nullptr) {
-		UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
-		if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
-		{
-			//MeshComp->SetMaterial(0, brushMaterial);
-			playerState->Server_ChangeMaterial(brickTouched->GetOwner(), brushMaterial, true);
+	//if (playerState != nullptr && GetOwner() != nullptr && brickTouched != nullptr) {
+	//	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
+	//	if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
+	//	{
+	//		//MeshComp->SetMaterial(0, brushMaterial);
+	//		playerState->Server_ChangeMaterial(brickTouched->GetOwner(), brushMaterial, true);
+	//	}
+	//}
+
+	if (GetOwner() && brickTouched && brickTouched->GetOwner() ) {
+		ABrickActor* brickTouchedActor = Cast<ABrickActor>(brickTouched->GetOwner());
+		ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
+		if (brickActor && brickTouchedActor) {
+			UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
+			if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
+				brickActor->Server_ChangeMaterial(brickTouchedActor, brushMaterial, true);
 		}
 	}
 }

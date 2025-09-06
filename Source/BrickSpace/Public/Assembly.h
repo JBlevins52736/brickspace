@@ -8,6 +8,7 @@
 #include "Engine/DataTable.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
+class AAssemblyActor;
 
 #include "Assembly.generated.h"
 
@@ -111,7 +112,9 @@ public:
 
 private:
 	
-	ABrickSpacePlayerState* playerState = nullptr;
+	//ABrickSpacePlayerState* playerState = nullptr;
+
+	AAssemblyActor* assemblyActor;
 
 	void InitMaterialMap();
 	TMap<UMaterialInterface*, UMaterialInterface*> solidToReveal;

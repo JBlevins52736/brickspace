@@ -1,6 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Brick.h"
+#include "BrickActor.h"
+#include "AssemblyActor.h"
 #include "Assembly.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
@@ -245,11 +247,12 @@ void UBrick::OnRep_Parent()
 		clientComponent = GetAttachParent();
 	}
 
-	if (groundplateActor == nullptr)
+	if (assemblyActor == nullptr)
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: is null"));
 
-	if (clientComponent != nullptr && groundplateActor != nullptr) {
-		UAssembly* assembly = groundplateActor->FindComponentByClass<UAssembly>();
+	if (clientComponent != nullptr && assemblyActor != nullptr) {
+		//UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
+		UAssembly* assembly = assemblyActor->assembly;
 		if (assembly != nullptr) {
 			UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: changing parent"));
 			clientComponent->AttachToComponent(assembly, FAttachmentTransformRules::KeepRelativeTransform);
@@ -362,15 +365,23 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	UE_LOG(LogTemp, Warning, TEXT("Bricks match:"));
 
 	// Make assemblerBrick active and solid.
-	if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
-		playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
+	//if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
+	//	playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
+	//}
+	if (assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
+		ABrickActor* brickActor = Cast<ABrickActor>(assemblerBrickMesh->GetOwner());
+		if (brickActor)
+			brickActor->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true);
 	}
 
 	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
 	AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
-	if (playerState != nullptr && groundplate != nullptr) {
-		playerState->Server_TryAdvanceLayer(groundplate);
-	}
+	//if (playerState != nullptr && groundplate != nullptr) {
+	//	playerState->Server_TryAdvanceLayer(groundplate);
+	//}
+
+	if (assemblyActor)
+		assemblyActor->Server_TryAdvanceLayer();
 
 	return true;
 }
@@ -415,6 +426,6 @@ void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 	DOREPLIFETIME(UBrick, solidMatchMaterial);
 	DOREPLIFETIME(UBrick, isSolid);
 	DOREPLIFETIME(UBrick, isGrabbable);
-	DOREPLIFETIME(UBrick, groundplateActor);
+	DOREPLIFETIME(UBrick, assemblyActor);
 
 }
