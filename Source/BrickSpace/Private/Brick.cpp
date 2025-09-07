@@ -251,8 +251,8 @@ void UBrick::OnRep_Parent()
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: is null"));
 
 	if (clientComponent != nullptr && assemblyActor != nullptr) {
-		//UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
-		UAssembly* assembly = assemblyActor->assembly;
+		UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
+		//UAssembly* assembly = assemblyActor->assembly;
 		if (assembly != nullptr) {
 			UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: changing parent"));
 			clientComponent->AttachToComponent(assembly, FAttachmentTransformRules::KeepRelativeTransform);
@@ -368,21 +368,32 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	//if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
 	//	playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
 	//}
-	if (assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
-		ABrickActor* brickActor = Cast<ABrickActor>(assemblerBrickMesh->GetOwner());
-		if (brickActor)
-			brickActor->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true);
+	ABrickActor* brickActor = Cast<ABrickActor>(assemblerBrickMesh->GetOwner());
+	if (!brickActor) {
+		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But assemblerBrick not a brickActor?"));
+		return false;
+	}
+
+	brickActor->Server_ChangeMaterial(mesh->GetMaterial(0), true);
+
+	if (!brickActor->brick) {
+		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick is null?"));
+		return false;
 	}
 
 	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
-	AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
+	//AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
 	//if (playerState != nullptr && groundplate != nullptr) {
 	//	playerState->Server_TryAdvanceLayer(groundplate);
 	//}
 
-	if (assemblyActor)
-		assemblyActor->Server_TryAdvanceLayer();
+	if (!brickActor->brick->assemblyActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick has no assemblyActor?"));
+		return false;
+	}
 
+	brickActor->brick->assemblyActor->Server_TryAdvanceLayer();
 	return true;
 }
 

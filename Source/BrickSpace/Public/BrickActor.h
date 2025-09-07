@@ -18,7 +18,7 @@ public:
 
 	// Changeing material
 	UFUNCTION(Server, Reliable)
-	void Server_ChangeMaterial(ABrickActor* TargetActor, UMaterialInterface* material, bool brickIsSolid);
+	void Server_ChangeMaterial(UMaterialInterface* material, bool brickIsSolid);
 
 	UBrick* brick;
 

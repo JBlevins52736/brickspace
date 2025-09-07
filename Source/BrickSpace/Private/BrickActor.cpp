@@ -10,7 +10,8 @@ ABrickActor::ABrickActor()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	SetReplicates(true);
+	bReplicates = true;
+	//SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -20,7 +21,7 @@ void ABrickActor::BeginPlay()
 	brick = FindComponentByClass<UBrick>();
 }
 
-void ABrickActor::Server_ChangeMaterial_Implementation(ABrickActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
+void ABrickActor::Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool brickIsSolid)
 {
 	if (brick)
 	{

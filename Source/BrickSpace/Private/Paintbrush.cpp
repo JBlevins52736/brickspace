@@ -23,13 +23,12 @@ void UPaintbrush::ChangeBrickTouched()
 	//	}
 	//}
 
-	if (GetOwner() && brickTouched && brickTouched->GetOwner() ) {
+	if (brickTouched && brickTouched->GetOwner() ) {
 		ABrickActor* brickTouchedActor = Cast<ABrickActor>(brickTouched->GetOwner());
-		ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-		if (brickActor && brickTouchedActor) {
+		if (brickTouchedActor) {
 			UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
 			if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
-				brickActor->Server_ChangeMaterial(brickTouchedActor, brushMaterial, true);
+				brickTouchedActor->Server_ChangeMaterial(brushMaterial, true);
 		}
 	}
 }
