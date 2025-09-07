@@ -2,7 +2,7 @@
 
 
 #include "BrickSpacePawn.h"
-#include <Kismet/GameplayStatics.h>
+//#include <Kismet/GameplayStatics.h>
 #include "Net/UnrealNetwork.h"
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()

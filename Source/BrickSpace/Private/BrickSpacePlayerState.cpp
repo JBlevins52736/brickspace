@@ -5,28 +5,28 @@
 #include "WallBrick.h"
 
 
-void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
-{
-	AActor* Replacement = GetWorld()->SpawnActor<AActor>(
-		TargetActor->GetClass(),
-		InitialTransform
-	);
+//void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
+//{
+//	AActor* Replacement = GetWorld()->SpawnActor<AActor>(
+//		TargetActor->GetClass(),
+//		InitialTransform
+//	);
+//
+//	UWallBrick* wallBrick = TargetActor->FindComponentByClass<UWallBrick>();
+//	if (wallBrick != nullptr)
+//		wallBrick->bThresholdReached = true;
+//}
 
-	UWallBrick* wallBrick = TargetActor->FindComponentByClass<UWallBrick>();
-	if (wallBrick != nullptr)
-		wallBrick->bThresholdReached = true;
-}
+//void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
+//{
+//	//clientComponent->SetWorldTransform(worldsrt);
+//	TargetActor->SetActorTransform(InitialTransform);
+//}
 
-void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
-{
-	//clientComponent->SetWorldTransform(worldsrt);
-	TargetActor->SetActorTransform(InitialTransform);
-}
-
-void ABrickSpacePlayerState::Server_DeleteActor_Implementation(AActor* TargetActor)
-{
-	TargetActor->Destroy(true, true);
-}
+//void ABrickSpacePlayerState::Server_DeleteActor_Implementation(AActor* TargetActor)
+//{
+//	TargetActor->Destroy(true, true);
+//}
 
 //void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
 //{

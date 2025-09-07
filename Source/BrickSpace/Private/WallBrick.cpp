@@ -2,6 +2,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/SceneComponent.h"
 #include "GameFramework/Actor.h"
+#include "BrickActor.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
@@ -20,7 +21,8 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
     if(!state && !bThresholdReached )
     {
         //clientComponent->SetWorldTransform(InitialTransform);
-        playerState->Server_MoveActor(clientComponent->GetOwner(), InitialTransform);
+        ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
+        brickActor->Server_Move(InitialTransform);
     }
 }
 
@@ -48,8 +50,11 @@ void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 void UWallBrick::OnThresholdReached()
 {
     bThresholdReached = true;
-    if (!clientComponent->GetOwner()) return;
-        playerState->Server_CloneActor(clientComponent->GetOwner(), InitialTransform);
+    if (!clientComponent->GetOwner()) 
+        return;
+
+    ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
+    brickActor->Server_Clone(InitialTransform);
 
 #ifdef BLAH
     USceneComponent* SpawnWallParent = FindSpawnWallAncestor();

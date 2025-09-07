@@ -16,9 +16,19 @@ public:
 	// Sets default values for this actor's properties
 	ABrickActor();
 
+	UFUNCTION(Server, Reliable)
+	void Server_Clone(const FTransform& InitialTransform);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Delete();
+
 	// Changeing material
 	UFUNCTION(Server, Reliable)
 	void Server_ChangeMaterial(UMaterialInterface* material, bool brickIsSolid);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Move(const FTransform& InitialTransform);
+
 
 	UBrick* brick;
 

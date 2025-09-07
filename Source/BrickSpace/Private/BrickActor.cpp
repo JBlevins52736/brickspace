@@ -3,6 +3,8 @@
 
 #include "BrickActor.h"
 #include "Brick.h"
+#include "WallBrick.h"
+#include "CoreMinimal.h"
 
 // Sets default values
 ABrickActor::ABrickActor()
@@ -21,6 +23,21 @@ void ABrickActor::BeginPlay()
 	brick = FindComponentByClass<UBrick>();
 }
 
+void ABrickActor::Server_Clone_Implementation(const FTransform& InitialTransform)
+{
+	GetWorld()->SpawnActor<AActor>( GetClass(), InitialTransform );
+
+	// When we set this from the server it will replicate to all clients.
+	UWallBrick* wallBrick = FindComponentByClass<UWallBrick>();
+	if (wallBrick != nullptr)
+		wallBrick->bThresholdReached = true;
+}
+
+void ABrickActor::Server_Delete_Implementation()
+{
+	Destroy(true, true);
+}
+
 void ABrickActor::Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool brickIsSolid)
 {
 	if (brick)
@@ -29,4 +46,9 @@ void ABrickActor::Server_ChangeMaterial_Implementation(UMaterialInterface* mater
 		brick->isSolid = brickIsSolid;
 		brick->OnRep_Material();
 	}
+}
+
+void ABrickActor::Server_Move_Implementation(const FTransform& InitialTransform)
+{
+	SetActorTransform(InitialTransform);
 }

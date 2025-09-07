@@ -5,7 +5,7 @@
 #include "HandSelector.h"
 #include "BrickSpacePlayerState.h"
 #include "BrickSpacePawn.h"
-#include <Kismet/GameplayStatics.h>
+//#include <Kismet/GameplayStatics.h>
 
 void UHandColorChanger::Focus(USelector* selector, bool state)
 {

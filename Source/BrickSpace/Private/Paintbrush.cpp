@@ -3,6 +3,7 @@
 
 #include "Paintbrush.h"
 #include "BrickActor.h"
+#include "PainterActor.h"
 //#include <Kismet/GameplayStatics.h>
 #include "BrickSpacePlayerState.h"
 
@@ -45,9 +46,10 @@ void UPaintbrush::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	// Move brick freely, if already snapped the brick will temporarilly be returned to unsnapped movement to allow unsnap testing.
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (playerState != nullptr && GetOwner() != nullptr) {
+	APainterActor* painterActor = Cast<APainterActor>(GetOwner());
+	painterActor->Server_Move(clientComponent->GetComponentTransform());
 
-		playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
-
-	}
+	//if (playerState != nullptr && GetOwner() != nullptr) {
+	//	playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
+	//}
 }

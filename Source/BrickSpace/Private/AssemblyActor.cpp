@@ -3,7 +3,7 @@
 
 #include "AssemblyActor.h"
 #include "Assembly.h"
-#include <Kismet/GameplayStatics.h>
+//#include <Kismet/GameplayStatics.h>
 
 // Sets default values
 AAssemblyActor::AAssemblyActor() : assembly(nullptr)

@@ -6,7 +6,7 @@
 #include "Assembly.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
-#include <Kismet/GameplayStatics.h>
+//#include <Kismet/GameplayStatics.h>
 
 void UBrick::BeginPlay()
 {
@@ -82,12 +82,14 @@ void UBrick::ForePinch(USelector* selector, bool state)
 
 				// Bricks off the wall are always deleted.
 				// When matched the translucent brick is made solid and one brick in the layer has been solved.
-				if (playerState && GetOwner()) {
-					playerState->Server_DeleteActor(GetOwner());
-				}
-				else {
-					UE_LOG(LogTemp, Error, TEXT("playerState or owner null when deleting."));
-				}
+				ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
+				brickActor->Server_Delete();
+				//if (playerState && GetOwner()) {
+				//	playerState->Server_DeleteActor(GetOwner());
+				//}
+				//else {
+				//	UE_LOG(LogTemp, Error, TEXT("playerState or owner null when deleting."));
+				//}
 				//GetOwner()->Destroy(true, true); //  Destroy();	
 			}
 		}
@@ -203,7 +205,8 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	//if (elapsedTick > 100.0) {
 
 	// Apply final brick location to server. 
-	playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
+	ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
+	brickActor->Server_Move(clientComponent->GetComponentTransform());
 
 	//	elapsedTick -= 100.0;
 	//}
