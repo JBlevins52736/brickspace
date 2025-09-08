@@ -17,6 +17,11 @@ void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActo
 		wallBrick->bThresholdReached = true;
 }
 
+void ABrickSpacePlayerState::Server_Own_Implementation(AActor*TargetActor,  AActor* pawn)
+{
+	TargetActor->SetOwner(pawn);
+}
+
 //void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
 //{
 //	//clientComponent->SetWorldTransform(worldsrt);
