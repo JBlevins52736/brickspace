@@ -12,8 +12,8 @@ ABrickActor::ABrickActor()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	bReplicates = true;
-	//SetReplicates(true);
+	//bReplicates = true;
+	SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
@@ -23,9 +23,9 @@ void ABrickActor::BeginPlay()
 	brick = FindComponentByClass<UBrick>();
 }
 
-void ABrickActor::Server_Clone_Implementation(const FTransform& InitialTransform)
+void ABrickActor::Server_Clone_Implementation(ABrickActor* TargetActor, const FTransform& InitialTransform)
 {
-	GetWorld()->SpawnActor<AActor>( GetClass(), InitialTransform );
+	GetWorld()->SpawnActor<AActor>(TargetActor->GetClass(), InitialTransform );
 
 	// When we set this from the server it will replicate to all clients.
 	UWallBrick* wallBrick = FindComponentByClass<UWallBrick>();

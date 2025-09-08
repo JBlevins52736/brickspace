@@ -54,7 +54,7 @@ void UWallBrick::OnThresholdReached()
         return;
 
     ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
-    brickActor->Server_Clone(InitialTransform);
+    brickActor->Server_Clone(brickActor, InitialTransform);
 
 #ifdef BLAH
     USceneComponent* SpawnWallParent = FindSpawnWallAncestor();

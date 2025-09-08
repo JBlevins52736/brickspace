@@ -17,7 +17,7 @@ public:
 	ABrickActor();
 
 	UFUNCTION(Server, Reliable)
-	void Server_Clone(const FTransform& InitialTransform);
+	void Server_Clone(ABrickActor* TargetActor, const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Delete();
