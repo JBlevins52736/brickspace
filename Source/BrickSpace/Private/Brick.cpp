@@ -206,7 +206,7 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 
 	// Apply final brick location to server. 
 	ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-	brickActor->Server_Move(clientComponent->GetComponentTransform());
+	brickActor->Server_Move(GetOwner(), clientComponent->GetComponentTransform());
 
 	//	elapsedTick -= 100.0;
 	//}

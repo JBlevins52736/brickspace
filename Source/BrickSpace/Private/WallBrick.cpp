@@ -3,6 +3,7 @@
 #include "Components/SceneComponent.h"
 #include "GameFramework/Actor.h"
 #include "BrickActor.h"
+#include "Selector.h"
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
@@ -21,11 +22,16 @@ void UWallBrick::BeginPlay()
 void UWallBrick::ForePinch(USelector* selector, bool state)
 {
     Super::ForePinch(selector, state);
+
+    if (state) {
+        GetOwner()->SetOwner(selector->GetOwner());
+    }
+
     if(!state && !bThresholdReached )
     {
         //clientComponent->SetWorldTransform(InitialTransform);
         ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-        brickActor->Server_Move(InitialTransform);
+        brickActor->Server_Move(GetOwner(), InitialTransform);
     }
 }
 
@@ -55,16 +61,13 @@ void UWallBrick::OnThresholdReached()
     bThresholdReached = true;
     if (!clientComponent->GetOwner()) 
         return;
-    //if (playerState == nullptr) {
-APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-ABrickSpacePlayerState *playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-//	if (!playerState)
-//		return;
-//}
+
+    APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+    ABrickSpacePlayerState *playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+    playerState->Server_CloneActor(GetOwner(), InitialTransform);
 
 //    ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
 //    brickActor->Server_Clone(brickActor, InitialTransform);
-    playerState->Server_CloneActor(GetOwner(), InitialTransform);
 
 #ifdef BLAH
     USceneComponent* SpawnWallParent = FindSpawnWallAncestor();

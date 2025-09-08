@@ -25,7 +25,7 @@ void ABrickActor::BeginPlay()
 
 void ABrickActor::Server_Clone_Implementation(const FTransform& InitialTransform)
 {
-	GetWorld()->SpawnActor<AActor>(>GetClass(), InitialTransform );
+	GetWorld()->SpawnActor<AActor>(GetClass(), InitialTransform );
 
 	// When we set this from the server it will replicate to all clients.
 	UWallBrick* wallBrick = FindComponentByClass<UWallBrick>();
@@ -48,7 +48,7 @@ void ABrickActor::Server_ChangeMaterial_Implementation(UMaterialInterface* mater
 	}
 }
 
-void ABrickActor::Server_Move_Implementation(const FTransform& InitialTransform)
+void ABrickActor::Server_Move_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
 {
-	SetActorTransform(InitialTransform);
+	TargetActor->SetActorTransform(InitialTransform);
 }

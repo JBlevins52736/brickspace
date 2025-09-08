@@ -27,7 +27,7 @@ public:
 	void Server_ChangeMaterial(UMaterialInterface* material, bool brickIsSolid);
 
 	UFUNCTION(Server, Reliable)
-	void Server_Move(const FTransform& InitialTransform);
+	void Server_Move(AActor * TargetActor, const FTransform& InitialTransform);
 
 
 	UBrick* brick;
