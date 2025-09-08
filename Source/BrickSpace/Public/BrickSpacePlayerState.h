@@ -17,8 +17,8 @@ class BRICKSPACE_API ABrickSpacePlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
-	//UFUNCTION(Server, Reliable)
-	//void Server_CloneActor(AActor* TargetActor, const FTransform& InitialTransform);
+	UFUNCTION(Server, Reliable)
+	void Server_CloneActor(AActor* TargetActor, const FTransform& InitialTransform);
 
 	//UFUNCTION(Server, Reliable)
 	//void Server_MoveActor(AActor* TargetActor, const FTransform& InitialTransform);

@@ -23,9 +23,9 @@ void ABrickActor::BeginPlay()
 	brick = FindComponentByClass<UBrick>();
 }
 
-void ABrickActor::Server_Clone_Implementation(ABrickActor* TargetActor, const FTransform& InitialTransform)
+void ABrickActor::Server_Clone_Implementation(const FTransform& InitialTransform)
 {
-	GetWorld()->SpawnActor<AActor>(TargetActor->GetClass(), InitialTransform );
+	GetWorld()->SpawnActor<AActor>(>GetClass(), InitialTransform );
 
 	// When we set this from the server it will replicate to all clients.
 	UWallBrick* wallBrick = FindComponentByClass<UWallBrick>();

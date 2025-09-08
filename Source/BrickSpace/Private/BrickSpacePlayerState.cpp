@@ -5,17 +5,17 @@
 #include "WallBrick.h"
 
 
-//void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
-//{
-//	AActor* Replacement = GetWorld()->SpawnActor<AActor>(
-//		TargetActor->GetClass(),
-//		InitialTransform
-//	);
-//
-//	UWallBrick* wallBrick = TargetActor->FindComponentByClass<UWallBrick>();
-//	if (wallBrick != nullptr)
-//		wallBrick->bThresholdReached = true;
-//}
+void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
+{
+	AActor* Replacement = GetWorld()->SpawnActor<AActor>(
+		TargetActor->GetClass(),
+		InitialTransform
+	);
+
+	UWallBrick* wallBrick = TargetActor->FindComponentByClass<UWallBrick>();
+	if (wallBrick != nullptr)
+		wallBrick->bThresholdReached = true;
+}
 
 //void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
 //{

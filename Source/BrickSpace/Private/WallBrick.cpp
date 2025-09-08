@@ -6,6 +6,9 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
+#include "BrickSpacePlayerState.h"
+#include <Kismet/GameplayStatics.h>
+
 static const FName TAG_SpawnWall(TEXT("spawn wall"));
 
 void UWallBrick::BeginPlay()
@@ -52,9 +55,16 @@ void UWallBrick::OnThresholdReached()
     bThresholdReached = true;
     if (!clientComponent->GetOwner()) 
         return;
+    //if (playerState == nullptr) {
+APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+ABrickSpacePlayerState *playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+//	if (!playerState)
+//		return;
+//}
 
-    ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
-    brickActor->Server_Clone(brickActor, InitialTransform);
+//    ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
+//    brickActor->Server_Clone(brickActor, InitialTransform);
+    playerState->Server_CloneActor(GetOwner(), InitialTransform);
 
 #ifdef BLAH
     USceneComponent* SpawnWallParent = FindSpawnWallAncestor();
