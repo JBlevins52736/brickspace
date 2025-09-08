@@ -17,6 +17,9 @@ public:
 	ABrickActor();
 
 	UFUNCTION(Server, Reliable)
+	void Server_Own( AActor *pawn);
+
+	UFUNCTION(Server, Reliable)
 	void Server_Clone(const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)

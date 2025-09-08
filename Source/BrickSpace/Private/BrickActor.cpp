@@ -33,6 +33,11 @@ void ABrickActor::Server_Clone_Implementation(const FTransform& InitialTransform
 		wallBrick->bThresholdReached = true;
 }
 
+void ABrickActor::Server_Own_Implementation(AActor* pawn)
+{
+	GetOwner()->SetOwner(pawn);
+}
+
 void ABrickActor::Server_Delete_Implementation()
 {
 	Destroy(true, true);

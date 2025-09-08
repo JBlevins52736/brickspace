@@ -24,7 +24,8 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
     Super::ForePinch(selector, state);
 
     if (state) {
-        GetOwner()->SetOwner(selector->GetOwner());
+        ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
+        brickActor->Server_Own(selector->GetOwner());
     }
 
     if(!state && !bThresholdReached )
