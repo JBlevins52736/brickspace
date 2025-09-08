@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Engine/StaticMeshActor.h"
 #include "PainterActor.generated.h"
 
 UCLASS()
-class BRICKSPACE_API APainterActor : public AActor
+class BRICKSPACE_API APainterActor : public AStaticMeshActor
 {
 	GENERATED_BODY()
 	
