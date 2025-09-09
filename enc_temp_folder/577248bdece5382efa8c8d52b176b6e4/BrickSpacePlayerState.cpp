@@ -3,7 +3,7 @@
 #include "BrickSpacePlayerState.h"
 #include "HandSelector.h"
 #include "WallBrick.h"
-#include "Net/UnrealNetwork.h"
+
 
 void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
 {
@@ -70,20 +70,19 @@ void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* t
 {
 	TArray<UActorComponent*> actorComp;
 	target->GetComponents(actorComp);
-	APawn* playerPawn = Cast<APawn>(target); // this is to check for local player
 	for (UActorComponent* actor : actorComp)
 	{
 		if (actor->GetName().Contains("HandSelectorL"))
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = leftTransform;
-			
+			handSelector->OnRep_MeshTransformUpdate();
 		}
 		else if (actor->GetName().Contains("HandSelectorR"))
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = rightTransform;
-	
+			handSelector->OnRep_MeshTransformUpdate();
 		}
 	}
 }

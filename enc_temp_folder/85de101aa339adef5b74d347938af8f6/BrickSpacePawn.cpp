@@ -11,7 +11,7 @@ ABrickSpacePawn::ABrickSpacePawn()
 {
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	SetReplicates(true);
+	
 
 
 }
@@ -46,8 +46,6 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 		this->GetComponents<UActorComponent>(components);
 		FTransform rightTrans;
 		FTransform leftTrans;
-		UHandSelector* right = nullptr;
-		UHandSelector* left = nullptr;
 		bool foundComp = false;
 		for (UActorComponent* component : components)
 		{
@@ -55,23 +53,14 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 			{
 				UHandSelector* handSelector = Cast<UHandSelector>(component);
 				leftTrans = handSelector->handMesh->GetComponentTransform();
-				left = handSelector;
 				
 			}
 			else if (component->GetName().Contains("HandSelectorR"))
 			{
 				UHandSelector* handSelector = Cast<UHandSelector>(component);
 				rightTrans = handSelector->handMesh->GetComponentTransform();
-				right = handSelector;
 			}
 		}
-
-
-		if (IsLocallyControlled() && HasAuthority()) {
-			left->handTransform = leftTrans;
-			right->handTransform = rightTrans;
-		}
-		else
 		playerState->Server_UpdatePlayerHandPos(this, leftTrans, rightTrans);
 		elapsedTickTime -= delayInterval;
 	}

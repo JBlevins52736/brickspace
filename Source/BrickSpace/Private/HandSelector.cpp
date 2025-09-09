@@ -163,7 +163,7 @@ void UHandSelector::OnRep_Material()
 void UHandSelector::OnRep_MeshTransformUpdate()
 {
 	FVector troubleShoot = handTransform.GetLocation();
-	GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, FString::Printf(TEXT("x: %f y:%f z:%f"),troubleShoot.X, troubleShoot.Y, troubleShoot.Z));
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, FString::Printf(TEXT("x: %f y:%f z:%f"),troubleShoot.X, troubleShoot.Y, troubleShoot.Z));
 	
 	handMesh->SetWorldTransform(handTransform);
 }
