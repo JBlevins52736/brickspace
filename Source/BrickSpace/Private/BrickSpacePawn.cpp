@@ -41,7 +41,7 @@ void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* sele
 		UE_LOG(LogTemp, Warning, TEXT("I am server and updating my hand color"));
 		UHandSelector* handSelector = Cast<UHandSelector>(selector);
 		handSelector->handMaterial = color;
-		handSelector->OnRep_Material();
+		handSelector->OnRep_Material(); // For some reason, this is necessary here, but not when I update hand position.
 
 	}
 	else if (IsLocallyControlled() && !HasAuthority()) {
