@@ -37,6 +37,8 @@ void ABrickSpacePawn::NotifyServerOfHandMatChange(USelector* selector, UMaterial
 
 void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* selector)
 {
+	// This function checks to see who is the owner and will handle the calls from there.
+	// This function is managing updates between clients and servers as displayed in the Play in Editor
 	if (HasAuthority() && IsLocallyControlled()) {
 		UE_LOG(LogTemp, Warning, TEXT("I am server and updating my hand color"));
 		UHandSelector* handSelector = Cast<UHandSelector>(selector);
@@ -46,7 +48,7 @@ void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* sele
 	}
 	else if (IsLocallyControlled() && !HasAuthority()) {
 		UE_LOG(LogTemp, Warning, TEXT("I am a client updating hand color"))
-		ServerUpdatePlayerHandColor(this, color, selector);
+		ServerUpdatePlayerHandColor(this, color, selector); 
 	}
 }
 
