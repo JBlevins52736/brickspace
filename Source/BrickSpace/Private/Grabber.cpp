@@ -5,7 +5,7 @@
 #include "Selector.h"
 #include "BrickSpacePlayerState.h"
 
-#include <Kismet/GameplayStatics.h>
+//#include <Kismet/GameplayStatics.h>
 
 void UGrabber::Focus(USelector* selector, bool state)
 {
@@ -18,12 +18,12 @@ void UGrabber::ForePinch(USelector* selector, bool state)
 	// ToDo: On Grab button true, set childsrt to the clients transform as a child of the selectors cursor.
 	// You must also grab the selectors focus during the grab and release it when finished.
 
-	if (playerState == nullptr) {
-		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-		if (!playerState)
-			return;
-	}
+	//if (playerState == nullptr) {
+	//	APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+	//	playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+	//	if (!playerState)
+	//		return;
+	//}
 
 	if (clientComponent->Mobility != EComponentMobility::Movable &&
 		grabbingSelector != nullptr && grabbingSelector != selector)

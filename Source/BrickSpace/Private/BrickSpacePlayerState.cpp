@@ -17,43 +17,39 @@ void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActo
 		wallBrick->bThresholdReached = true;
 }
 
-void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
+void ABrickSpacePlayerState::Server_Own_Implementation(AActor*TargetActor,  AActor* pawn)
 {
-	//clientComponent->SetWorldTransform(worldsrt);
-	TargetActor->SetActorTransform(InitialTransform);
+	TargetActor->SetOwner(pawn);
 }
 
-void ABrickSpacePlayerState::Server_DeleteActor_Implementation(AActor* TargetActor)
-{
-	TargetActor->Destroy(true, true);
-}
+//void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
+//{
+//	//clientComponent->SetWorldTransform(worldsrt);
+//	TargetActor->SetActorTransform(InitialTransform);
+//}
 
-void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
-{
-	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-	if (brick != nullptr) {
-		brick->brickMaterial = material;
-		brick->isSolid = brickIsSolid;
-		brick->OnRep_Material();
-	}
-}
+//void ABrickSpacePlayerState::Server_DeleteActor_Implementation(AActor* TargetActor)
+//{
+//	TargetActor->Destroy(true, true);
+//}
 
-void ABrickSpacePlayerState::Server_ChangeGrabbable_Implementation(AActor* TargetActor, bool isGrabbable)
-{
-	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-	if (brick != nullptr) {
-		brick->isGrabbable = isGrabbable;
-		brick->OnRep_Grabbable();
-	}
-}
+//void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
+//{
+//	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
+//	if (brick != nullptr) {
+//		brick->brickMaterial = material;
+//		brick->isSolid = brickIsSolid;
+//		brick->OnRep_Material();
+//	}
+//}
 
-void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AActor* GroundplateActor)
-{
-	UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
-	if (assembly != nullptr) {
-		assembly->TryAdvanceLayer();
-	}
-}
+//void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AActor* GroundplateActor)
+//{
+//	UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
+//	if (assembly != nullptr) {
+//		assembly->TryAdvanceLayer();
+//	}
+//}
 
 void ABrickSpacePlayerState::Server_ChangeHandColor_Implementation(AActor* target, UMaterialInterface* material)
 {

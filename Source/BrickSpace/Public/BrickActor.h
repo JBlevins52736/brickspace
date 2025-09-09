@@ -1,0 +1,39 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+class UBrick;
+#include "BrickActor.generated.h"
+
+UCLASS()
+class BRICKSPACE_API ABrickActor : public AActor
+{
+	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	ABrickActor();
+
+	UFUNCTION(Server, Reliable)
+	void Server_Clone(const FTransform& InitialTransform);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Delete();
+
+	// Changeing material
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeMaterial(UMaterialInterface* material, bool brickIsSolid);
+
+	UFUNCTION(Server, Reliable)
+	void Server_Move(AActor * TargetActor, const FTransform& InitialTransform);
+
+
+	UBrick* brick;
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+};

@@ -7,6 +7,8 @@
 #include <list>
 #include <vector>
 
+class AAssemblyActor;
+
 #include "Brick.generated.h"
 
 /**
@@ -48,7 +50,7 @@ public:
 	virtual void OnRep_Material();
 
 	UPROPERTY(ReplicatedUsing = OnRep_Parent)
-	AActor* groundplateActor = nullptr;
+	AAssemblyActor* assemblyActor = nullptr;
 
 	UFUNCTION()
 	virtual void OnRep_Parent();
@@ -63,8 +65,6 @@ public:
 	//void Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial);
 	bool TryMatch( UBrick *assemblerBrick );
 	bool IsSolved() { return isSolid; }
-
-
 
 protected:
 	virtual void BeginPlay() override;

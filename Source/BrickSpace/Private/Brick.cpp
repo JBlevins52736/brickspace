@@ -1,10 +1,12 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "Brick.h"
+#include "BrickActor.h"
+#include "AssemblyActor.h"
 #include "Assembly.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
-#include <Kismet/GameplayStatics.h>
+//#include <Kismet/GameplayStatics.h>
 
 void UBrick::BeginPlay()
 {
@@ -80,12 +82,14 @@ void UBrick::ForePinch(USelector* selector, bool state)
 
 				// Bricks off the wall are always deleted.
 				// When matched the translucent brick is made solid and one brick in the layer has been solved.
-				if (playerState && GetOwner()) {
-					playerState->Server_DeleteActor(GetOwner());
-				}
-				else {
-					UE_LOG(LogTemp, Error, TEXT("playerState or owner null when deleting."));
-				}
+				ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
+				brickActor->Server_Delete();
+				//if (playerState && GetOwner()) {
+				//	playerState->Server_DeleteActor(GetOwner());
+				//}
+				//else {
+				//	UE_LOG(LogTemp, Error, TEXT("playerState or owner null when deleting."));
+				//}
 				//GetOwner()->Destroy(true, true); //  Destroy();	
 			}
 		}
@@ -201,7 +205,8 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	//if (elapsedTick > 100.0) {
 
 	// Apply final brick location to server. 
-	playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
+	ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
+	brickActor->Server_Move(GetOwner(), clientComponent->GetComponentTransform());
 
 	//	elapsedTick -= 100.0;
 	//}
@@ -245,11 +250,12 @@ void UBrick::OnRep_Parent()
 		clientComponent = GetAttachParent();
 	}
 
-	if (groundplateActor == nullptr)
+	if (assemblyActor == nullptr)
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: is null"));
 
-	if (clientComponent != nullptr && groundplateActor != nullptr) {
-		UAssembly* assembly = groundplateActor->FindComponentByClass<UAssembly>();
+	if (clientComponent != nullptr && assemblyActor != nullptr) {
+		UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
+		//UAssembly* assembly = assemblyActor->assembly;
 		if (assembly != nullptr) {
 			UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent: changing parent"));
 			clientComponent->AttachToComponent(assembly, FAttachmentTransformRules::KeepRelativeTransform);
@@ -362,16 +368,35 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	UE_LOG(LogTemp, Warning, TEXT("Bricks match:"));
 
 	// Make assemblerBrick active and solid.
-	if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
-		playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
+	//if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
+	//	playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
+	//}
+	ABrickActor* brickActor = Cast<ABrickActor>(assemblerBrickMesh->GetOwner());
+	if (!brickActor) {
+		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But assemblerBrick not a brickActor?"));
+		return false;
+	}
+
+	brickActor->Server_ChangeMaterial(mesh->GetMaterial(0), true);
+
+	if (!brickActor->brick) {
+		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick is null?"));
+		return false;
 	}
 
 	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
-	AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
-	if (playerState != nullptr && groundplate != nullptr) {
-		playerState->Server_TryAdvanceLayer(groundplate);
+	//AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
+	//if (playerState != nullptr && groundplate != nullptr) {
+	//	playerState->Server_TryAdvanceLayer(groundplate);
+	//}
+
+	if (!brickActor->brick->assemblyActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick has no assemblyActor?"));
+		return false;
 	}
 
+	brickActor->brick->assemblyActor->Server_TryAdvanceLayer();
 	return true;
 }
 
@@ -415,6 +440,6 @@ void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 	DOREPLIFETIME(UBrick, solidMatchMaterial);
 	DOREPLIFETIME(UBrick, isSolid);
 	DOREPLIFETIME(UBrick, isGrabbable);
-	DOREPLIFETIME(UBrick, groundplateActor);
+	DOREPLIFETIME(UBrick, assemblyActor);
 
 }

@@ -2,7 +2,9 @@
 
 
 #include "Paintbrush.h"
-#include <Kismet/GameplayStatics.h>
+#include "BrickActor.h"
+#include "PainterActor.h"
+//#include <Kismet/GameplayStatics.h>
 #include "BrickSpacePlayerState.h"
 
 void UPaintbrush::BeginPlay()
@@ -13,12 +15,21 @@ void UPaintbrush::BeginPlay()
 
 void UPaintbrush::ChangeBrickTouched()
 {
-	if (playerState != nullptr && GetOwner() != nullptr && brickTouched != nullptr) {
-		UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
-		if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
-		{
-			//MeshComp->SetMaterial(0, brushMaterial);
-			playerState->Server_ChangeMaterial(brickTouched->GetOwner(), brushMaterial, true);
+	//if (playerState != nullptr && GetOwner() != nullptr && brickTouched != nullptr) {
+	//	UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
+	//	if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
+	//	{
+	//		//MeshComp->SetMaterial(0, brushMaterial);
+	//		playerState->Server_ChangeMaterial(brickTouched->GetOwner(), brushMaterial, true);
+	//	}
+	//}
+
+	if (brickTouched && brickTouched->GetOwner() ) {
+		ABrickActor* brickTouchedActor = Cast<ABrickActor>(brickTouched->GetOwner());
+		if (brickTouchedActor) {
+			UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
+			if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
+				brickTouchedActor->Server_ChangeMaterial(brushMaterial, true);
 		}
 	}
 }
@@ -35,9 +46,10 @@ void UPaintbrush::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	// Move brick freely, if already snapped the brick will temporarilly be returned to unsnapped movement to allow unsnap testing.
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (playerState != nullptr && GetOwner() != nullptr) {
+	APainterActor* painterActor = Cast<APainterActor>(GetOwner());
+	painterActor->Server_Move(clientComponent->GetComponentTransform());
 
-		playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
-
-	}
+	//if (playerState != nullptr && GetOwner() != nullptr) {
+	//	playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
+	//}
 }
