@@ -70,8 +70,23 @@ void ABrickSpacePlayerState::Server_ChangeHandColor_Implementation(AActor* targe
 	}
 }
 
-void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* target, FTransform actorLocation)
+void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* target, FTransform leftTransform, FTransform rightTransform)
 {
-
-	target->SetActorTransform(actorLocation);
+	TArray<UActorComponent*> actorComp;
+	target->GetComponents(actorComp);
+	for (UActorComponent* actor : actorComp)
+	{
+		if (actor->GetName().Contains("HandSelectorL"))
+		{
+			UHandSelector* handSelector = Cast<UHandSelector>(actor);
+			handSelector->handTransform = leftTransform;
+			handSelector->OnRep_MeshTransformUpdate();
+		}
+		else if (actor->GetName().Contains("HandSelectorR"))
+		{
+			UHandSelector* handSelector = Cast<UHandSelector>(actor);
+			handSelector->handTransform = rightTransform;
+			handSelector->OnRep_MeshTransformUpdate();
+		}
+	}
 }

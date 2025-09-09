@@ -26,11 +26,14 @@ public:
 
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* handMaterial;
-
+	UPROPERTY(ReplicatedUsing = OnRep_MeshTransformUpdate)
+	FTransform handTransform;
 	//void SetHandMaterial(UMaterialInterface* material);
 
 	UFUNCTION()
 	virtual void OnRep_Material();
+	UFUNCTION()
+	virtual void OnRep_MeshTransformUpdate();
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -50,4 +53,5 @@ private:
 
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
+	
 };

@@ -3,6 +3,8 @@
 
 #include "BrickSpacePawn.h"
 #include <Kismet/GameplayStatics.h>
+
+#include "HandSelector.h"
 #include "Net/UnrealNetwork.h"
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()
@@ -40,7 +42,26 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 
 	if (elapsedTickTime > delayInterval && playerState) 
 	{
-		playerState->Server_UpdatePlayerHandPos(this, this->GetActorTransform());
+		TArray<UActorComponent*> components;
+		this->GetComponents<UActorComponent>(components);
+		FTransform rightTrans;
+		FTransform leftTrans;
+		bool foundComp = false;
+		for (UActorComponent* component : components)
+		{
+			if (component->GetName().Contains("HandSelectorL"))
+			{
+				UHandSelector* handSelector = Cast<UHandSelector>(component);
+				leftTrans = handSelector->handMesh->GetComponentTransform();
+				
+			}
+			else if (component->GetName().Contains("HandSelectorR"))
+			{
+				UHandSelector* handSelector = Cast<UHandSelector>(component);
+				rightTrans = handSelector->handMesh->GetComponentTransform();
+			}
+		}
+		playerState->Server_UpdatePlayerHandPos(this, leftTrans, rightTrans);
 		elapsedTickTime -= delayInterval;
 	}
 

@@ -160,6 +160,15 @@ void UHandSelector::OnRep_Material()
 	handMesh->SetMaterial(0, handMaterial);
 }
 
+void UHandSelector::OnRep_MeshTransformUpdate()
+{
+	FVector troubleShoot = handTransform.GetLocation();
+	GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, FString::Printf(TEXT("x: %f y:%f z:%f"),troubleShoot.X, troubleShoot.Y, troubleShoot.Z));
+	
+	handMesh->SetWorldTransform(handTransform);
+}
+
+
 void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

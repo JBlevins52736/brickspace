@@ -12,7 +12,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cecef9c4-6718-498a-b3a5-da48b4417cf0" name="Changes" comment="" />
+    <list default="true" id="cecef9c4-6718-498a-b3a5-da48b4417cf0" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BrickSpace/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BrickSpace/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/BP_BrickworldPawn.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/BP_BrickworldPawn.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Content/BluePrint/Components/BP_SessionManager.uasset" beforeDir="false" afterPath="$PROJECT_DIR$/Content/BluePrint/Components/BP_SessionManager.uasset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePawn.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePawn.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePlayerState.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Private/BrickSpacePlayerState.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Private/HandSelector.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Private/HandSelector.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Public/BrickSpacePlayerState.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Public/BrickSpacePlayerState.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Source/BrickSpace/Public/HandSelector.h" beforeDir="false" afterPath="$PROJECT_DIR$/Source/BrickSpace/Public/HandSelector.h" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -23,6 +32,7 @@
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="cidr-memory-view://2" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Intermediate/Build/Win64/UnrealEditor/Inc/BrickSpace/UHT/BrickSpacePlayerState.generated.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
@@ -39,7 +49,7 @@
     "C/C++ Project.BrickSpace.executor": "Debug",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "ryanDevbranch",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -157,6 +167,7 @@
       <updated>1757033005420</updated>
       <workItem from="1757033006796" duration="5046000" />
       <workItem from="1757086466949" duration="141000" />
+      <workItem from="1757105177239" duration="3576000" />
     </task>
     <servers />
   </component>
