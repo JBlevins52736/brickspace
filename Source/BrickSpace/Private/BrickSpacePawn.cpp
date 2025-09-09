@@ -71,7 +71,7 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 			left->handTransform = leftTrans;
 			right->handTransform = rightTrans;
 		}
-		else
+		else if(IsLocallyControlled() && !HasAuthority())
 		playerState->Server_UpdatePlayerHandPos(this, leftTrans, rightTrans);
 		elapsedTickTime -= delayInterval;
 	}

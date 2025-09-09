@@ -174,5 +174,4 @@ void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UHandSelector, handMaterial);
-	DOREPLIFETIME(UHandSelector, handTransform);
 }

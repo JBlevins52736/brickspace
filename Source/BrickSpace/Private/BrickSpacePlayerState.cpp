@@ -70,7 +70,8 @@ void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* t
 {
 	TArray<UActorComponent*> actorComp;
 	target->GetComponents(actorComp);
-	APawn* playerPawn = Cast<APawn>(target); // this is to check for local player
+	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, TEXT("Server was notified"));
+	UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
 	for (UActorComponent* actor : actorComp)
 	{
 		if (actor->GetName().Contains("HandSelectorL"))
@@ -83,7 +84,7 @@ void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* t
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = rightTransform;
-	
+			
 		}
 	}
 }
