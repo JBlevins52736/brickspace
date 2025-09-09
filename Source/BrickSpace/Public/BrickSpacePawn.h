@@ -36,6 +36,9 @@ public:
 
 	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
 
+	UFUNCTION(Server, Reliable)
+	void ServerUpdatePlayerHandPos(AActor* target, FTransform left, FTransform right);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

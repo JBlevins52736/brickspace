@@ -3,16 +3,15 @@
 
 #include "BrickSpacePawn.h"
 #include <Kismet/GameplayStatics.h>
-
 #include "HandSelector.h"
 #include "Net/UnrealNetwork.h"
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	SetReplicates(true);
-
+	PrimaryActorTick.bStartWithTickEnabled = true;
 
 }
 
@@ -22,15 +21,18 @@ void ABrickSpacePawn::BeginPlay()
 	Super::BeginPlay();
 	if (APlayerController* PC = Cast<APlayerController>(GetController())) {
 		playerState = Cast<ABrickSpacePlayerState>(PC->PlayerState);
+		if(!playerState) UE_LOG(LogTemp, Error, TEXT("Failed to acquire player state"))
 	}
+	SetActorTickEnabled(true);
 
+	UE_LOG(LogTemp, Warning, TEXT("Begin play has finished"));
 }
 
 void ABrickSpacePawn::NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material)
 {
 	if (playerState)
-	playerState->Server_ChangeHandColor(this, material);
-	
+		playerState->Server_ChangeHandColor(this, material);
+
 }
 
 // Called every frame
@@ -39,8 +41,8 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	elapsedTickTime += DeltaTime;
-
-	if (elapsedTickTime > delayInterval && playerState) 
+	//UE_LOG(LogTemp, Warning, TEXT("Tick is firing on the clients"));
+	if (elapsedTickTime > delayInterval)
 	{
 		TArray<UActorComponent*> components;
 		this->GetComponents<UActorComponent>(components);
@@ -56,7 +58,7 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 				UHandSelector* handSelector = Cast<UHandSelector>(component);
 				leftTrans = handSelector->handMesh->GetComponentTransform();
 				left = handSelector;
-				
+
 			}
 			else if (component->GetName().Contains("HandSelectorR"))
 			{
@@ -71,12 +73,38 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 			left->handTransform = leftTrans;
 			right->handTransform = rightTrans;
 		}
-		else if(IsLocallyControlled() && !HasAuthority())
-		playerState->Server_UpdatePlayerHandPos(this, leftTrans, rightTrans);
+		else if (IsLocallyControlled() && !HasAuthority()) 
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Client sending update"));
+
+			ServerUpdatePlayerHandPos(this, leftTrans, rightTrans);
+		}
 		elapsedTickTime -= delayInterval;
 	}
 
 
+}
+
+void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, FTransform left, FTransform right)
+{
+	TArray<UActorComponent*> actorComp;
+	target->GetComponents(actorComp);
+	UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
+	for (UActorComponent* actor : actorComp)
+	{
+		if (actor->GetName().Contains("HandSelectorL"))
+		{
+			UHandSelector* handSelector = Cast<UHandSelector>(actor);
+			handSelector->handTransform = left;
+
+		}
+		else if (actor->GetName().Contains("HandSelectorR"))
+		{
+			UHandSelector* handSelector = Cast<UHandSelector>(actor);
+			handSelector->handTransform = right;
+
+		}
+	}
 }
 
 // Called to bind functionality to input
