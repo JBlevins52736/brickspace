@@ -38,7 +38,7 @@ void UGrabber::ForePinch(USelector* selector, bool state)
 
 		// Set childsrt to the clients transform as a child of the selectors cursor.
 		childsrt = clientComponent->GetComponentTransform() * selector->Cursor().Inverse();
-
+		UpdateColor(selector);
 	}
 	else {
 		//UE_LOG(LogTemp, Warning, TEXT("Release:%s"), *FString(GetOwner()->GetActorLabel()));
@@ -59,4 +59,11 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 		FTransform worldsrt = childsrt * grabbingSelector->Cursor();
 		clientComponent->SetWorldTransform(worldsrt);
 	}
+}
+
+void UGrabber::UpdateColor(USelector* selector)
+{
+	// Use this to default and set brick color
+	
+	UE_LOG(LogTemp, Warning, TEXT("Used grabber version"));
 }

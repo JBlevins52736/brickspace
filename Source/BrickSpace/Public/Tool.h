@@ -19,6 +19,7 @@ class BRICKSPACE_API UTool : public UGrabber
 protected:
 	virtual void BeginPlay() override;
 	virtual void ChangeBrickTouched();
+	
 
 	UBrick *brickTouched = nullptr;
 

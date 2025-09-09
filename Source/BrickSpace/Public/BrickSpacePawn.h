@@ -39,6 +39,11 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerUpdatePlayerHandPos(AActor* target, FTransform left, FTransform right);
 
+	UFUNCTION(Server, Reliable)
+	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
+
+
+	void UpdateHandColor(UMaterialInterface* color, USelector* selector);
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

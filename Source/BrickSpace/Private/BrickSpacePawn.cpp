@@ -21,11 +21,11 @@ void ABrickSpacePawn::BeginPlay()
 	Super::BeginPlay();
 	if (APlayerController* PC = Cast<APlayerController>(GetController())) {
 		playerState = Cast<ABrickSpacePlayerState>(PC->PlayerState);
-		if(!playerState) UE_LOG(LogTemp, Error, TEXT("Failed to acquire player state"))
+		//if(!playerState) UE_LOG(LogTemp, Error, TEXT("Failed to acquire player state"))
 	}
 	SetActorTickEnabled(true);
 
-	UE_LOG(LogTemp, Warning, TEXT("Begin play has finished"));
+	//UE_LOG(LogTemp, Warning, TEXT("Begin play has finished"));
 }
 
 void ABrickSpacePawn::NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material)
@@ -33,6 +33,21 @@ void ABrickSpacePawn::NotifyServerOfHandMatChange(USelector* selector, UMaterial
 	if (playerState)
 		playerState->Server_ChangeHandColor(this, material);
 
+}
+
+void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* selector)
+{
+	if (HasAuthority() && IsLocallyControlled()) {
+		UE_LOG(LogTemp, Warning, TEXT("I am server and updating my hand color"));
+		UHandSelector* handSelector = Cast<UHandSelector>(selector);
+		handSelector->handMaterial = color;
+		handSelector->OnRep_Material();
+
+	}
+	else if (IsLocallyControlled() && !HasAuthority()) {
+		UE_LOG(LogTemp, Warning, TEXT("I am a client updating hand color"))
+		ServerUpdatePlayerHandColor(this, color, selector);
+	}
 }
 
 // Called every frame
@@ -75,7 +90,7 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 		}
 		else if (IsLocallyControlled() && !HasAuthority()) 
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Client sending update"));
+			//UE_LOG(LogTemp, Warning, TEXT("Client sending update"));
 
 			ServerUpdatePlayerHandPos(this, leftTrans, rightTrans);
 		}
@@ -89,7 +104,7 @@ void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, F
 {
 	TArray<UActorComponent*> actorComp;
 	target->GetComponents(actorComp);
-	UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
+	//UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
 	for (UActorComponent* actor : actorComp)
 	{
 		if (actor->GetName().Contains("HandSelectorL"))
@@ -112,6 +127,15 @@ void ABrickSpacePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+}
+
+void ABrickSpacePawn::ServerUpdatePlayerHandColor_Implementation(AActor* target, UMaterialInterface* color, USelector* selector) 
+{
+	if (selector) {
+		UHandSelector* handSelector = Cast<UHandSelector>(selector);
+
+		handSelector->handMaterial = color;
+	}
 }
 
 

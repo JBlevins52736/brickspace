@@ -4,6 +4,8 @@
 #include "Paintbrush.h"
 #include "BrickActor.h"
 #include "PainterActor.h"
+#include "Selector.h"
+#include "BrickSpacePawn.h"
 //#include <Kismet/GameplayStatics.h>
 #include "BrickSpacePlayerState.h"
 
@@ -52,4 +54,11 @@ void UPaintbrush::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	//if (playerState != nullptr && GetOwner() != nullptr) {
 	//	playerState->Server_MoveActor(clientComponent->GetOwner(), clientComponent->GetComponentTransform());
 	//}
+}
+
+void UPaintbrush::UpdateColor(USelector* selector)
+{
+	AActor* owner = selector->GetOwner();
+	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(owner);
+	pawn->UpdateHandColor(brushMaterial, selector);
 }

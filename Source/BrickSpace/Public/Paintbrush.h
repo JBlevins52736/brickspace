@@ -22,5 +22,5 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void ChangeBrickTouched() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	void UpdateColor(USelector* selector) override;
 };

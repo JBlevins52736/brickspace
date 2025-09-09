@@ -20,12 +20,12 @@ class BRICKSPACE_API UGrabber : public UVodget
 public:
 	virtual void Focus(USelector* selector, bool state) override;
 	virtual void ForePinch(USelector* selector, bool state) override;
-
+	
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
-
+	virtual void UpdateColor(USelector* selector);
 	USelector* grabbingSelector = nullptr;
 	FTransform childsrt;
 //	ABrickSpacePlayerState* playerState;
