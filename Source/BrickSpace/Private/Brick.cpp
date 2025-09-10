@@ -4,6 +4,7 @@
 #include "BrickActor.h"
 #include "AssemblyActor.h"
 #include "Assembly.h"
+#include "Selector.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
 //#include <Kismet/GameplayStatics.h>
@@ -52,6 +53,7 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			// Add overlap with other bricks.
 			mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
 			mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
+			GetAndSetMatColorFromPlayer(selector);
 		}
 		else {
 			// This attempts to resolve error noticed on release that could be due to an
@@ -210,6 +212,26 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 
 	//	elapsedTick -= 100.0;
 	//}
+}
+
+void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
+{
+	APawn* pawn = Cast<APawn>(selector->GetOwner());
+	
+	if (pawn)
+	{
+		if (pawn->HasAuthority() && pawn->IsLocallyControlled()) 
+		{
+			UE_LOG(LogTemp, Warning, TEXT("I am server for update"));
+			brickMaterial = selector->handMaterial;
+			OnRep_Material();
+		}
+		else if (!pawn->HasAuthority() && pawn->IsLocallyControlled())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
+			UpdateMaterialOnGrab(selector->handMaterial, selector);
+		}
+	}
 }
 
 FVector UBrick::GetLocation()
@@ -430,6 +452,13 @@ void UBrick::OnRep_Grabbable()
 		MeshComp->Mobility = (isGrabbable) ? EComponentMobility::Movable : EComponentMobility::Stationary;
 		//UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable"));
 	}
+}
+
+void UBrick::UpdateMaterialOnGrab_Implementation(UMaterialInterface* color, USelector* selector) 
+{
+	UE_LOG(LogTemp, Warning, TEXT("Entered server logic for update"))
+	brickMaterial = color;
+
 }
 
 void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

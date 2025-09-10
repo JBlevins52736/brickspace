@@ -150,15 +150,7 @@ void UHandSelector::SetFilter(uint16 filter)
 //{
 //}
 
-void UHandSelector::OnRep_Material()
-{
-	//if (handMesh != nullptr && brushMaterial != nullptr ) {
-	//	handMesh->SetMaterial(0, brushMaterial);
-	//	//UE_LOG(LogTemp, Warning, TEXT("OnRep_Material: setting material %s"), *(brushMaterial->GetFName()).ToString());
-	//}
-	GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, TEXT("color should update"));
-	handMesh->SetMaterial(0, handMaterial);
-}
+
 
 void UHandSelector::OnRep_MeshTransformUpdate()
 {

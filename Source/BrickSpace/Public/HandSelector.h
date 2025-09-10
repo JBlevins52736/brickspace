@@ -21,17 +21,14 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	USceneComponent* centerEye = nullptr;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
-	UStaticMeshComponent* handMesh = nullptr;
 
-	UPROPERTY(ReplicatedUsing = OnRep_Material)
-	UMaterialInterface* handMaterial;
+
+
 	UPROPERTY(ReplicatedUsing = OnRep_MeshTransformUpdate)
 	FTransform handTransform;
 	//void SetHandMaterial(UMaterialInterface* material);
 
-	UFUNCTION()
-	virtual void OnRep_Material();
+
 	UFUNCTION()
 	virtual void OnRep_MeshTransformUpdate();
 

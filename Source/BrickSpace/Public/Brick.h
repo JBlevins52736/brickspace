@@ -55,6 +55,9 @@ public:
 	UFUNCTION()
 	virtual void OnRep_Parent();
 
+	UFUNCTION(Server, Reliable)
+	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
+
 	FVector GetLocation();
 	FQuat GetQuat();
 	UMaterialInterface* GetMaterial();
@@ -69,6 +72,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void GetAndSetMatColorFromPlayer(USelector* selector);
 
 private:
 	/** called when something enters the sphere component */

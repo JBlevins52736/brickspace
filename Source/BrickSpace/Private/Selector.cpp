@@ -1,5 +1,6 @@
 #include "Selector.h"
 #include "Vodget.h"
+#include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
 USelector::USelector()
@@ -36,6 +37,22 @@ const FTransform& USelector::Cursor()
 void USelector::SetFilter(uint16 filter)
 {
 	selectionFilter = filter;
+}
+void USelector::OnRep_Material()
+{
+	//if (handMesh != nullptr && brushMaterial != nullptr ) {
+	//	handMesh->SetMaterial(0, brushMaterial);
+	//	//UE_LOG(LogTemp, Warning, TEXT("OnRep_Material: setting material %s"), *(brushMaterial->GetFName()).ToString());
+	//}
+
+	handMesh->SetMaterial(0, handMaterial);
+}
+void USelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(USelector, handMaterial);
+	
 }
 
 // This method should be pure virtual but is implemented to avoid Unreal compiler issues.
