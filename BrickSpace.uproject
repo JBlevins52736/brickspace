@@ -43,10 +43,6 @@
 				"Linux",
 				"Android"
 			]
-		},
-		{
-			"Name": "ReplicationTest",
-			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [
