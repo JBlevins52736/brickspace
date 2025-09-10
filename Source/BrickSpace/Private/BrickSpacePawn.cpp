@@ -113,13 +113,14 @@ void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, F
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = left;
+			handSelector->OnRep_MeshTransformUpdate();
 
 		}
 		else if (actor->GetName().Contains("HandSelectorR"))
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = right;
-
+			handSelector->OnRep_MeshTransformUpdate();
 		}
 	}
 }
@@ -137,6 +138,7 @@ void ABrickSpacePawn::ServerUpdatePlayerHandColor_Implementation(AActor* target,
 		UHandSelector* handSelector = Cast<UHandSelector>(selector);
 
 		handSelector->handMaterial = color;
+		handSelector->OnRep_Material();
 	}
 }
 

@@ -224,12 +224,14 @@ void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("I am server for update"));
 			brickMaterial = selector->handMaterial;
-			OnRep_Material();
+			OnRep_Material();// This sets the server as the server has authority
 		}
 		else if (!pawn->HasAuthority() && pawn->IsLocallyControlled())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
-			UpdateMaterialOnGrab(selector->handMaterial, selector);
+			AActor* actor = GetOwner();
+			ABrickActor* brickActor = Cast<ABrickActor>(actor);
+			brickActor->Server_ChangeMaterial(selector->handMaterial, brickActor->brick->isSolid); // this allows replication via actor class
 		}
 	}
 }
