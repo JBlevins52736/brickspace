@@ -23,12 +23,12 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 {
     Super::ForePinch(selector, state);
 
-    if (state) {
-        APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-        ABrickSpacePlayerState* playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+    //if (state) {
+    //    APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+    //    ABrickSpacePlayerState* playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 
-        playerState->Server_Own(GetOwner(), selector->GetOwner());
-    }
+    //    playerState->Server_Own(GetOwner(), selector->GetOwner());
+    //}
 
     if(!state && !bThresholdReached )
     {

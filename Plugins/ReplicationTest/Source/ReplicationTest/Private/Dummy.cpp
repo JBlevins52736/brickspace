@@ -21,8 +21,7 @@ ADummy::ADummy()
 		CubeMeshComponent->SetStaticMesh(CubeMeshAsset.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/Plugins/ReplicationTest/BryansBS/M_Color"));
-	//static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/Game/BryansBS/M_Color"));
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> MaterialFinder(TEXT("/ReplicationTest/BryansBS/M_Color.M_Color"));
 	if (MaterialFinder.Succeeded())
 	{
 		// Create a dynamic material instance so we can modify it at runtime
@@ -46,7 +45,7 @@ void ADummy::BeginPlay()
 	CubeMeshComponent->SetCollisionProfileName(TEXT("OverlapAllDynamic"));
 	CubeMeshComponent->SetGenerateOverlapEvents(true);
 
-	if (HasAuthority())
+	//if (HasAuthority())
 	{
 		CubeMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &ADummy::OnOverlapBegin);
 	}
@@ -54,23 +53,23 @@ void ADummy::BeginPlay()
 
 void ADummy::Server_ChangeColor_Implementation(AActor* TargetActor)
 {
-	//if (HasAuthority())
-	{
-		FLinearColor color(FMath::RandRange(0.0, 1.0), FMath::RandRange(0.0, 1.0), FMath::RandRange(0.0, 1.0));
-		colorVec = color;
-		OnRep_Color();
-	}
-}
+	FLinearColor color(FMath::RandRange(0.0, 1.0), FMath::RandRange(0.0, 1.0), FMath::RandRange(0.0, 1.0));
+	colorVec = color;
+	OnRep_Color();
 
-void ADummy::OnRep_Color()
-{
-	DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), colorVec);
 	if (HasAuthority()) {
 		UE_LOG(LogTemp, Warning, TEXT("SERVER Color:%f %f %f"), colorVec.R, colorVec.G, colorVec.B);
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("CLIENT Color:%f %f %f"), colorVec.R, colorVec.G, colorVec.B);
 	}
+
+}
+
+void ADummy::OnRep_Color()
+{
+	DynamicMaterialInstance->SetVectorParameterValue(TEXT("Color"), colorVec);
+
 
 }
 
