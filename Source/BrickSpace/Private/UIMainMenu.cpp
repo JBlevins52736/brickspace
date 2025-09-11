@@ -51,13 +51,22 @@ void UUIMainMenu::UpdateUIScreenComp()
 void UUIMainMenu::BeginPlay()
 {
 	Super::BeginPlay();
-	camera = GetWorld()->GetFirstPlayerController()->GetPawn()->FindComponentByClass<UCameraComponent>();
-	FVector startPos = camera->GetComponentTransform().GetLocation() + (camera->GetForwardVector() * distanceFromFace);
-	startPos.Z += 120;
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Orange, FString::Printf(TEXT("Begin play x: %f, y: %f, z: %f"), startPos.X, startPos.Y, startPos.Z));
-	this->GetOwner()->SetActorLocation(startPos);
-	FQuat rot = FQuat(1, 1, 180, 1);
-	GetOwner()->SetActorRotation(rot);
+	APlayerController* controller = GetWorld()->GetFirstPlayerController();
+	if (controller) {
+		APawn* pawn = controller->GetPawn();
+		if (pawn) {
+			camera = pawn->FindComponentByClass<UCameraComponent>();
+			if (camera) {
+				FVector startPos = camera->GetComponentTransform().GetLocation() + (camera->GetForwardVector() * distanceFromFace);
+				startPos.Z += 120;
+				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Orange, FString::Printf(TEXT("Begin play x: %f, y: %f, z: %f"), startPos.X, startPos.Y, startPos.Z));
+				this->GetOwner()->SetActorLocation(startPos);
+				FQuat rot = FQuat(1, 1, 180, 1);
+				GetOwner()->SetActorRotation(rot);
+			}
+		}
+	}
+	//camera = GetWorld()->GetFirstPlayerController()->GetPawn()->FindComponentByClass<UCameraComponent>();
 }
 
 
