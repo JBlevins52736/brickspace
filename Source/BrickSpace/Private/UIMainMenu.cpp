@@ -61,8 +61,8 @@ void UUIMainMenu::BeginPlay()
 				startPos.Z += 120;
 				GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Orange, FString::Printf(TEXT("Begin play x: %f, y: %f, z: %f"), startPos.X, startPos.Y, startPos.Z));
 				this->GetOwner()->SetActorLocation(startPos);
-				FQuat rot = FQuat(1, 1, 180, 1);
-				GetOwner()->SetActorRotation(rot);
+				//FQuat rot = FQuat(0, 0, sin(PI/2), cos(PI/2) );
+				//GetOwner()->SetActorRotation(rot);
 			}
 		}
 	}

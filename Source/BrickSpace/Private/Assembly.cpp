@@ -36,6 +36,8 @@ void UAssembly::BeginPlay()
 		// This instance is not the server
 		return;
 	}
+	if ( niagaraThrusterEffect )
+	niagaraThrusterEffect->Activate();
 
 	assemblyActor = Cast<AAssemblyActor>(this->GetOwner());
 
@@ -250,6 +252,8 @@ bool UAssembly::TryAdvanceLayer()
 		// Take off!
 		startPos = GetComponentLocation();
 		PrimaryComponentTick.SetTickFunctionEnable(true);
+
+		niagaraThrusterEffect->Activate();
 	}
 	return true;
 }
