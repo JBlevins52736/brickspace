@@ -17,6 +17,7 @@ class BRICKSPACE_API ABrickSpacePlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
+	virtual void BeginPlay() override;
 
 
 	UFUNCTION(Server, Reliable)
@@ -34,8 +35,13 @@ public:
 	//UFUNCTION(Server, Reliable)
 	//void Server_ChangeMaterial(AActor* TargetActor, UMaterialInterface* material, bool isSolid );
 
-	//UFUNCTION(Server, Reliable)
-	//void Server_TryAdvanceLayer(AActor* GroundplateActor);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	AActor* groundplate;
+
+	UAssembly* assembly;
+
+	UFUNCTION(Server, Reliable)
+	void Server_TryAdvanceLayer();
 
 	UFUNCTION(Server, Reliable)
 	void Server_ChangeHandColor(AActor* target, UMaterialInterface* material);

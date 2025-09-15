@@ -364,7 +364,7 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		}
 
 		// If only one tube is snapped then possible orientations are infinite.
-		if (/*tubesSnapped > 1 && */matched != tubes.size())
+		if (tubesSnapped > 1 && matched != tubes.size())
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Failed pose: Not all tubes matched"));
 			return false;

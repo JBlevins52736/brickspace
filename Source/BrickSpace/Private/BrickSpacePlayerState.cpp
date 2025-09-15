@@ -3,7 +3,28 @@
 #include "BrickSpacePlayerState.h"
 #include "HandSelector.h"
 #include "WallBrick.h"
+#include "AssemblyActor.h"
+#include "Assembly.h"
 #include "Net/UnrealNetwork.h"
+
+void ABrickSpacePlayerState::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (groundplate) {
+		TArray<AActor*> ChildActors;
+		groundplate->GetAllChildActors(ChildActors, true); // true to include descendants
+		for (AActor* ChildActor : ChildActors)
+		{
+			AAssemblyActor* assemblyActor = Cast<AAssemblyActor>(ChildActor);
+			if (assemblyActor)
+			{
+				assembly = assemblyActor->FindComponentByClass<UAssembly>();
+				break; // Found the assemblyActor, no need to continue searching
+			}
+		}
+	}
+}
 
 void ABrickSpacePlayerState::Server_Own_Implementation(AActor* TargetActor, AActor* pawn)
 {
@@ -43,13 +64,13 @@ void ABrickSpacePlayerState::Server_Own_Implementation(AActor* TargetActor, AAct
 //	}
 //}
 
-//void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AActor* GroundplateActor)
-//{
-//	UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
-//	if (assembly != nullptr) {
-//		assembly->TryAdvanceLayer();
-//	}
-//}
+void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation()
+{
+	//UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
+	if (assembly != nullptr) {
+		assembly->TryAdvanceLayer();
+	}
+}
 
 void ABrickSpacePlayerState::Server_ChangeHandColor_Implementation(AActor* target, UMaterialInterface* material)
 {

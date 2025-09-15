@@ -81,9 +81,11 @@ void UWallBrick::Server_Clone_Implementation(const FTransform& onWallTransform)
     AActor* clonedBrick = owner->GetWorld()->SpawnActor<AActor>(owner->GetClass(), onWallTransform);
 
     // When we set this from the server it will replicate to all clients.
-    UWallBrick* wallBrick = clonedBrick->FindComponentByClass<UWallBrick>();
-    if (wallBrick != nullptr)
-        wallBrick->bThresholdReached = true;
+    //UWallBrick* wallBrick = clonedBrick->FindComponentByClass<UWallBrick>();
+    //if (wallBrick != nullptr)
+    //    wallBrick->bThresholdReached = true;
+
+    bThresholdReached = true;
 }
 
 void UWallBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

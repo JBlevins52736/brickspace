@@ -19,6 +19,7 @@ class BRICKSPACE_API UUIMainMenu : public UVodgetButton
 public:
 	UFUNCTION(BlueprintCallable)
 	void changeScene(bool F);
+
 	UFUNCTION(BlueprintCallable)
 	void SpawnMenu();
 
@@ -38,7 +39,6 @@ public:
 	float UIFovUpdate = 0.10f;
 	
 	void BeginPlay() override;
-
 	
 private:
 
