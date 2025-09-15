@@ -64,16 +64,34 @@ void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* Target
 	}
 }
 
-void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation()
+void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AAssemblyActor* assemblyActor)
 {
-	ENetMode CurrentNetMode = GetNetMode();
-	if (CurrentNetMode != NM_ListenServer)
-	{
-		// This instance is not the server
-		return;
-	}
+	//ENetMode CurrentNetMode = GetNetMode();
+	//if (CurrentNetMode != NM_ListenServer)
+	//{
+	//	// This instance is not the server
+	//	return;
+	//}
 
 	//UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
+	//if (assembly == nullptr) {
+	//	if (groundplate) {
+	//		TArray<AActor*> ChildActors;
+	//		groundplate->GetAllChildActors(ChildActors, true); // true to include descendants
+	//		for (AActor* ChildActor : ChildActors)
+	//		{
+	//			AAssemblyActor* assemblyActor = Cast<AAssemblyActor>(ChildActor);
+	//			if (assemblyActor)
+	//			{
+	//				assembly = assemblyActor->FindComponentByClass<UAssembly>();
+	//				break; // Found the assemblyActor, no need to continue searching
+	//			}
+	//		}
+	//	}
+	//}
+
+
+	assembly = assemblyActor->FindComponentByClass<UAssembly>();
 	if (assembly != nullptr) {
 		assembly->TryAdvanceLayer();
 	}

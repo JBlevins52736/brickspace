@@ -41,7 +41,7 @@ public:
 	UAssembly* assembly;
 
 	UFUNCTION(Server, Reliable)
-	void Server_TryAdvanceLayer();
+	void Server_TryAdvanceLayer( AAssemblyActor *assemblyActor );
 
 	UFUNCTION(Server, Reliable)
 	void Server_ChangeHandColor(AActor* target, UMaterialInterface* material);

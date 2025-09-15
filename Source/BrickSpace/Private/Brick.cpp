@@ -412,7 +412,7 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
 	if (playerState != nullptr) {
-		playerState->Server_TryAdvanceLayer();
+		playerState->Server_TryAdvanceLayer(assemblyActor);
 	}
 
 	//if (!brickActor->brick->assemblyActor)
