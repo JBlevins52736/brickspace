@@ -384,15 +384,20 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		return false;
 	}
 
-	if (!brickActor->HasAuthority()) {
-		if (playerState == nullptr) {
-			APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-			playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-		}
-		playerState->Server_Own(brickActor, grabbingSelector->GetOwner());
+	//// We probably don't have authority over the translucent brick that the grabbed brick just collided with.
+	//if (!brickActor->HasAuthority()) {
+	//	if (playerState == nullptr) {
+	//		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+	//		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+	//	}
+	//	
+	//	playerState->Server_Own(brickActor, playerState);
+	//}
+	if (playerState == nullptr) {
+		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
-
-	brickActor->Server_ChangeMaterial(mesh->GetMaterial(0), true);
+	playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true);
 
 	if (!brickActor->brick) {
 		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick is null?"));

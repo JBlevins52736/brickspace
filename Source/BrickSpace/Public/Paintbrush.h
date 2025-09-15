@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Tool.h"
+class ABrickSpacePlayerState;
 #include "Paintbrush.generated.h"
 
 /**
@@ -23,4 +24,7 @@ protected:
 	virtual void ChangeBrickTouched() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void UpdateColor(USelector* selector) override;
+
+	ABrickSpacePlayerState* playerState = nullptr;
+
 };

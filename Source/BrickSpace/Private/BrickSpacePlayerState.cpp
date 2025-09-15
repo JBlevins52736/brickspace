@@ -54,15 +54,15 @@ void ABrickSpacePlayerState::Server_Own_Implementation(AActor* TargetActor, AAct
 //	TargetActor->Destroy(true, true);
 //}
 
-//void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
-//{
-//	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-//	if (brick != nullptr) {
-//		brick->brickMaterial = material;
-//		brick->isSolid = brickIsSolid;
-//		brick->OnRep_Material();
-//	}
-//}
+void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
+{
+	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
+	if (brick != nullptr) {
+		brick->brickMaterial = material;
+		brick->isSolid = brickIsSolid;
+		brick->OnRep_Material();
+	}
+}
 
 void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation()
 {

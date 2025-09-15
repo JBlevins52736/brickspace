@@ -39,15 +39,15 @@ void ABrickActor::Server_Delete_Implementation()
 	Destroy(true, true);
 }
 
-void ABrickActor::Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool brickIsSolid)
-{
-	if (brick)
-	{
-		brick->brickMaterial = material;
-		brick->isSolid = brickIsSolid;
-		brick->OnRep_Material();
-	}
-}
+//void ABrickActor::Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool brickIsSolid)
+//{
+//	if (brick)
+//	{
+//		brick->brickMaterial = material;
+//		brick->isSolid = brickIsSolid;
+//		brick->OnRep_Material();
+//	}
+//}
 
 void ABrickActor::Server_Move_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
 {
