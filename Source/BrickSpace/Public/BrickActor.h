@@ -16,8 +16,8 @@ public:
 	// Sets default values for this actor's properties
 	ABrickActor();
 
-	UFUNCTION(Server, Reliable)
-	void Server_Clone(const FTransform& InitialTransform);
+	//UFUNCTION(Server, Reliable)
+	//void Server_Clone(const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Delete();

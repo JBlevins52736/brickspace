@@ -22,8 +22,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_Own(AActor* TargetActor, AActor* pawn);
 
-	UFUNCTION(Server, Reliable)
-	void Server_CloneActor(AActor* TargetActor, const FTransform& InitialTransform);
+	//UFUNCTION(Server, Reliable)
+	//void Server_CloneActor(AActor* TargetActor, const FTransform& InitialTransform);
 
 	//UFUNCTION(Server, Reliable)
 	//void Server_MoveActor(AActor* TargetActor, const FTransform& InitialTransform);
