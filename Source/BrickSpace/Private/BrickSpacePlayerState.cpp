@@ -66,6 +66,13 @@ void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* Target
 
 void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation()
 {
+	ENetMode CurrentNetMode = GetNetMode();
+	if (CurrentNetMode != NM_ListenServer)
+	{
+		// This instance is not the server
+		return;
+	}
+
 	//UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
 	if (assembly != nullptr) {
 		assembly->TryAdvanceLayer();
