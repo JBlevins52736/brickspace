@@ -16,11 +16,12 @@ void UWallBrick::BeginPlay()
 {
     Super::BeginPlay();
     //InitialTransform = clientComponent->GetComponentTransform();
-    InitialTransform = clientComponent->GetOwner()->GetTransform();
+    InitialTransform = clientComponent->GetComponentTransform();
 }
 
 void UWallBrick::ForePinch(USelector* selector, bool state)
 {
+    InitialTransform = clientComponent->GetComponentTransform();
     Super::ForePinch(selector, state);
 
     //if (state) {
@@ -41,13 +42,13 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+    
     if (bThresholdReached) return;
     if (!grabbingSelector) return;
 
     const float Dist = FVector::Dist(
         clientComponent->GetComponentLocation(),
-        InitialTransform.GetLocation()
+        childsrt.GetLocation()
     );
 
     if (Dist <= DistanceThreshold)
@@ -64,7 +65,7 @@ void UWallBrick::OnThresholdReached()
     bThresholdReached = true;
     if (!clientComponent->GetOwner()) 
         return;
-
+    
     APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
     ABrickSpacePlayerState *playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
     playerState->Server_CloneActor(GetOwner(), InitialTransform);
