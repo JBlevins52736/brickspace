@@ -232,7 +232,7 @@ void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
 			UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
 			AActor* actor = GetOwner();
 			ABrickActor* brickActor = Cast<ABrickActor>(actor);
-			brickActor->Server_ChangeMaterial(selector->handMaterial, brickActor->brick->isSolid); // this allows replication via actor class
+			//brickActor->Server_ChangeMaterial(selector->handMaterial, brickActor->brick->isSolid); // this allows replication via actor class
 		}
 	}
 }
@@ -421,7 +421,7 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
-	playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true);
+	//playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true); // come back to fix this
 
 	if (!brickActor->brick) {
 		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick is null?"));
