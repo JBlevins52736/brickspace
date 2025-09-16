@@ -6,7 +6,7 @@
 #include "PainterActor.h"
 #include "Selector.h"
 #include "BrickSpacePawn.h"
-//#include <Kismet/GameplayStatics.h>
+#include <Kismet/GameplayStatics.h>
 #include "BrickSpacePlayerState.h"
 
 void UPaintbrush::BeginPlay()
@@ -30,8 +30,14 @@ void UPaintbrush::ChangeBrickTouched()
 		ABrickActor* brickTouchedActor = Cast<ABrickActor>(brickTouched->GetOwner());
 		if (brickTouchedActor) {
 			UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
-			if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable)
-				brickTouchedActor->Server_ChangeMaterial(brushMaterial, true);
+			if (MeshComp != nullptr && MeshComp->Mobility == EComponentMobility::Movable) {
+				if (playerState == nullptr) {
+					APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+					playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+				}
+				playerState->Server_ChangeMaterial(brickTouchedActor, brushMaterial, true);
+				//brickTouchedActor->Server_ChangeMaterial(brushMaterial, true);
+			}
 		}
 	}
 }

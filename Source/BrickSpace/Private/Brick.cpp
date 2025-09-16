@@ -7,7 +7,8 @@
 #include "Selector.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
-//#include <Kismet/GameplayStatics.h>
+#include <Kismet/GameplayStatics.h>
+#include "Selector.h"
 
 void UBrick::BeginPlay()
 {
@@ -375,15 +376,21 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 			FVector pos = tubes[tubeind]->GetComponentLocation();
 			for (int othtubeind = 0; othtubeind < assemblerBrick->tubes.size(); ++othtubeind) {
 				FVector othpos = assemblerBrick->tubes[othtubeind]->GetComponentLocation();
+
+				if (tubes.size() == 1) {
+					float dist = FVector::Distance(pos, othpos);
+					UE_LOG(LogTemp, Warning, TEXT("SingleTubeDist: %f"), dist);
+				}
+
 				if (pos.Equals(othpos, 2.1)) // WHY ARE THEY OFF 2.1cm in world space when snapped in the opposite direction?!
 					++matched;
 			}
 		}
 
 		// If only one tube is snapped then possible orientations are infinite.
-		if (tubesSnapped > 1 && matched != tubes.size())
+		if (/*tubesSnapped > 1 && */matched != tubes.size())
 		{
-			UE_LOG(LogTemp, Warning, TEXT("Failed pose: Not all tubes matched"));
+			//UE_LOG(LogTemp, Warning, TEXT("Failed pose: Not all tubes matched"));
 			return false;
 		}
 
@@ -401,7 +408,20 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		return false;
 	}
 
-	brickActor->Server_ChangeMaterial(mesh->GetMaterial(0), true);
+	//// We probably don't have authority over the translucent brick that the grabbed brick just collided with.
+	//if (!brickActor->HasAuthority()) {
+	//	if (playerState == nullptr) {
+	//		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+	//		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+	//	}
+	//	
+	//	playerState->Server_Own(brickActor, playerState);
+	//}
+	if (playerState == nullptr) {
+		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+	}
+	playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true);
 
 	if (!brickActor->brick) {
 		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick is null?"));
@@ -410,17 +430,27 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 
 	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
 	//AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
-	//if (playerState != nullptr && groundplate != nullptr) {
-	//	playerState->Server_TryAdvanceLayer(groundplate);
-	//}
 
-	if (!brickActor->brick->assemblyActor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick has no assemblyActor?"));
-		return false;
+	if (playerState == nullptr) {
+		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
 
-	brickActor->brick->assemblyActor->Server_TryAdvanceLayer();
+	//if (!assemblyActor)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("assemblyActor null before Brick TryAdvanceLayer call"));
+	//}
+	if (playerState != nullptr && assemblerBrick->assemblyActor ) {
+		playerState->Server_TryAdvanceLayer(assemblerBrick->assemblyActor);
+	}
+
+	//if (!brickActor->brick->assemblyActor)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick has no assemblyActor?"));
+	//	return false;
+	//}
+
+	//brickActor->brick->assemblyActor->Server_TryAdvanceLayer();
 	return true;
 }
 

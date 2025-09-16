@@ -16,6 +16,9 @@ public:
     UPROPERTY(EditAnywhere, Replicated)
     bool bThresholdReached = false;  // only bool we need
 
+    UFUNCTION(Server, Reliable)
+    void Server_Clone(const FTransform& onWallTransform);
+
 protected:
     virtual void BeginPlay() override;
     virtual void ForePinch(USelector* selector, bool state) override;

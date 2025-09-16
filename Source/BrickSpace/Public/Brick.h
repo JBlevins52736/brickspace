@@ -8,6 +8,7 @@
 #include <vector>
 
 class AAssemblyActor;
+class ABrickSpacePlayerState;
 
 #include "Brick.generated.h"
 
@@ -91,4 +92,6 @@ private:
 	void DoAcceptMatchWithRevealedBrick();
 
 	std::list<UBrick *> overlappedBricks;	// Note: Assumes no bricks are actually deleted.
+
+	ABrickSpacePlayerState* playerState = nullptr;
 };

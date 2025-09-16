@@ -36,6 +36,8 @@ void UAssembly::BeginPlay()
 		// This instance is not the server
 		return;
 	}
+	//if ( niagaraThrusterEffect )
+	//niagaraThrusterEffect->Activate();
 
 	assemblyActor = Cast<AAssemblyActor>(this->GetOwner());
 
@@ -248,8 +250,10 @@ bool UAssembly::TryAdvanceLayer()
 	}
 	if (!LoadNextLayer()) {
 		// Take off!
-		startPos = GetComponentLocation();
+		startPos = GetOwner()->GetActorLocation();
 		PrimaryComponentTick.SetTickFunctionEnable(true);
+
+		niagaraThrusterEffect->Activate();
 	}
 	return true;
 }
@@ -309,7 +313,7 @@ void UAssembly::CreateAssembly(const int Value)
 void UAssembly::SaveAssembly(const int Value)
 {
 	// Assembly cannot be saved when game mode is active. Developer must call CreateAssembly first.
-	if (GameModeActive)
+	if (GameModeActive || ! GetOwner()->HasAuthority() )
 		return;
 
 

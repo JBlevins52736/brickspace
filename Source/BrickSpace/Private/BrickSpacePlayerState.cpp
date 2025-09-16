@@ -3,24 +3,67 @@
 #include "BrickSpacePlayerState.h"
 #include "HandSelector.h"
 #include "WallBrick.h"
+#include "AssemblyActor.h"
+#include "Assembly.h"
 #include "Net/UnrealNetwork.h"
 
-void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
+void ABrickSpacePlayerState::BeginPlay()
 {
-	AActor* Replacement = GetWorld()->SpawnActor<AActor>(
-		TargetActor->GetClass(),
-		InitialTransform
-	);
+	Super::BeginPlay();
 
-	UWallBrick* wallBrick = TargetActor->FindComponentByClass<UWallBrick>();
-	if (wallBrick != nullptr)
-		wallBrick->bThresholdReached = true;
+	AAssemblyActor* assemblyActor = nullptr;
+	if (groundplate) {
+		TArray<AActor*> ChildActors;
+		groundplate->GetAllChildActors(ChildActors, true); // true to include descendants
+		for (AActor* ChildActor : ChildActors)
+		{
+			assemblyActor = Cast<AAssemblyActor>(ChildActor);
+			if (assemblyActor)
+			{
+				assembly = assemblyActor->FindComponentByClass<UAssembly>();
+				break; // Found the assemblyActor, no need to continue searching
+			}
+		}
+	}
+
+
+	//// Set replicated state of all bricks on the wall.
+	//ENetMode CurrentNetMode = GetNetMode();
+	//if (wallOfBricks && (CurrentNetMode == NM_ListenServer || CurrentNetMode == NM_Standalone)) {
+
+	//	TArray<UWallBrick*> WallBricks;
+	//	wallOfBricks->GetComponents<UWallBrick>(WallBricks);
+	//	for (UWallBrick* wallBrick : WallBricks)
+	//	{
+	//		//wallBrick->assemblyActor = assemblyActor;
+	//		//wallBrick->solidMatchMaterial = wallBrick->GetMaterial();
+	//		//wallBrick->isSolid = true;
+	//		//wallBrick->isGrabbable = true;
+	//		//wallBrick->brickMaterial = wallBrick->solidMatchMaterial;
+	//		//wallBrick->OnRep_Material();
+	//		//wallBrick->OnRep_Grabbable();
+	//		//wallBrick->OnRep_Parent();
+	//	}
+	//}
+
 }
 
-void ABrickSpacePlayerState::Server_Own_Implementation(AActor*TargetActor,  AActor* pawn)
+void ABrickSpacePlayerState::Server_Own_Implementation(AActor* TargetActor, AActor* pawn)
 {
 	TargetActor->SetOwner(pawn);
 }
+
+//void ABrickSpacePlayerState::Server_CloneActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
+//{
+//	AActor* Replacement = GetWorld()->SpawnActor<AActor>(
+//		TargetActor->GetClass(),
+//		InitialTransform
+//	);
+//
+//	UWallBrick* wallBrick = TargetActor->FindComponentByClass<UWallBrick>();
+//	if (wallBrick != nullptr)
+//		wallBrick->bThresholdReached = true;
+//}
 
 //void ABrickSpacePlayerState::Server_MoveActor_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
 //{
@@ -33,23 +76,56 @@ void ABrickSpacePlayerState::Server_Own_Implementation(AActor*TargetActor,  AAct
 //	TargetActor->Destroy(true, true);
 //}
 
-//void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
-//{
-//	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-//	if (brick != nullptr) {
-//		brick->brickMaterial = material;
-//		brick->isSolid = brickIsSolid;
-//		brick->OnRep_Material();
-//	}
-//}
+void ABrickSpacePlayerState::Server_ChangeMaterial_Implementation(AActor* TargetActor, UMaterialInterface* material, bool brickIsSolid)
+{
+	UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
+	if (brick != nullptr) {
+		brick->brickMaterial = material;
+		brick->isSolid = brickIsSolid;
+		brick->OnRep_Material();
+	}
+}
 
-//void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AActor* GroundplateActor)
-//{
-//	UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
-//	if (assembly != nullptr) {
-//		assembly->TryAdvanceLayer();
-//	}
-//}
+void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AAssemblyActor* assemblyActor)
+{
+	//ENetMode CurrentNetMode = GetNetMode();
+	//if (CurrentNetMode != NM_ListenServer)
+	//{
+	//	// This instance is not the server
+	//	return;
+	//}
+
+	//UAssembly* assembly = GroundplateActor->FindComponentByClass<UAssembly>();
+	//if (assembly == nullptr) {
+	//	if (groundplate) {
+	//		TArray<AActor*> ChildActors;
+	//		groundplate->GetAllChildActors(ChildActors, true); // true to include descendants
+	//		for (AActor* ChildActor : ChildActors)
+	//		{
+	//			AAssemblyActor* assemblyActor = Cast<AAssemblyActor>(ChildActor);
+	//			if (assemblyActor)
+	//			{
+	//				assembly = assemblyActor->FindComponentByClass<UAssembly>();
+	//				break; // Found the assemblyActor, no need to continue searching
+	//			}
+	//		}
+	//	}
+	//}
+
+	if (!assemblyActor)
+	{
+		// Note: The client tests for null before calling this on the server.
+		// When a valid pointer is passed in an RPC but arrives as null on the server the object referenced must not be replicated.
+		// Actors passed as pointers in an RPC must be replicated to be deserialized (found) on the server.
+		UE_LOG(LogTemp, Warning, TEXT("assemblyActor null in server TryAdvanceLayer call"));
+	}
+	else {
+		if (!assembly)
+			assembly = assemblyActor->FindComponentByClass<UAssembly>();
+		if (assembly)
+			assembly->TryAdvanceLayer();
+	}
+}
 
 void ABrickSpacePlayerState::Server_ChangeHandColor_Implementation(AActor* target, UMaterialInterface* material)
 {
@@ -78,13 +154,13 @@ void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* t
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = leftTransform;
-			
+
 		}
 		else if (actor->GetName().Contains("HandSelectorR"))
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = rightTransform;
-			
+
 		}
 	}
 }

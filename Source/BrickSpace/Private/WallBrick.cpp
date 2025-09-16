@@ -65,23 +65,28 @@ void UWallBrick::OnThresholdReached()
     bThresholdReached = true;
     if (!clientComponent->GetOwner()) 
         return;
-    
-    APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-    ABrickSpacePlayerState *playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-    playerState->Server_CloneActor(GetOwner(), InitialTransform);
 
-//    ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
-//    brickActor->Server_Clone(brickActor, InitialTransform);
+    //APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+    //ABrickSpacePlayerState *playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+    //playerState->Server_CloneActor(GetOwner(), InitialTransform);
 
-#ifdef BLAH
-    USceneComponent* SpawnWallParent = FindSpawnWallAncestor();
-    if (SpawnWallParent)
-    {
-        //SpawnReplacementAtHome(SpawnWallParent);
-    }
+    //ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
+    //brickActor->Server_Clone(InitialTransform);
 
-    DecoupleFromParent();
-#endif
+    Server_Clone(InitialTransform);
+}
+
+void UWallBrick::Server_Clone_Implementation(const FTransform& onWallTransform)
+{
+    AActor* owner = GetOwner();
+    AActor* clonedBrick = owner->GetWorld()->SpawnActor<AActor>(owner->GetClass(), onWallTransform);
+
+    // When we set this from the server it will replicate to all clients.
+    //UWallBrick* wallBrick = clonedBrick->FindComponentByClass<UWallBrick>();
+    //if (wallBrick != nullptr)
+    //    wallBrick->bThresholdReached = true;
+
+    bThresholdReached = true;
 }
 
 void UWallBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -90,50 +95,3 @@ void UWallBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
 
     DOREPLIFETIME(UWallBrick, bThresholdReached);
 }
-
-#ifdef BLAH
-void UWallBrick::SpawnReplacement()
-{
-    if (!clientComponent->GetOwner()) return;
-
-    playerState->Server_CloneActor(clientComponent->GetOwner(), InitialTransform );
-}
-
-USceneComponent* UWallBrick::FindSpawnWallAncestor() const
-{
-    USceneComponent* Cur = clientComponent;
-    while (Cur)
-    {
-        if (Cur->ComponentHasTag("spawn wall"))
-            return Cur;
-        Cur = Cur->GetAttachParent();
-    }
-    return nullptr;
-}
-    void UWallBrick::SpawnReplacementAtHome(USceneComponent * AttachParentIfAny)
-    {
-        AActor* Replacement = GetWorld()->SpawnActor<AActor>(
-            GetOwner()->GetClass(),
-            InitialTransform
-        );
-
-    if (Replacement && AttachParentIfAny)
-    {
-        if (USceneComponent* Root = Replacement->GetRootComponent())
-        {
-            Root->AttachToComponent(AttachParentIfAny, FAttachmentTransformRules::KeepWorldTransform);
-        }
-    }
-}
-
-void UWallBrick::DecoupleFromParent()
-{
-    clientComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
-
-    if (UPrimitiveComponent* Prim = Cast<UPrimitiveComponent>(clientComponent))
-    {
-        Prim->SetMobility(EComponentMobility::Movable);
-    }
-}
-#endif
-

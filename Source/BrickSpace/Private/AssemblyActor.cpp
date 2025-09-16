@@ -11,6 +11,8 @@ AAssemblyActor::AAssemblyActor() : assembly(nullptr)
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
+
+	bReplicates = true;
 }
 
 // Called when the game starts or when spawned
@@ -29,11 +31,11 @@ void AAssemblyActor::BeginPlay()
 	}
 }
 
-void AAssemblyActor::Server_TryAdvanceLayer_Implementation()
-{
-	if (assembly) 
-		assembly->TryAdvanceLayer();
-}
+//void AAssemblyActor::Server_TryAdvanceLayer_Implementation()
+//{
+//	if (assembly) 
+//		assembly->TryAdvanceLayer();
+//}
 
 void AAssemblyActor::Server_Move_Implementation(const FTransform& transform)
 {

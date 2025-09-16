@@ -16,8 +16,8 @@ public:
 	// Sets default values for this actor's properties
 	AAssemblyActor();
 
-	UFUNCTION(Server, Reliable)
-	void Server_TryAdvanceLayer();
+	//UFUNCTION(Server, Reliable)
+	//void Server_TryAdvanceLayer();
 
 	UFUNCTION(Server, Reliable)
 	void Server_Move(const FTransform& transform);

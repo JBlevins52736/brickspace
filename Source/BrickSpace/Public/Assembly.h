@@ -91,8 +91,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Assembler")
 	float velocityCmPerSec = 100.0;
 
-	UPROPERTY(EditAnywhere, Category = "Niagara")
-	class UNiagaraSystem* niagraBrickExplode;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Niagara")
+	UNiagaraComponent* niagaraThrusterEffect;
 
 	bool PlayMode();
 	bool TryAddBrick(UBrick* brick);
