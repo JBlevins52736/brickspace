@@ -59,9 +59,9 @@ private:
 
 	float initialWorldToMeters = 100.0;
 	
-	UPROPERTY(ReplicatedUsing = OnRep_WorldScale)
+	//UPROPERTY(ReplicatedUsing = OnRep_WorldScale)
 	float currWorldToMeters = 100.0;
 	
-	UFUNCTION()
-	virtual void OnRep_WorldScale();
+/*	UFUNCTION()
+	virtual void OnRep_WorldScale()*/;
 };

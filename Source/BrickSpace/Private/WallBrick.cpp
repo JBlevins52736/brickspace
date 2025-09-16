@@ -48,7 +48,7 @@ void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
     const float Dist = FVector::Dist(
         clientComponent->GetComponentLocation(),
-        childsrt.GetLocation()
+        InitialTransform.GetLocation()
     );
 
     if (Dist <= DistanceThreshold)

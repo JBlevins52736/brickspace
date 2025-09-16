@@ -101,8 +101,8 @@ void UWorldGrabber::SetLocalCursor()
 			ds = initialBimanualHandDist / currBimanualHandDist;
 
 			currWorldToMeters = initialWorldToMeters * ds;
-			//GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-			OnRep_WorldScale();
+			GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+			//OnRep_WorldScale();
 
 			// Scale the Pawns geometry, Note: WorldToMeters base is 100.
 			float handScale = currWorldToMeters / 100.0;
@@ -185,13 +185,13 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		this->SetRelativeTransform(pawnChildOfWorld);
 }
 
-void UWorldGrabber::OnRep_WorldScale()
-{
-	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-}
-
-void UWorldGrabber::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UWorldGrabber, currWorldToMeters);
-}
+//void UWorldGrabber::OnRep_WorldScale()
+//{
+//	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+//}
+//
+//void UWorldGrabber::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+//{
+//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+//	DOREPLIFETIME(UWorldGrabber, currWorldToMeters);
+//}

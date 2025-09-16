@@ -402,7 +402,7 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	//if (playerState != nullptr && assemblerBrickMesh != nullptr && assemblerBrickMesh->GetOwner() != nullptr) {
 	//	playerState->Server_ChangeMaterial(assemblerBrickMesh->GetOwner(), mesh->GetMaterial(0), true);
 	//}
-	ABrickActor* brickActor = Cast<ABrickActor>(assemblerBrickMesh->GetOwner());
+	ABrickActor* brickActor = Cast<ABrickActor>(assemblerBrick->GetOwner());
 	if (!brickActor) {
 		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But assemblerBrick not a brickActor?"));
 		return false;
@@ -421,7 +421,7 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
-	//playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true); // come back to fix this
+	playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true); // come back to fix this
 
 	if (!brickActor->brick) {
 		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick is null?"));

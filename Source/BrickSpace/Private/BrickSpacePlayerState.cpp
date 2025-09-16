@@ -50,6 +50,9 @@ void ABrickSpacePlayerState::BeginPlay()
 
 void ABrickSpacePlayerState::Server_Own_Implementation(AActor* TargetActor, AActor* pawn)
 {
+	FString resultString;
+	TargetActor->GetName(resultString);
+	UE_LOG(LogTemp, Warning, TEXT("Server_Own_Implementation TargetActor:%s"), *resultString);
 	TargetActor->SetOwner(pawn);
 }
 
