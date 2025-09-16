@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
 	AActor* groundplate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	AActor* wallOfBricks;
+
 	UAssembly* assembly;
 
 	UFUNCTION(Server, Reliable)

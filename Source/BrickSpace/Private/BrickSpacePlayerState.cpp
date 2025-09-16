@@ -11,12 +11,13 @@ void ABrickSpacePlayerState::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AAssemblyActor* assemblyActor = nullptr;
 	if (groundplate) {
 		TArray<AActor*> ChildActors;
 		groundplate->GetAllChildActors(ChildActors, true); // true to include descendants
 		for (AActor* ChildActor : ChildActors)
 		{
-			AAssemblyActor* assemblyActor = Cast<AAssemblyActor>(ChildActor);
+			assemblyActor = Cast<AAssemblyActor>(ChildActor);
 			if (assemblyActor)
 			{
 				assembly = assemblyActor->FindComponentByClass<UAssembly>();
@@ -24,6 +25,27 @@ void ABrickSpacePlayerState::BeginPlay()
 			}
 		}
 	}
+
+
+	//// Set replicated state of all bricks on the wall.
+	//ENetMode CurrentNetMode = GetNetMode();
+	//if (wallOfBricks && (CurrentNetMode == NM_ListenServer || CurrentNetMode == NM_Standalone)) {
+
+	//	TArray<UWallBrick*> WallBricks;
+	//	wallOfBricks->GetComponents<UWallBrick>(WallBricks);
+	//	for (UWallBrick* wallBrick : WallBricks)
+	//	{
+	//		//wallBrick->assemblyActor = assemblyActor;
+	//		//wallBrick->solidMatchMaterial = wallBrick->GetMaterial();
+	//		//wallBrick->isSolid = true;
+	//		//wallBrick->isGrabbable = true;
+	//		//wallBrick->brickMaterial = wallBrick->solidMatchMaterial;
+	//		//wallBrick->OnRep_Material();
+	//		//wallBrick->OnRep_Grabbable();
+	//		//wallBrick->OnRep_Parent();
+	//	}
+	//}
+
 }
 
 void ABrickSpacePlayerState::Server_Own_Implementation(AActor* TargetActor, AActor* pawn)
@@ -98,7 +120,7 @@ void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AAssemblyActo
 		UE_LOG(LogTemp, Warning, TEXT("assemblyActor null in server TryAdvanceLayer call"));
 	}
 	else {
-		if ( ! assembly )
+		if (!assembly)
 			assembly = assemblyActor->FindComponentByClass<UAssembly>();
 		if (assembly)
 			assembly->TryAdvanceLayer();
@@ -132,13 +154,13 @@ void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* t
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = leftTransform;
-			
+
 		}
 		else if (actor->GetName().Contains("HandSelectorR"))
 		{
 			UHandSelector* handSelector = Cast<UHandSelector>(actor);
 			handSelector->handTransform = rightTransform;
-			
+
 		}
 	}
 }

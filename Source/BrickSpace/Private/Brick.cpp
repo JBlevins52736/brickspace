@@ -412,12 +412,12 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
 
-	if (!assemblyActor)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("assemblyActor null before Brick TryAdvanceLayer call"));
-	}
-	if (playerState != nullptr && assemblyActor ) {
-		playerState->Server_TryAdvanceLayer(assemblyActor);
+	//if (!assemblyActor)
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("assemblyActor null before Brick TryAdvanceLayer call"));
+	//}
+	if (playerState != nullptr && assemblerBrick->assemblyActor ) {
+		playerState->Server_TryAdvanceLayer(assemblerBrick->assemblyActor);
 	}
 
 	//if (!brickActor->brick->assemblyActor)

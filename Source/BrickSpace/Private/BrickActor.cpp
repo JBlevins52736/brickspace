@@ -12,8 +12,8 @@ ABrickActor::ABrickActor()
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = false;
 
-	//bReplicates = true;
-	SetReplicates(true);
+	bReplicates = true;
+	//SetReplicates(true);
 }
 
 // Called when the game starts or when spawned
