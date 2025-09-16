@@ -44,6 +44,7 @@ void AWorldAlignmentActor::SetAnchorPostions(FTransform anchorPostion)
 
 		TArray<AActor*> worldActors;
 		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), worldActors);
+		USceneComponent* directionalLightTargetComp = nullptr;
 		for (AActor* actor : worldActors)
 		{
 			if (actor == this) continue;
@@ -55,6 +56,7 @@ void AWorldAlignmentActor::SetAnchorPostions(FTransform anchorPostion)
 				if (rootComp)
 				{
 					rootComp->SetMobility(EComponentMobility::Static);
+					
 				}
 				
 			}
@@ -67,6 +69,14 @@ void AWorldAlignmentActor::SetAnchorPostions(FTransform anchorPostion)
 				{
 					rootComp->SetMobility(EComponentMobility::Static);
 				}
+			}
+			else if (actor->GetName().StartsWith("DirectionalLight"))
+			{
+				actor->GetRootComponent()->SetMobility(EComponentMobility::Movable);
+				FVector direction = endTransform.GetLocation() - actor->GetActorLocation();
+				FRotator rotDirection = direction.Rotation();
+				actor->SetActorRotation(rotDirection);
+				
 			}
 		}
 	}
