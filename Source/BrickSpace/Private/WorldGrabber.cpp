@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "WorldGrabber.h"
 #include "Components/SceneComponent.h"
+#include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "HandSelector.h"
+#include "Runtime/MovieSceneTracks/Private/MovieSceneTracksCustomAccessors.h"
 
 // Sets default values for this component's properties
 UWorldGrabber::UWorldGrabber() :
@@ -85,8 +87,7 @@ void UWorldGrabber::SetLocalCursor()
 
 			// Set currBimanualHandDist to the actual distance next.
 			float currBimanualHandDist = (left - right).Length();
-
-#ifdef WORLDTOMETERS_SCALING
+			
 			// The VR Pawn is made larger/smaller in Unreal by changing the WorldToMeters setting.
 			// Pawn geometry like the markers attached to controllers is the responsibility of the application.
 			// https://forums.unrealengine.com/t/changing-the-player-pawn-camera-size/384747/3
@@ -100,16 +101,14 @@ void UWorldGrabber::SetLocalCursor()
 			ds = initialBimanualHandDist / currBimanualHandDist;
 
 			currWorldToMeters = initialWorldToMeters * ds;
-			GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+			//GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+			OnRep_WorldScale();
 
 			// Scale the Pawns geometry, Note: WorldToMeters base is 100.
 			float handScale = currWorldToMeters / 100.0;
 			leftHand->SetWorldScale3D(FVector::OneVector * handScale);
 			rightHand->SetWorldScale3D(FVector::OneVector * handScale);
-#else
-			float scale = initialBimanualHandDist / currBimanualHandDist;
-			cursorsrt.SetScale3D(FVector::OneVector * scale);
-#endif
+
 		}
 		else
 		{
@@ -156,17 +155,16 @@ void UWorldGrabber::GrabChanged()
 		FVector left = leftHand->GetComponentLocation();
 		FVector right = rightHand->GetComponentLocation();
 		initialBimanualHandDist = (left - right).Length();
-#ifdef WORLDTOMETERS_SCALING
 		if (scaleMode) {
 			initialWorldToMeters = currWorldToMeters;
 		}
-#endif
 	}
 
 	SetLocalCursor();
 
 	childsrt = cursorsrt.Inverse();
 }
+
 
 void UWorldGrabber::DollyToggle(const bool Value) { dollyMode = !dollyMode; }
 void UWorldGrabber::ScaleToggle(const bool Value) { scaleMode = !scaleMode; }
@@ -181,8 +179,19 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	SetLocalCursor();
 	FTransform worldsrt = childsrt * cursorsrt;
-	FTransform pawnChildOfWorld = GetOwner()->GetActorTransform() * worldsrt.Inverse();
+	FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
 
 	if ( scaleMode )
-		GetOwner()->SetActorTransform(pawnChildOfWorld);
+		this->SetRelativeTransform(pawnChildOfWorld);
+}
+
+void UWorldGrabber::OnRep_WorldScale()
+{
+	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+}
+
+void UWorldGrabber::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UWorldGrabber, currWorldToMeters);
 }

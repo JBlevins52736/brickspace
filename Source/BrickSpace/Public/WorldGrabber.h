@@ -1,17 +1,16 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-#define WORLDTOMETERS_SCALING
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Components/SceneComponent.h"
 #include "WorldGrabber.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BRICKSPACE_API UWorldGrabber : public UActorComponent
+class BRICKSPACE_API UWorldGrabber : public USceneComponent
 {
 	GENERATED_BODY()
 
@@ -57,8 +56,12 @@ private:
 
 	bool dollyMode = true;
 	bool scaleMode = false;
-#ifdef WORLDTOMETERS_SCALING
+
 	float initialWorldToMeters = 100.0;
+	
+	UPROPERTY(ReplicatedUsing = OnRep_WorldScale)
 	float currWorldToMeters = 100.0;
-#endif
+	
+	UFUNCTION()
+	virtual void OnRep_WorldScale();
 };
