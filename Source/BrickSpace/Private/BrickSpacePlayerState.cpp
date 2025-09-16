@@ -90,10 +90,18 @@ void ABrickSpacePlayerState::Server_TryAdvanceLayer_Implementation(AAssemblyActo
 	//	}
 	//}
 
-
-	assembly = assemblyActor->FindComponentByClass<UAssembly>();
-	if (assembly != nullptr) {
-		assembly->TryAdvanceLayer();
+	if (!assemblyActor)
+	{
+		// Note: The client tests for null before calling this on the server.
+		// When a valid pointer is passed in an RPC but arrives as null on the server the object referenced must not be replicated.
+		// Actors passed as pointers in an RPC must be replicated to be deserialized (found) on the server.
+		UE_LOG(LogTemp, Warning, TEXT("assemblyActor null in server TryAdvanceLayer call"));
+	}
+	else {
+		if ( ! assembly )
+			assembly = assemblyActor->FindComponentByClass<UAssembly>();
+		if (assembly)
+			assembly->TryAdvanceLayer();
 	}
 }
 

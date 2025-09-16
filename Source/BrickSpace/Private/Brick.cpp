@@ -411,7 +411,12 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
-	if (playerState != nullptr) {
+
+	if (!assemblyActor)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("assemblyActor null before Brick TryAdvanceLayer call"));
+	}
+	if (playerState != nullptr && assemblyActor ) {
 		playerState->Server_TryAdvanceLayer(assemblyActor);
 	}
 
