@@ -64,5 +64,5 @@ void UGrabber::UpdateColor(USelector* selector)
 {
 	// Use this to default and set brick color
 	
-	UE_LOG(LogTemp, Warning, TEXT("Used grabber version"));
+	//UE_LOG(LogTemp, Warning, TEXT("Used grabber version"));
 }

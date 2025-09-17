@@ -75,6 +75,8 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void GetAndSetMatColorFromPlayer(USelector* selector);
 
+	ABrickSpacePlayerState* playerState = nullptr;
+
 private:
 	/** called when something enters the sphere component */
 	UFUNCTION()
@@ -93,5 +95,4 @@ private:
 
 	std::list<UBrick *> overlappedBricks;	// Note: Assumes no bricks are actually deleted.
 
-	ABrickSpacePlayerState* playerState = nullptr;
 };

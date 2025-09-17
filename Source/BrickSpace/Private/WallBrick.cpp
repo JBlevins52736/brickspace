@@ -21,7 +21,7 @@ void UWallBrick::BeginPlay()
 
 void UWallBrick::ForePinch(USelector* selector, bool state)
 {
-    InitialTransform = clientComponent->GetComponentTransform();
+    //InitialTransform = clientComponent->GetComponentTransform();
     Super::ForePinch(selector, state);
 
     //if (state) {
@@ -33,6 +33,18 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 
     if(!state && !bThresholdReached )
     {
+        if ( !GetOwner()->HasAuthority() ) {
+
+            if (!playerState) {
+                APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+                playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+            }
+            if (playerState)
+            playerState->Server_Own(GetOwner(), selector->GetOwner());
+
+            UE_LOG(LogTemp, Warning, TEXT("WallBrick lost authority to snap back?!") );
+        }
+
         //clientComponent->SetWorldTransform(InitialTransform);
         ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
         brickActor->Server_Move(GetOwner(), InitialTransform);
