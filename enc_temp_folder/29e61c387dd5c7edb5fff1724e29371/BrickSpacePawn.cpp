@@ -70,7 +70,7 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 
 	if (IsLocallyControlled() && HasAuthority())
 	{
-		//ServerUpdatePlayerHandPos(this, leftHand->GetComponentLocation(), rightHand->GetComponentLocation() );
+//		ServerUpdatePlayerHandPos(this, leftHand->GetComponentLocation(), rightHand->GetComponentLocation() );
 	}
 #ifdef BLAH
 	elapsedTickTime += DeltaTime;
