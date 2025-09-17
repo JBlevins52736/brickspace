@@ -4,6 +4,7 @@
 #include "Assembly.h"
 #include "AssemblyActor.h"
 #include "Brick.h"
+#include "BrickActor.h"
 #include "Json.h"
 #include "JsonUtilities.h"
 #include "Misc/FileHelper.h"
@@ -289,9 +290,13 @@ void UAssembly::ClearAssembly()
 	{
 		if (Child)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("  - %s (Class: %s)"), *Child->GetName(), *Child->GetClass()->GetName());
-			// Note: We must delete the actor blueprint that is the owner of each child brick scenecomponent.
-			Child->GetOwner()->Destroy(true, true); //  Destroy();
+			// Only destroy attached bricks.
+			ABrickActor* brickActor = Cast<ABrickActor>(Child->GetOwner());
+			if (brickActor) {
+				UE_LOG(LogTemp, Warning, TEXT("  - %s (Class: %s)"), *Child->GetName(), *Child->GetClass()->GetName());
+				// Note: We must delete the actor blueprint that is the owner of each child brick scenecomponent.
+				brickActor->Destroy(true, true); //  Destroy();
+			}
 		}
 	}
 
@@ -413,16 +418,21 @@ bool UAssembly::TryRemoveBrick(UBrick* brick)
 void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	// Fly upward at velocityCmPerSec until well over the ceiling (about 10m or 1000cm)
-	FVector pos = GetComponentLocation();
+	//FVector pos = GetComponentLocation();
+	FVector pos = GetOwner()->GetActorLocation();
 	if (pos.Z > 500.0) {
+
+		niagaraThrusterEffect->Deactivate();
+
 		PrimaryComponentTick.SetTickFunctionEnable(false);
 		ClearAssembly();
-		SetWorldLocation(startPos);
 
-		FVector scalevec = FVector::OneVector * 0.25f;
-		FTransform posrot(FQuat::Identity, startPos, scalevec);
-		assemblyActor->Server_Move(posrot);
+		//FVector scalevec = FVector::OneVector * 0.25f;
+		//FTransform posrot(FQuat::Identity, startPos, scalevec);
+		GetOwner()->SetActorLocation(startPos);
 		LoadAssembly();
+
+		//assemblyActor->Server_Move(posrot);
 		return;
 	}
 
@@ -436,9 +446,10 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	//}
 
 	{
-		FVector scalevec = FVector::OneVector * 0.25f;
-		FTransform posrot(FQuat::Identity, pos, scalevec);
-		assemblyActor->Server_Move(posrot);
+		//FVector scalevec = FVector::OneVector * 0.25f;
+		//FTransform posrot(FQuat::Identity, pos, scalevec);
+		GetOwner()->SetActorLocation(pos);
+		//assemblyActor->Server_Move(posrot);
 		//SetWorldLocation(pos);
 	}
 }
