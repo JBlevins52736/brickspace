@@ -68,9 +68,9 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsLocallyControlled())
+	if (IsLocallyControlled() && HasAuthority())
 	{
-		ServerUpdatePlayerHandPos(this, leftHand->GetComponentLocation(), rightHand->GetComponentLocation() );
+//		ServerUpdatePlayerHandPos(this, leftHand->GetComponentLocation(), rightHand->GetComponentLocation() );
 	}
 #ifdef BLAH
 	elapsedTickTime += DeltaTime;
@@ -119,7 +119,7 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 
 void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, FVector left, FVector right)
 {
-	if ( !IsLocallyControlled() )
+	//if ( !IsLocallyControlled() )
 	{
 		leftHand->SetWorldLocation(left);
 		rightHand->SetWorldLocation(right);
