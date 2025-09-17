@@ -13,6 +13,7 @@ ABrickSpacePawn::ABrickSpacePawn()
 	SetReplicates(true);
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
+	PrimaryActorTick.TickInterval = delayInterval;
 }
 
 // Called when the game starts or when spawned
@@ -67,6 +68,11 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (IsLocallyControlled())
+	{
+		ServerUpdatePlayerHandPos(this, leftHand->GetComponentLocation(), rightHand->GetComponentLocation() );
+	}
+#ifdef BLAH
 	elapsedTickTime += DeltaTime;
 	//UE_LOG(LogTemp, Warning, TEXT("Tick is firing on the clients"));
 	if (elapsedTickTime > delayInterval)
@@ -108,12 +114,17 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 		}
 		elapsedTickTime -= delayInterval;
 	}
-
-
+#endif
 }
 
-void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, FTransform left, FTransform right)
+void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, FVector left, FVector right)
 {
+	if ( !IsLocallyControlled() )
+	{
+		leftHand->SetWorldLocation(left);
+		rightHand->SetWorldLocation(right);
+	}
+#ifdef BLAH
 	TArray<UActorComponent*> actorComp;
 	target->GetComponents(actorComp);
 	//UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
@@ -133,6 +144,7 @@ void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, F
 			handSelector->OnRep_MeshTransformUpdate();
 		}
 	}
+#endif
 }
 
 // Called to bind functionality to input

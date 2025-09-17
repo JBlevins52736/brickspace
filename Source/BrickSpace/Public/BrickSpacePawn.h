@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "BrickSpacePlayerState.h"
+class UHandSelector;
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -37,7 +38,7 @@ public:
 	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
 
 	UFUNCTION(Server, Reliable)
-	void ServerUpdatePlayerHandPos(AActor* target, FTransform left, FTransform right);
+	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
 
 	UFUNCTION(Server, Reliable)
 	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
@@ -49,5 +50,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
 
 };

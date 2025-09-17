@@ -144,26 +144,26 @@ void ABrickSpacePlayerState::Server_ChangeHandColor_Implementation(AActor* targe
 		}
 	}
 }
-
-void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* target, FTransform leftTransform, FTransform rightTransform)
-{
-	TArray<UActorComponent*> actorComp;
-	target->GetComponents(actorComp);
-	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, TEXT("Server was notified"));
-	UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
-	for (UActorComponent* actor : actorComp)
-	{
-		if (actor->GetName().Contains("HandSelectorL"))
-		{
-			UHandSelector* handSelector = Cast<UHandSelector>(actor);
-			handSelector->handTransform = leftTransform;
-
-		}
-		else if (actor->GetName().Contains("HandSelectorR"))
-		{
-			UHandSelector* handSelector = Cast<UHandSelector>(actor);
-			handSelector->handTransform = rightTransform;
-
-		}
-	}
-}
+//
+//void ABrickSpacePlayerState::Server_UpdatePlayerHandPos_Implementation(AActor* target, FTransform leftTransform, FTransform rightTransform)
+//{
+//	TArray<UActorComponent*> actorComp;
+//	target->GetComponents(actorComp);
+//	GEngine->AddOnScreenDebugMessage(-1, 1, FColor::Orange, TEXT("Server was notified"));
+//	UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
+//	for (UActorComponent* actor : actorComp)
+//	{
+//		if (actor->GetName().Contains("HandSelectorL"))
+//		{
+//			UHandSelector* handSelector = Cast<UHandSelector>(actor);
+//			handSelector->handTransform = leftTransform;
+//
+//		}
+//		else if (actor->GetName().Contains("HandSelectorR"))
+//		{
+//			UHandSelector* handSelector = Cast<UHandSelector>(actor);
+//			handSelector->handTransform = rightTransform;
+//
+//		}
+//	}
+//}

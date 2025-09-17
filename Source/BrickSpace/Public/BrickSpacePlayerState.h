@@ -49,7 +49,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ChangeHandColor(AActor* target, UMaterialInterface* material);
 
-	UFUNCTION(Server, Reliable)
-	void Server_UpdatePlayerHandPos(AActor* target, FTransform leftTransform, FTransform rightTransform);
+	//UFUNCTION(Server, Reliable)
+	//void Server_UpdatePlayerHandPos(AActor* target, FTransform leftTransform, FTransform rightTransform);
 
 };

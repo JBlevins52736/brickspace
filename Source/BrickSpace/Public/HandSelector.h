@@ -24,13 +24,13 @@ public:
 
 
 
-	UPROPERTY(ReplicatedUsing = OnRep_MeshTransformUpdate)
-	FTransform handTransform;
+	//UPROPERTY(ReplicatedUsing = OnRep_MeshTransformUpdate)
+	//FTransform handTransform;
 	//void SetHandMaterial(UMaterialInterface* material);
 
 
-	UFUNCTION()
-	virtual void OnRep_MeshTransformUpdate();
+	//UFUNCTION()
+	//virtual void OnRep_MeshTransformUpdate();
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
