@@ -94,6 +94,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Niagara")
 	UNiagaraComponent* niagaraThrusterEffect;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multi_OnSmoke(bool val);
+
 	bool PlayMode();
 	bool TryAddBrick(UBrick* brick);
 	bool TryRemoveBrick(UBrick* brick);

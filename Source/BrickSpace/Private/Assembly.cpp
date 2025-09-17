@@ -254,7 +254,8 @@ bool UAssembly::TryAdvanceLayer()
 		startPos = GetOwner()->GetActorLocation();
 		PrimaryComponentTick.SetTickFunctionEnable(true);
 
-		niagaraThrusterEffect->Activate();
+		//niagaraThrusterEffect->Activate();
+		Multi_OnSmoke(true);
 	}
 	return true;
 }
@@ -400,6 +401,14 @@ void UAssembly::SaveAssembly(const int Value)
 	LoadAssembly();
 }
 
+void UAssembly::Multi_OnSmoke_Implementation(bool val)
+{
+	if(val)
+		niagaraThrusterEffect->Activate();
+	else
+		niagaraThrusterEffect->Deactivate();
+}
+
 bool UAssembly::PlayMode()
 {
 	return false;
@@ -422,7 +431,8 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	FVector pos = GetOwner()->GetActorLocation();
 	if (pos.Z > 500.0) {
 
-		niagaraThrusterEffect->Deactivate();
+		//niagaraThrusterEffect->Deactivate();
+		Multi_OnSmoke(false);
 
 		PrimaryComponentTick.SetTickFunctionEnable(false);
 		ClearAssembly();
