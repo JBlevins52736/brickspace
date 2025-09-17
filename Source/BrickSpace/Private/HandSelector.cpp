@@ -164,7 +164,5 @@ void UHandSelector::OnRep_MeshTransformUpdate()
 void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(UHandSelector, handMaterial);
 	DOREPLIFETIME(UHandSelector, handTransform);
 }

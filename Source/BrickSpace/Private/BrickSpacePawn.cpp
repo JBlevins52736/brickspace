@@ -39,16 +39,26 @@ void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* sele
 {
 	// This function checks to see who is the owner and will handle the calls from there.
 	// This function is managing updates between clients and servers as displayed in the Play in Editor
-	if (HasAuthority() && IsLocallyControlled()) {
-		UE_LOG(LogTemp, Warning, TEXT("I am server and updating my hand color"));
-		UHandSelector* handSelector = Cast<UHandSelector>(selector);
-		handSelector->handMaterial = color;
-		handSelector->OnRep_Material(); // For some reason, this is necessary here, but not when I update hand position.
+	if (IsLocallyControlled()) {
+		if (HasAuthority()) {
+			UE_LOG(LogTemp, Warning, TEXT("I am server and updating my hand color"));
 
-	}
-	else if (IsLocallyControlled() && !HasAuthority()) {
-		UE_LOG(LogTemp, Warning, TEXT("I am a client updating hand color"))
-		ServerUpdatePlayerHandColor(this, color, selector); 
+			//UHandSelector* handSelector = Cast<UHandSelector>(selector);
+			//handSelector->handMaterial = color;
+			//handSelector->OnRep_Material(); // For some reason, this is necessary here, but not when I update hand position.
+			
+			// LocallyControlled pawn with authority needs to make this change on the server to have changes propogate to all clients.
+			// Calling OnRep_Material() is supposed to be called from the server.
+			// While this doesn't change the local copy immediately, OnRep_Material() will be called eventually.
+			// Another option would be to change the color locally first and use LocallyControlled() inside OnRep_Material to avoid calling it again.
+			ServerUpdatePlayerHandColor(this, color, selector);
+		}
+		else
+		{
+			// LocallyControlled pawns always have authority so this case shouldn't be possible.
+			UE_LOG(LogTemp, Warning, TEXT("I am a client updating hand color"));
+			//ServerUpdatePlayerHandColor(this, color, selector);
+		}
 	}
 }
 
@@ -90,7 +100,7 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 			left->handTransform = leftTrans;
 			right->handTransform = rightTrans;
 		}
-		else if (IsLocallyControlled() && !HasAuthority()) 
+		else if (IsLocallyControlled() && !HasAuthority())
 		{
 			//UE_LOG(LogTemp, Warning, TEXT("Client sending update"));
 
@@ -132,7 +142,7 @@ void ABrickSpacePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComp
 
 }
 
-void ABrickSpacePawn::ServerUpdatePlayerHandColor_Implementation(AActor* target, UMaterialInterface* color, USelector* selector) 
+void ABrickSpacePawn::ServerUpdatePlayerHandColor_Implementation(AActor* target, UMaterialInterface* color, USelector* selector)
 {
 	if (selector) {
 		UHandSelector* handSelector = Cast<UHandSelector>(selector);

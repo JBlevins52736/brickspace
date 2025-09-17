@@ -217,23 +217,27 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 
 void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
 {
+	// If selector handMaterial is null the hand is "clean" it doesn't change brick material.
+	if (!selector->handMaterial)
+		return;
+
 	APawn* pawn = Cast<APawn>(selector->GetOwner());
 	
-	if (pawn)
+	if (pawn && pawn->IsLocallyControlled() )
 	{
-		if (pawn->HasAuthority() && pawn->IsLocallyControlled()) 
+		if (pawn->HasAuthority() ) 
 		{
 			UE_LOG(LogTemp, Warning, TEXT("I am server for update"));
 			brickMaterial = selector->handMaterial;
 			OnRep_Material();// This sets the server as the server has authority
 		}
-		else if (!pawn->HasAuthority() && pawn->IsLocallyControlled())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
-			AActor* actor = GetOwner();
-			ABrickActor* brickActor = Cast<ABrickActor>(actor);
-			//brickActor->Server_ChangeMaterial(selector->handMaterial, brickActor->brick->isSolid); // this allows replication via actor class
-		}
+		//else
+		//{
+		//	UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
+		//	AActor* actor = GetOwner();
+		//	ABrickActor* brickActor = Cast<ABrickActor>(actor);
+		//	//brickActor->Server_ChangeMaterial(selector->handMaterial, brickActor->brick->isSolid); // this allows replication via actor class
+		//}
 	}
 }
 

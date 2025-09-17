@@ -14,7 +14,7 @@ void UHandColorChanger::Focus(USelector* selector, bool state)
 	if (!selector->GetOwner())
 		return;
 
-	UHandSelector* handSelector = Cast<UHandSelector>(selector);
+	//UHandSelector* handSelector = Cast<UHandSelector>(selector);
 	//if (handSelector)
 	//	handSelector->handMaterial = brushMaterial;
 
@@ -29,11 +29,11 @@ void UHandColorChanger::Focus(USelector* selector, bool state)
 	AActor* actor = selector->GetOwner();
 
 	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(actor);
-	TArray<UActorComponent*> actorComps;
-	pawn->GetComponents(actorComps);
-	for (int i = 0; i < actorComps.Max(); i++) {
-		//UActorComponent* actor
-	}
+	//TArray<UActorComponent*> actorComps;
+	//pawn->GetComponents(actorComps);
+	//for (int i = 0; i < actorComps.Max(); i++) {
+	//	//UActorComponent* actor
+	//}
 	// add in param to send to server to distinguish which selector needs color updated
 	pawn->NotifyServerOfHandMatChange(selector, brushMaterial);
 

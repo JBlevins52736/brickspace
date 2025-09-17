@@ -3,7 +3,7 @@
 #include "Net/UnrealNetwork.h"
 
 // Sets default values for this component's properties
-USelector::USelector()
+USelector::USelector() : handMaterial(nullptr)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -45,7 +45,8 @@ void USelector::OnRep_Material()
 	//	//UE_LOG(LogTemp, Warning, TEXT("OnRep_Material: setting material %s"), *(brushMaterial->GetFName()).ToString());
 	//}
 
-	handMesh->SetMaterial(0, handMaterial);
+	if (handMaterial)
+		handMesh->SetMaterial(0, handMaterial);
 }
 void USelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
