@@ -182,7 +182,7 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	}
 
 
-	if (leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || !rightGrabbing) )
+	if (leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing) )
 		return;
 
 	SetLocalCursor();

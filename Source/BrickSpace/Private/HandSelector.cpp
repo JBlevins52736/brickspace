@@ -108,15 +108,24 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	// Turn tick off in the remote ghosts.
 	APawn* pawn = Cast<APawn>(GetOwner());
 	if (pawn) {
-		if (!pawn->IsLocallyControlled())
+		if (!pawn->IsLocallyControlled()) {
 			PrimaryComponentTick.SetTickFunctionEnable(false);
+			return;
+		}
 	}
+
+	//if ( !HasAuthority() ) {
+	//	PrimaryComponentTick.SetTickFunctionEnable(false);
+	//	return;
+	//}
 
 	if (hand == nullptr) {
 		UE_LOG(LogTemp, Warning, TEXT("Ticking but Hand is nullptr in HandSelector.cpp"));
 
 		return;
 	}
+
+	Server_MeshPosUpdate_Implementation(hand->GetComponentLocation() );
 
 	if (!focus_grabbed)
 	{
@@ -171,10 +180,10 @@ void UHandSelector::OnRep_MeshPosUpdate()
 	}
 }
 
-void UHandSelector::Server_MeshPosUpdate_Implementation(FVector pos)
+void UHandSelector::Server_MeshPosUpdate_Implementation(UHandSelector*selector, FVector pos)
 {
-	handPos = pos;
-	OnRep_MeshPosUpdate();
+	selector->handPos = pos;
+	selector->OnRep_MeshPosUpdate();
 }
 
 
