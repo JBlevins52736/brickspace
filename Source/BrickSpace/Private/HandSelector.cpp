@@ -6,6 +6,7 @@
 #include "Vodget.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
+#include "BrickSpacePawn.h"
 #include "GameFramework/Pawn.h"
 
 
@@ -125,7 +126,8 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		return;
 	}
 
-	Server_MeshPosUpdate_Implementation(hand->GetComponentLocation() );
+	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
+	Server_MeshPosUpdate_Implementation(bspawn, this, hand->GetComponentLocation() );
 
 	if (!focus_grabbed)
 	{
@@ -180,7 +182,7 @@ void UHandSelector::OnRep_MeshPosUpdate()
 	}
 }
 
-void UHandSelector::Server_MeshPosUpdate_Implementation(UHandSelector*selector, FVector pos)
+void UHandSelector::Server_MeshPosUpdate_Implementation(ABrickSpacePawn* pawn, UHandSelector* selector, FVector pos)
 {
 	selector->handPos = pos;
 	selector->OnRep_MeshPosUpdate();
