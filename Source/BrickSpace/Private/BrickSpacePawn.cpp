@@ -64,10 +64,29 @@ void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* sele
 	}
 }
 
-void ABrickSpacePawn::Server_MeshPosUpdate_Implementation(ABrickSpacePawn* pawn, UHandSelector* selector, FVector pos)
+void ABrickSpacePawn::UpdateHandPos(USelector* selector, FVector pos)
 {
-	selector->handPos = pos;
-	selector->OnRep_MeshPosUpdate();
+	if (IsLocallyControlled()) {
+		if (HasAuthority()) {
+			UE_LOG(LogTemp, Warning, TEXT("I am server and UpdateHandPos"));
+			Server_MeshPosUpdate(GetOwner(), selector, pos);
+		}
+		else
+		{
+			// LocallyControlled pawns always have authority so this case shouldn't be possible.
+			//UE_LOG(LogTemp, Warning, TEXT("I am a client UpdateHandPos"));
+		}
+	}
+}
+
+void ABrickSpacePawn::Server_MeshPosUpdate_Implementation(AActor* target, USelector* selector, FVector pos)
+{
+	if (selector) {
+		UHandSelector* handSelector = Cast<UHandSelector>(selector);
+
+		handSelector->handPos = pos;
+		handSelector->OnRep_MeshPosUpdate();
+	}
 }
 
 #ifdef BLAH

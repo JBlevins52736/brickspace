@@ -127,7 +127,9 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	}
 
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
-	bspawn->Server_MeshPosUpdate(bspawn, this, hand->GetComponentLocation());
+	if (bspawn && bspawn->HasAuthority()) {
+		bspawn->UpdateHandPos(this, hand->GetComponentLocation());
+	}
 
 	if (!focus_grabbed)
 	{

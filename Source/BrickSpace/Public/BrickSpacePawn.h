@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "BrickSpacePlayerState.h"
-class UHandSelector;
+#include "HandSelector.h"
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -44,9 +44,10 @@ public:
 	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
 
 	UFUNCTION(Server, Unreliable)
-	void Server_MeshPosUpdate(ABrickSpacePawn* pawn, UHandSelector* selector, FVector pos);
+	void Server_MeshPosUpdate(AActor* target, USelector* selector, FVector pos);
 
 	void UpdateHandColor(UMaterialInterface* color, USelector* selector);
+	void UpdateHandPos(USelector* selector, FVector pos);
 
 #ifdef BLAH
 	// Called every frame
