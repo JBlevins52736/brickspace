@@ -37,10 +37,8 @@ public:
 
 	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
 
-//#ifdef BLAH
 //	UFUNCTION(Server, Unreliable)
 //	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
-//#endif
 
 	UFUNCTION(Server, Reliable)
 	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);

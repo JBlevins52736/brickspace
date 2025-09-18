@@ -10,11 +10,10 @@ ABrickSpacePawn::ABrickSpacePawn()
 {
 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	SetReplicates(true);
+	//SetReplicates(true);
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	//PrimaryActorTick.TickInterval = delayInterval;
-	PrimaryActorTick.TickInterval = 0.25; // Check predicted position against actual 4 times per second.
+	//PrimaryActorTick.TickInterval = 0.25; // Check predicted position against actual 4 times per second.
 
 }
 

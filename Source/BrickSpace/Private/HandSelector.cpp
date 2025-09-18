@@ -105,17 +105,19 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-
-	if (hand == nullptr)
-		return;
-
-	UE_LOG(LogTemp, Warning, TEXT("Hand is not nullptr in tick component in HandSelector.cpp"));
+	// Turn tick off in the remote ghosts.
 	APawn* pawn = Cast<APawn>(GetOwner());
-	if (pawn && !pawn->IsLocallyControlled()) {
-
-		handMesh->SetWorldLocation(handPos);
-
+	if (pawn) {
+		if (!pawn->IsLocallyControlled())
+			PrimaryComponentTick.SetTickFunctionEnable(false);
 	}
+
+	if (hand == nullptr) {
+		UE_LOG(LogTemp, Warning, TEXT("Ticking but Hand is nullptr in HandSelector.cpp"));
+
+		return;
+	}
+
 	if (!focus_grabbed)
 	{
 		// Use a physics raycast to find vodgets in the scene.
@@ -167,6 +169,12 @@ void UHandSelector::OnRep_MeshPosUpdate()
 			handMesh->SetWorldLocation(handPos);
 		else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));
 	}
+}
+
+void UHandSelector::Server_MeshPosUpdate_Implementation(FVector pos)
+{
+	handPos = pos;
+	OnRep_MeshPosUpdate();
 }
 
 

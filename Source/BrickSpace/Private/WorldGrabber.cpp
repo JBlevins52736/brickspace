@@ -174,7 +174,15 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (leftHand == nullptr || rightHand == nullptr)
+	// Turn tick off in the remote ghosts.
+	APawn* pawn = Cast<APawn>(GetOwner());
+	if (pawn) {
+		if (!pawn->IsLocallyControlled())
+			PrimaryComponentTick.SetTickFunctionEnable(false);
+	}
+
+
+	if (leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || !rightGrabbing) )
 		return;
 
 	SetLocalCursor();
