@@ -13,7 +13,9 @@ ABrickSpacePawn::ABrickSpacePawn()
 	SetReplicates(true);
 	PrimaryActorTick.bStartWithTickEnabled = true;
 
-	PrimaryActorTick.TickInterval = delayInterval;
+	//PrimaryActorTick.TickInterval = delayInterval;
+	PrimaryActorTick.TickInterval = 0.25; // Check predicted position against actual 4 times per second.
+
 }
 
 // Called when the game starts or when spawned
@@ -63,16 +65,15 @@ void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* sele
 	}
 }
 
+#ifdef BLAH
+
 // Called every frame
 void ABrickSpacePawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (IsLocallyControlled() && HasAuthority())
-	{
-		//ServerUpdatePlayerHandPos(this, leftHand->GetComponentLocation(), rightHand->GetComponentLocation() );
-	}
-#ifdef BLAH
+	ServerUpdatePlayerHandPos(this, leftHand->GetComponentLocation(), rightHand->GetComponentLocation() );
+	
 	elapsedTickTime += DeltaTime;
 	//UE_LOG(LogTemp, Warning, TEXT("Tick is firing on the clients"));
 	if (elapsedTickTime > delayInterval)
@@ -114,17 +115,41 @@ void ABrickSpacePawn::Tick(float DeltaTime)
 		}
 		elapsedTickTime -= delayInterval;
 	}
-#endif
 }
 
 void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, FVector left, FVector right)
 {
-	//if ( !IsLocallyControlled() )
+	if ( !IsLocallyControlled() )
 	{
-		leftHand->SetWorldLocation(left);
-		rightHand->SetWorldLocation(right);
+		//leftHand->SetWorldLocation(left);
+		//rightHand->SetWorldLocation(right);
+
+		if (leftSelector == nullptr || rightSelector == nullptr) {
+			TArray<UActorComponent*> actorComp;
+			target->GetComponents(actorComp);
+			//UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
+			for (UActorComponent* actor : actorComp)
+			{
+				if (actor->GetName().Contains("HandSelectorL"))
+				{
+					leftSelector = Cast<UHandSelector>(actor);
+				}
+				else if (actor->GetName().Contains("HandSelectorR"))
+				{
+					rightSelector = Cast<UHandSelector>(actor);
+				}
+			}
+		}
+
+		if (leftSelector) {
+			leftSelector->handPos = left;
+			leftSelector->OnRep_MeshPosUpdate();
+		}
+		if (rightSelector) {
+			rightSelector->handPos = left;
+			rightSelector->OnRep_MeshPosUpdate();
+		}
 	}
-#ifdef BLAH
 	TArray<UActorComponent*> actorComp;
 	target->GetComponents(actorComp);
 	//UE_LOG(LogTemp, Error, TEXT("=== SERVER RPC RECEIVED ==="));
@@ -144,14 +169,13 @@ void ABrickSpacePawn::ServerUpdatePlayerHandPos_Implementation(AActor* target, F
 			handSelector->OnRep_MeshTransformUpdate();
 		}
 	}
-#endif
 }
+#endif
 
 // Called to bind functionality to input
 void ABrickSpacePawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
 }
 
 void ABrickSpacePawn::ServerUpdatePlayerHandColor_Implementation(AActor* target, UMaterialInterface* color, USelector* selector)

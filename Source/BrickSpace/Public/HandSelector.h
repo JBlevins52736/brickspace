@@ -21,16 +21,11 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	USceneComponent* centerEye = nullptr;
 
+	UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
+	FVector handPos;
 
-
-
-	//UPROPERTY(ReplicatedUsing = OnRep_MeshTransformUpdate)
-	//FTransform handTransform;
-	//void SetHandMaterial(UMaterialInterface* material);
-
-
-	//UFUNCTION()
-	//virtual void OnRep_MeshTransformUpdate();
+	UFUNCTION()
+	virtual void OnRep_MeshPosUpdate();
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

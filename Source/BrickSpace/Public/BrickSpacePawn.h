@@ -37,19 +37,25 @@ public:
 
 	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
 
-	UFUNCTION(Server, Reliable)
-	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
+//#ifdef BLAH
+//	UFUNCTION(Server, Unreliable)
+//	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
+//#endif
 
 	UFUNCTION(Server, Reliable)
 	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
 
-
 	void UpdateHandColor(UMaterialInterface* color, USelector* selector);
+
+#ifdef BLAH
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+		virtual void Tick(float DeltaTime) override;
+#endif
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-
+private:
+	UHandSelector* leftSelector = nullptr;
+	UHandSelector* rightSelector = nullptr;
 };

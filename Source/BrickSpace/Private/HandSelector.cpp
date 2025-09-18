@@ -6,6 +6,8 @@
 #include "Vodget.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
+#include "GameFramework/Pawn.h"
+
 
 UHandSelector::UHandSelector()
 {
@@ -103,9 +105,17 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+
 	if (hand == nullptr)
 		return;
 
+	UE_LOG(LogTemp, Warning, TEXT("Hand is not nullptr in tick component in HandSelector.cpp"));
+	APawn* pawn = Cast<APawn>(GetOwner());
+	if (pawn && !pawn->IsLocallyControlled()) {
+
+		handMesh->SetWorldLocation(handPos);
+
+	}
 	if (!focus_grabbed)
 	{
 		// Use a physics raycast to find vodgets in the scene.
@@ -144,25 +154,24 @@ void UHandSelector::SetFilter(uint16 filter)
 	//SetHandColor();
 }
 
+void UHandSelector::OnRep_MeshPosUpdate()
+{
+	//FVector troubleShoot = handTransform.GetLocation();
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, FString::Printf(TEXT("x: %f y:%f z:%f"),troubleShoot.X, troubleShoot.Y, troubleShoot.Z));
+
+	//handMesh->SetWorldTransform(handTransform);
+
+	APawn* pawn = Cast<APawn>(GetOwner());
+	if (pawn && !pawn->IsLocallyControlled()) {
+		if (handMesh)
+			handMesh->SetWorldLocation(handPos);
+		else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));
+	}
+}
 
 
-//void UHandSelector::SetHandMaterial(UMaterialInterface* material)
-//{
-//}
-
-
-
-//void UHandSelector::OnRep_MeshTransformUpdate()
-//{
-//	FVector troubleShoot = handTransform.GetLocation();
-//	//GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, FString::Printf(TEXT("x: %f y:%f z:%f"),troubleShoot.X, troubleShoot.Y, troubleShoot.Z));
-//	
-//	handMesh->SetWorldTransform(handTransform);
-//}
-
-//
-//void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//	DOREPLIFETIME(UHandSelector, handTransform);
-//}
+void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UHandSelector, handPos);
+}
