@@ -64,6 +64,12 @@ void ABrickSpacePawn::UpdateHandColor(UMaterialInterface* color, USelector* sele
 	}
 }
 
+void ABrickSpacePawn::Server_MeshPosUpdate_Implementation(ABrickSpacePawn* pawn, UHandSelector* selector, FVector pos)
+{
+	selector->handPos = pos;
+	selector->OnRep_MeshPosUpdate();
+}
+
 #ifdef BLAH
 
 // Called every frame

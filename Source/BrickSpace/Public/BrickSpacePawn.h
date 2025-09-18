@@ -43,6 +43,9 @@ public:
 	UFUNCTION(Server, Reliable)
 	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
 
+	UFUNCTION(Server, Unreliable)
+	void Server_MeshPosUpdate(ABrickSpacePawn* pawn, UHandSelector* selector, FVector pos);
+
 	void UpdateHandColor(UMaterialInterface* color, USelector* selector);
 
 #ifdef BLAH
