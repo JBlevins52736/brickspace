@@ -418,7 +418,7 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	//{
 	//	UE_LOG(LogTemp, Warning, TEXT("assemblyActor null before Brick TryAdvanceLayer call"));
 	//}
-	if (playerState != nullptr && assemblerBrick->assemblyActor ) {
+	if (playerState != nullptr && assemblerBrick->assemblyActor) {
 		playerState->Server_TryAdvanceLayer(assemblerBrick->assemblyActor);
 	}
 
@@ -442,7 +442,8 @@ void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
 	if (pawn->HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
-		Server_SetMaterial_Implementation(selector->handMaterial);
+		brickMaterial = selector->handMaterial;
+		OnRep_Material();// This sets the server as the server has authority	
 	}
 	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
 	{
@@ -498,10 +499,10 @@ void UBrick::OnRep_Grabbable()
 	}
 }
 
-void UBrick::UpdateMaterialOnGrab_Implementation(UMaterialInterface* color, USelector* selector) 
+void UBrick::UpdateMaterialOnGrab_Implementation(UMaterialInterface* color, USelector* selector)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Entered server logic for update"))
-	brickMaterial = color;
+		brickMaterial = color;
 
 }
 
