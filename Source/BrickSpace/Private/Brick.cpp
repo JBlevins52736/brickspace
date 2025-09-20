@@ -215,32 +215,6 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	//}
 }
 
-void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
-{
-	// If selector handMaterial is null the hand is "clean" it doesn't change brick material.
-	if (!selector->handMaterial)
-		return;
-
-	APawn* pawn = Cast<APawn>(selector->GetOwner());
-	
-	if (pawn && pawn->IsLocallyControlled() )
-	{
-		if (pawn->HasAuthority() ) 
-		{
-			UE_LOG(LogTemp, Warning, TEXT("I am server for update"));
-			brickMaterial = selector->handMaterial;
-			OnRep_Material();// This sets the server as the server has authority
-		}
-		//else
-		//{
-		//	UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
-		//	AActor* actor = GetOwner();
-		//	ABrickActor* brickActor = Cast<ABrickActor>(actor);
-		//	//brickActor->Server_ChangeMaterial(selector->handMaterial, brickActor->brick->isSolid); // this allows replication via actor class
-		//}
-	}
-}
-
 FVector UBrick::GetLocation()
 {
 	return clientComponent->GetRelativeLocation();
@@ -456,6 +430,32 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 
 	//brickActor->brick->assemblyActor->Server_TryAdvanceLayer();
 	return true;
+}
+
+void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
+{
+	// If selector handMaterial is null the hand is "clean" it doesn't change brick material.
+	if (!selector->handMaterial)
+		return;
+
+	APawn* pawn = Cast<APawn>(selector->GetOwner());
+	if (pawn->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
+		Server_SetMaterial_Implementation(selector->handMaterial);
+	}
+	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
+		Server_SetMaterial(selector->handMaterial);
+	}
+}
+
+void UBrick::Server_SetMaterial_Implementation(UMaterialInterface* color)
+{
+	UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
+	brickMaterial = color;
+	OnRep_Material();// This sets the server as the server has authority
 }
 
 void UBrick::OnRep_Material()

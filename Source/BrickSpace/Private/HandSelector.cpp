@@ -181,18 +181,20 @@ void UHandSelector::SetFilter(uint16 filter)
 
 void UHandSelector::OnRep_MeshPosUpdate()
 {
-	//VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
-
 	APawn* pawn = Cast<APawn>(GetOwner());
 	if (!pawn) {
 		UE_LOG(LogTemp, Error, TEXT("OnRep_MeshPosUpdate() could not cast owner to pawn in HandSelector.cpp"));
 		return;
 	}
 
-	if (!pawn->IsLocallyControlled()) {
-		if (handMesh)
-			handMesh->SetWorldLocation(handPos);
-		else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));
+	if (handMesh && 
+		pawn->GetLocalRole() == ROLE_SimulatedProxy || 
+		(pawn->GetLocalRole() == ROLE_Authority && !pawn->IsLocallyControlled()) )
+	{
+		//VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
+
+		handMesh->SetWorldLocation(handPos);
+	//	else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));	
 	}
 }
 

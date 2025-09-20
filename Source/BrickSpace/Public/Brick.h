@@ -41,23 +41,26 @@ public:
 	UFUNCTION()
 	virtual void OnRep_Grabbable();
 
+	UFUNCTION(Server, Reliable)
+	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetMaterial(UMaterialInterface* color);
+
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;
 
-	UPROPERTY(Replicated)
-	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
-
 	UFUNCTION()
 	virtual void OnRep_Material();
+
+	UPROPERTY(Replicated)
+	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
 
 	UPROPERTY(ReplicatedUsing = OnRep_Parent)
 	AAssemblyActor* assemblyActor = nullptr;
 
 	UFUNCTION()
 	virtual void OnRep_Parent();
-
-	UFUNCTION(Server, Reliable)
-	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
 
 	FVector GetLocation();
 	FQuat GetQuat();
