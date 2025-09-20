@@ -52,13 +52,13 @@ void USelector::VARLog(FString methodName)
 	switch (pawn->GetLocalRole())
 	{
 	case ROLE_Authority:		// Server Actor version: This is also the hosting listen client version.
-		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_Authority: Hosting client running on server %s"), *methodName, *locstr);
+		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_Authority: %s"), *methodName, *locstr);
 		break;
 	case ROLE_AutonomousProxy:	// Non-Server Player Actor version: IsLocallyControlled should be true
-		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_AutonomousProxy: Player client running remotely %s"), *methodName, *locstr);
+		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_AutonomousProxy: %s"), *methodName, *locstr);
 		break;
 	case ROLE_SimulatedProxy:	// Non-Server Ghost
-		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_SimulatedProxy: Ghost client running remotely %s"), *methodName, *locstr);
+		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_SimulatedProxy: %s"), *methodName, *locstr);
 		break;
 	}
 }
@@ -74,9 +74,11 @@ void USelector::SetMaterial(UMaterialInterface* color)
 	}
 
 	if (pawn->HasAuthority()) {
+		UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from server client"));
 		Server_SetMaterial_Implementation(color);
 	}
 	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy) {
+		UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from remote client"));
 		Server_SetMaterial(color);
 	}
 }

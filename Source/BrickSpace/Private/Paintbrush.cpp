@@ -26,7 +26,7 @@ void UPaintbrush::ChangeBrickTouched()
 	//	}
 	//}
 
-	if (brickTouched && brickTouched->GetOwner() ) {
+	if (brickTouched && brickTouched->GetOwner()) {
 		ABrickActor* brickTouchedActor = Cast<ABrickActor>(brickTouched->GetOwner());
 		if (brickTouchedActor) {
 			UStaticMeshComponent* MeshComp = Cast<UStaticMeshComponent>(brickTouched->GetAttachParent());
@@ -53,6 +53,14 @@ void UPaintbrush::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 
 	// Move brick freely, if already snapped the brick will temporarilly be returned to unsnapped movement to allow unsnap testing.
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!GetOwner()->HasAuthority()) {
+		if (!playerState) {
+			APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+			playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+		}
+		playerState->Server_Own(GetOwner(), grabbingSelector->GetOwner());
+	}
 
 	APainterActor* painterActor = Cast<APainterActor>(GetOwner());
 	painterActor->Server_Move(clientComponent->GetComponentTransform());

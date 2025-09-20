@@ -25,20 +25,20 @@ protected:
 	ABrickSpacePlayerState* playerState = nullptr;
 	float elapsedTickTime = 0.0f;
 
-public:	
+public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	UStaticMeshComponent* rightHand = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	UStaticMeshComponent* leftHand = nullptr;
-	
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	//UStaticMeshComponent* rightHand = nullptr;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	//UStaticMeshComponent* leftHand = nullptr;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
 	float delayInterval = 0.0f;
 
-//	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
+	//	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
 
-//	UFUNCTION(Server, Unreliable)
-//	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
+	//	UFUNCTION(Server, Unreliable)
+	//	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
 
 	//UFUNCTION(Server, Reliable)
 	//void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
@@ -53,7 +53,7 @@ public:
 
 #ifdef BLAH
 	// Called every frame
-		virtual void Tick(float DeltaTime) override;
+	virtual void Tick(float DeltaTime) override;
 #endif
 
 	//// Called to bind functionality to input
