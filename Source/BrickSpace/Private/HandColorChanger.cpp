@@ -11,6 +11,10 @@ void UHandColorChanger::Focus(USelector* selector, bool state)
 {
 	UVodget::Focus(selector, state);
 
+#ifdef BLAH
+	// Component not currently used
+
+
 	if (!selector->GetOwner())
 		return;
 
@@ -36,6 +40,6 @@ void UHandColorChanger::Focus(USelector* selector, bool state)
 	//}
 	// add in param to send to server to distinguish which selector needs color updated
 	pawn->NotifyServerOfHandMatChange(selector, brushMaterial);
-
+#endif
 	
 }

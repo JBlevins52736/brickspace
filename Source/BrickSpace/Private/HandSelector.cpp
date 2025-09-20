@@ -115,20 +115,30 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		}
 	}
 
-	//if ( !HasAuthority() ) {
-	//	PrimaryComponentTick.SetTickFunctionEnable(false);
-	//	return;
-	//}
-
 	if (hand == nullptr) {
 		UE_LOG(LogTemp, Warning, TEXT("Ticking but Hand is nullptr in HandSelector.cpp"));
 
 		return;
 	}
 
+	//if ( !HasAuthority() ) {
+	//	PrimaryComponentTick.SetTickFunctionEnable(false);
+	//	return;
+	//}
+
+	VARLog(TEXT("UHandSelector::TickComponent"));
+
+
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
-	if (bspawn && bspawn->HasAuthority()) {
-		bspawn->UpdateHandPos(this, hand->GetComponentLocation());
+	if (bspawn) {
+		if (pawn->GetLocalRole() == ROLE_Authority)
+		{
+			Server_MeshPosUpdate_Implementation(GetOwner(), this, hand->GetComponentLocation());
+		}
+		else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			Server_MeshPosUpdate(GetOwner(), this, hand->GetComponentLocation());
+		}
 	}
 
 	if (!focus_grabbed)
@@ -171,16 +181,30 @@ void UHandSelector::SetFilter(uint16 filter)
 
 void UHandSelector::OnRep_MeshPosUpdate()
 {
-	//FVector troubleShoot = handTransform.GetLocation();
-	//GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, FString::Printf(TEXT("x: %f y:%f z:%f"),troubleShoot.X, troubleShoot.Y, troubleShoot.Z));
-
-	//handMesh->SetWorldTransform(handTransform);
+	VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
 
 	APawn* pawn = Cast<APawn>(GetOwner());
-	if (pawn && !pawn->IsLocallyControlled()) {
+	if (!pawn) {
+		UE_LOG(LogTemp, Error, TEXT("OnRep_MeshPosUpdate() could not cast owner to pawn in HandSelector.cpp"));
+		return;
+	}
+
+	if (!pawn->IsLocallyControlled()) {
 		if (handMesh)
 			handMesh->SetWorldLocation(handPos);
 		else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));
+	}
+}
+
+void UHandSelector::Server_MeshPosUpdate_Implementation(AActor* target, USelector* selector, FVector pos)
+{
+	VARLog(TEXT("UHandSelector::Server_MeshPosUpdate_Implementation"));
+
+	if (selector) {
+		UHandSelector* handSelector = Cast<UHandSelector>(selector);
+
+		handSelector->handPos = pos;
+		handSelector->OnRep_MeshPosUpdate();
 	}
 }
 

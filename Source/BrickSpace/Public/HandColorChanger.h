@@ -10,7 +10,7 @@ class ABrickSpacePlayerState;
 #include "HandColorChanger.generated.h"
 
 /**
- * 
+ * Note: Component not currently used
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API UHandColorChanger : public UVodget

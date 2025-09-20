@@ -64,7 +64,8 @@ void UPaintbrush::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 
 void UPaintbrush::UpdateColor(USelector* selector)
 {
-	AActor* owner = selector->GetOwner();
-	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(owner);
-	pawn->UpdateHandColor(brushMaterial, selector);
+	selector->SetMaterial(brushMaterial);
+	//AActor* owner = selector->GetOwner();
+	//ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(owner);
+	//pawn->UpdateHandColor(brushMaterial, selector);
 }

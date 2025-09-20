@@ -35,29 +35,31 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
 	float delayInterval = 0.0f;
 
-	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
+//	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
 
 //	UFUNCTION(Server, Unreliable)
 //	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
 
-	UFUNCTION(Server, Reliable)
-	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
+	//UFUNCTION(Server, Reliable)
+	//void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
 
-	UFUNCTION(Server, Unreliable)
-	void Server_MeshPosUpdate(AActor* target, USelector* selector, FVector pos);
+	//UFUNCTION(Server, Unreliable)
+	//void Server_MeshPosUpdate(AActor* target, USelector* selector, FVector pos);
 
-	void UpdateHandColor(UMaterialInterface* color, USelector* selector);
-	void UpdateHandPos(USelector* selector, FVector pos);
+	//void UpdateHandColor(UMaterialInterface* color, USelector* selector);
+	//void UpdateHandPos(USelector* selector, FVector pos);
+
+	void VARLog(FString methodName);
 
 #ifdef BLAH
 	// Called every frame
 		virtual void Tick(float DeltaTime) override;
 #endif
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
-private:
-	UHandSelector* leftSelector = nullptr;
-	UHandSelector* rightSelector = nullptr;
+	//// Called to bind functionality to input
+	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+//
+//private:
+//	UHandSelector* leftSelector = nullptr;
+//	UHandSelector* rightSelector = nullptr;
 };

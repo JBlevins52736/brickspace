@@ -36,11 +36,18 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	UStaticMeshComponent* handMesh = nullptr;
 
+	virtual void SetMaterial(UMaterialInterface* color);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetMaterial(UMaterialInterface* color);
+
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* handMaterial;
 
 	UFUNCTION()
 	virtual void OnRep_Material();
+
+	void VARLog(FString methodName);
 
 protected:
 

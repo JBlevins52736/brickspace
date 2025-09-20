@@ -28,6 +28,8 @@ public:
 	UFUNCTION()
 	virtual void OnRep_MeshPosUpdate();
 
+	UFUNCTION(Server, Unreliable)
+	void Server_MeshPosUpdate(AActor* target, USelector* selector, FVector pos);
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
