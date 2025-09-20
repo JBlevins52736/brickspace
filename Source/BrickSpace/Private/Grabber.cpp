@@ -15,18 +15,16 @@ void UGrabber::Focus(USelector* selector, bool state)
 
 void UGrabber::ForePinch(USelector* selector, bool state)
 {
-	// ToDo: On Grab button true, set childsrt to the clients transform as a child of the selectors cursor.
-	// You must also grab the selectors focus during the grab and release it when finished.
+	if (clientComponent->Mobility != EComponentMobility::Movable &&
+		grabbingSelector != nullptr && grabbingSelector != selector)
+		return;	
+	
 	if (state && ! GetOwner()->HasAuthority() ) {
 		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 		ABrickSpacePlayerState* playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 
 		playerState->Server_Own(GetOwner(), selector->GetOwner());
 	}
-
-	if (clientComponent->Mobility != EComponentMobility::Movable &&
-		grabbingSelector != nullptr && grabbingSelector != selector)
-		return;
 
 	// We grab the selectors focus when grabbing is true to ensure receiving focusUpdate until grabbing is released.
 	selector->GrabFocus(state);
