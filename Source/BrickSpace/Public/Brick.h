@@ -44,8 +44,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
 
-	UFUNCTION(Server, Reliable)
-	void Server_SetMaterial(UMaterialInterface* color);
+	//UFUNCTION(Server, Reliable)
+	//void Server_SetMaterial(UMaterialInterface* color);
 
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;

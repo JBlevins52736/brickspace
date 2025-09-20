@@ -446,17 +446,25 @@ void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
 	}
 	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
-		Server_SetMaterial(selector->handMaterial);
+		if (!playerState) {
+			APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+			playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+		}
+		playerState->Server_ChangeMaterial(GetOwner(), selector->handMaterial, true);
+
+		//playerState->Server_Own(GetOwner(), selector->GetOwner());
+
+		//UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
+		//Server_SetMaterial(selector->handMaterial);
 	}
 }
 
-void UBrick::Server_SetMaterial_Implementation(UMaterialInterface* color)
-{
-	UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
-	brickMaterial = color;
-	OnRep_Material();// This sets the server as the server has authority
-}
+//void UBrick::Server_SetMaterial_Implementation(UMaterialInterface* color)
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
+//	brickMaterial = color;
+//	OnRep_Material();// This sets the server as the server has authority
+//}
 
 void UBrick::OnRep_Material()
 {
