@@ -148,6 +148,14 @@ void UWorldGrabber::GrabChanged()
 	if (leftHand == nullptr || rightHand == nullptr)
 		return;
 
+	if (!leftGrabbing && !rightGrabbing) {
+		PrimaryComponentTick.SetTickFunctionEnable(false);
+		return;
+	}
+	if ( !PrimaryComponentTick.IsTickFunctionEnabled() ) {
+		PrimaryComponentTick.SetTickFunctionEnable(true);
+	}
+
 	// This is the very moment that bimanual grabbing begins.
 	if (leftGrabbing && rightGrabbing)
 	{
@@ -174,12 +182,12 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Turn tick off in the remote ghosts.
-	APawn* pawn = Cast<APawn>(GetOwner());
-	if (pawn) {
-		if (!pawn->IsLocallyControlled())
-			PrimaryComponentTick.SetTickFunctionEnable(false);
-	}
+	//// Turn tick off in the remote ghosts.
+	//APawn* pawn = Cast<APawn>(GetOwner());
+	//if (pawn) {
+	//	if (!pawn->IsLocallyControlled())
+	//		PrimaryComponentTick.SetTickFunctionEnable(false);
+	//}
 
 
 	if (leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing) )

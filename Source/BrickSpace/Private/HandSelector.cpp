@@ -110,7 +110,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	APawn* pawn = Cast<APawn>(GetOwner());
 	if (pawn) {
 		if (!pawn->IsLocallyControlled()) {
-			PrimaryComponentTick.SetTickFunctionEnable(false);
+			//PrimaryComponentTick.SetTickFunctionEnable(false);
 			return;
 		}
 	}
@@ -126,11 +126,11 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	//	return;
 	//}
 
-	VARLog(TEXT("UHandSelector::TickComponent"));
-
-
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
 	if (bspawn) {
+
+		VARLog(TEXT("UHandSelector::TickComponent"));
+
 		if (pawn->GetLocalRole() == ROLE_Authority)
 		{
 			Server_MeshPosUpdate_Implementation(GetOwner(), this, hand->GetComponentLocation());
