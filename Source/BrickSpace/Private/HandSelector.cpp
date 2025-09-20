@@ -127,7 +127,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	//}
 
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
-	if (bspawn) {
+	if (false && bspawn) {
 
 		VARLog(TEXT("UHandSelector::TickComponent"));
 
