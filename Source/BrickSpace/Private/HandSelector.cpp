@@ -127,9 +127,9 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	//}
 
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
-	if (false && bspawn) {
+	if (bspawn) {
 
-		VARLog(TEXT("UHandSelector::TickComponent"));
+		//VARLog(TEXT("UHandSelector::TickComponent"));
 
 		if (pawn->GetLocalRole() == ROLE_Authority)
 		{
@@ -181,7 +181,7 @@ void UHandSelector::SetFilter(uint16 filter)
 
 void UHandSelector::OnRep_MeshPosUpdate()
 {
-	VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
+	//VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
 
 	APawn* pawn = Cast<APawn>(GetOwner());
 	if (!pawn) {
@@ -198,7 +198,7 @@ void UHandSelector::OnRep_MeshPosUpdate()
 
 void UHandSelector::Server_MeshPosUpdate_Implementation(AActor* target, USelector* selector, FVector pos)
 {
-	VARLog(TEXT("UHandSelector::Server_MeshPosUpdate_Implementation"));
+	//VARLog(TEXT("UHandSelector::Server_MeshPosUpdate_Implementation"));
 
 	if (selector) {
 		UHandSelector* handSelector = Cast<UHandSelector>(selector);
