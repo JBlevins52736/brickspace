@@ -17,13 +17,13 @@ public:
 	// Sets default values for this pawn's properties
 	ABrickSpacePawn();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+//protected:
+//	// Called when the game starts or when spawned
+//	virtual void BeginPlay() override;
 
-	// Create the methods to broadcast the hand color change
-	ABrickSpacePlayerState* playerState = nullptr;
-	float elapsedTickTime = 0.0f;
+	//// Create the methods to broadcast the hand color change
+	//ABrickSpacePlayerState* playerState = nullptr;
+	//float elapsedTickTime = 0.0f;
 
 public:
 
@@ -32,8 +32,8 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
 	//UStaticMeshComponent* leftHand = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	float delayInterval = 0.0f;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
+	//float delayInterval = 0.0f;
 
 	//	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
 
@@ -49,12 +49,10 @@ public:
 	//void UpdateHandColor(UMaterialInterface* color, USelector* selector);
 	//void UpdateHandPos(USelector* selector, FVector pos);
 
-	void VARLog(FString methodName);
+	//void VARLog(FString methodName);
 
-#ifdef BLAH
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-#endif
+	//virtual void Tick(float DeltaTime) override;
 
 	//// Called to bind functionality to input
 	//virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;

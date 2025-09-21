@@ -2,7 +2,33 @@
 
 
 #include "Tool.h"
+#include <Kismet/GameplayStatics.h>
+#include "BrickSpacePlayerState.h"
+#include "Selector.h"
 
+
+void UTool::ForePinch(USelector* selector, bool state)
+{
+	if (clientComponent->Mobility != EComponentMobility::Movable &&
+		grabbingSelector != nullptr && grabbingSelector != selector)
+		return;
+
+	Super::ForePinch(selector, state);
+
+	// When grabbing this tool we change ownership to the selector which is owned by the player pawn.
+	// While ownership does not give authority to change replicated properties it does allow the player to call server functions on the tool.
+	if (state && !GetOwner()->HasAuthority()) {
+
+		if (!playerState)
+		{
+			APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+			playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+		}
+
+		// We change ownership through the player state which is already owned by the player controller and can call server functions.
+		playerState->Server_Own(GetOwner(), selector->GetOwner());
+	}
+}
 
 void UTool::BeginPlay()
 {

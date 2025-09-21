@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "Vodget.h"
 
-//class ABrickSpacePlayerState;
-
 #include "Grabber.generated.h"
 
 /**
@@ -25,8 +23,6 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 protected:
-	virtual void UpdateColor(USelector* selector);
 	USelector* grabbingSelector = nullptr;
 	FTransform childsrt;
-//	ABrickSpacePlayerState* playerState;
 };

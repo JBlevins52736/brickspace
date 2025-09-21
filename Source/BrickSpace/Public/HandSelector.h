@@ -22,6 +22,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	USceneComponent* centerEye = nullptr;
 
+	// Called every frame
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	virtual void SetFilter(uint16 filter) override;
+
+#pragma region HAND_MESH_POSITION_REPLICATION
 	UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
 	FVector handPos;
 
@@ -30,11 +36,27 @@ public:
 
 	UFUNCTION(Server, Unreliable)
 	void Server_MeshPosUpdate(AActor* target, USelector* selector, FVector pos);
+#pragma endregion HAND_MESH_POSITION_REPLICATION
 
-	// Called every frame
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual void SetFilter(uint16 filter) override;
+#pragma region HAND_MATERIAL_CHANGE_REPLICATION
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	UStaticMeshComponent* handMesh = nullptr;
+
+	virtual void SetMaterial(UMaterialInterface* color);
+
+	UFUNCTION(Server, Reliable)
+	void Server_SetMaterial(UMaterialInterface* color);
+
+	UPROPERTY(ReplicatedUsing = OnRep_Material)
+	UMaterialInterface* handMaterial;
+
+	UFUNCTION()
+	virtual void OnRep_Material();
+
+	void VARLog(FString methodName);
+
+#pragma endregion HAND_MATERIAL_CHANGE_REPLICATION
 
 protected:
 	// Called when the game starts

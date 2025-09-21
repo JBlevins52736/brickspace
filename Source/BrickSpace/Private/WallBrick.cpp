@@ -84,7 +84,7 @@ void UWallBrick::OnThresholdReached()
 
     //ABrickActor* brickActor = Cast<ABrickActor>(GetOwner()); 
     //brickActor->Server_Clone(InitialTransform);
-
+    
     Server_Clone(InitialTransform);
 }
 

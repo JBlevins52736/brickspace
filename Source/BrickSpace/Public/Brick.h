@@ -44,9 +44,6 @@ public:
 	UFUNCTION(Server, Reliable)
 	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
 
-	//UFUNCTION(Server, Reliable)
-	//void Server_SetMaterial(UMaterialInterface* color);
-
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;
 
@@ -69,14 +66,13 @@ public:
 	bool TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks);
 	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
 
-	//void Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial);
 	bool TryMatch( UBrick *assemblerBrick );
 	bool IsSolved() { return isSolid; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void GetAndSetMatColorFromPlayer(USelector* selector);
+	void GetAndSetMatColorFromPlayer();
 
 	ABrickSpacePlayerState* playerState = nullptr;
 

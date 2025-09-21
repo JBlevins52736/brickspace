@@ -18,12 +18,19 @@ public:
 	// Sets default values for this component's properties
 	UWorldGrabber();
 
+
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* leftHand;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* rightHand;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
+	USceneComponent* leftHandReplicated;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
+	USceneComponent* rightHandReplicated;
 
 private:
 
@@ -59,9 +66,12 @@ private:
 
 	float initialWorldToMeters = 100.0;
 	
-	//UPROPERTY(ReplicatedUsing = OnRep_WorldScale)
+	UPROPERTY(ReplicatedUsing = OnRep_WorldScale)
 	float currWorldToMeters = 100.0;
 	
-/*	UFUNCTION()
-	virtual void OnRep_WorldScale()*/;
+	UFUNCTION()
+	virtual void OnRep_WorldScale();
+
+	void CalibrateHands();
+
 };

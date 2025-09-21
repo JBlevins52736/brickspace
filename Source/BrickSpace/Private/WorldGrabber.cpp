@@ -18,41 +18,6 @@ UWorldGrabber::UWorldGrabber() :
 	initialBimanualHandDist = 0.0;
 }
 
-//
-//// Called when the game starts
-//void UWorldGrabber::BeginPlay()
-//{
-//	Super::BeginPlay();
-//
-//	APlayerController* playerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-//	if (playerController != nullptr)
-//	{
-//		GetOwner()->EnableInput(playerController);
-//
-//		UInputComponent* inputComponent = playerController->InputComponent;
-//		if (UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(inputComponent))
-//		{
-//			const UInputAction* action;
-//
-//			action = AVRPawn::_instance->GetAction("IA_LWorldGrab");
-//			//if (action != nullptr)
-//			//	Input->BindAction(action, ETriggerEvent::Triggered, this, &UWorldGrabber::LWorldGrab);
-//
-//			action = AVRPawn::_instance->GetAction("IA_RWorldGrab");
-//			if (action != nullptr)
-//				Input->BindAction(action, ETriggerEvent::Triggered, this, &UWorldGrabber::RWorldGrab);
-//
-//			action = AVRPawn::_instance->GetAction("IA_DollyToggle");
-//			if (action != nullptr)
-//				Input->BindAction(action, ETriggerEvent::Triggered, this, &UWorldGrabber::DollyToggle);
-//
-//			action = AVRPawn::_instance->GetAction("IA_ScaleToggle");
-//			if (action != nullptr)
-//				Input->BindAction(action, ETriggerEvent::Triggered, this, &UWorldGrabber::ScaleToggle);
-//		}
-//	}
-//}
-
 void UWorldGrabber::SetLocalCursor()
 {
 	if (leftGrabbing && rightGrabbing)
@@ -72,19 +37,11 @@ void UWorldGrabber::SetLocalCursor()
 		}
 		FQuat rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
 
-		//// If dollyMode constrain rotation to rotate about Z up only.
-		//if (dollyMode)
-		//{
-		//	// Constrain cursor rotation to maintain Z up vector.		
-		//	FVector wonkyup = rot.RotateVector(FVector::UpVector);
-		//	FQuat dq = FQuat::FindBetweenVectors(wonkyup, FVector::UpVector);
-		//	rot = dq * rot;
-		//	//rot = rot * dq;
-		//}
 		cursorsrt.SetRotation(rot);
 
-		if (scaleMode) {
-
+		// Only the server should change WorldToMeters property
+		if (scaleMode && GetOwner()->GetLocalRole() == ROLE_Authority)
+		{
 			// Set currBimanualHandDist to the actual distance next.
 			float currBimanualHandDist = (left - right).Length();
 			
@@ -101,6 +58,7 @@ void UWorldGrabber::SetLocalCursor()
 			ds = initialBimanualHandDist / currBimanualHandDist;
 
 			currWorldToMeters = initialWorldToMeters * ds;
+
 			GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
 			//OnRep_WorldScale();
 
@@ -182,32 +140,74 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	//// Turn tick off in the remote ghosts.
-	//APawn* pawn = Cast<APawn>(GetOwner());
-	//if (pawn) {
-	//	if (!pawn->IsLocallyControlled())
-	//		PrimaryComponentTick.SetTickFunctionEnable(false);
-	//}
-
-
-	if (leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing) )
+	if (!scaleMode || leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing) )
 		return;
 
 	SetLocalCursor();
 	FTransform worldsrt = childsrt * cursorsrt;
 	FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
-
-	if ( scaleMode )
-		this->SetRelativeTransform(pawnChildOfWorld);
+	this->SetRelativeTransform(pawnChildOfWorld);
 }
 
-//void UWorldGrabber::OnRep_WorldScale()
-//{
-//	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-//}
-//
-//void UWorldGrabber::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//	DOREPLIFETIME(UWorldGrabber, currWorldToMeters);
-//}
+void UWorldGrabber::OnRep_WorldScale()
+{
+	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+	}
+	else if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		//CalibrateHands();
+	}
+}
+
+void UWorldGrabber::CalibrateHands()
+{
+	if (leftHand == nullptr || rightHand == nullptr || leftHandReplicated == nullptr || rightHandReplicated == nullptr)
+		return;
+
+	// For some reason the replicated hand components are not in the same place as sent to the server.
+	// This method calculates the offset between local and replicated hands and moves the pawn to match.
+	// This is only called on clients when the server changes the WorldToMeters property.
+	// It assumes the local hands are correct and moves the pawn to match the replicated hands.
+	// I don't know why the replicated hands don't match and suspect it might have something to do with the different
+	// tracking origins between server and client headsets and would be gobsmacked if this calibrates them correctly (lol).
+
+	FVector left = leftHand->GetComponentLocation();
+	FVector right = rightHand->GetComponentLocation();
+	FVector leftRepl = leftHandReplicated->GetComponentLocation();
+	FVector rightRepl = rightHandReplicated->GetComponentLocation();
+
+	// Set the cursor to the local hands.
+	cursorsrt.SetLocation((left + right) * 0.5);
+	FVector xAxis = left - right;
+	xAxis.Z = 0.0;
+	FQuat rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
+	cursorsrt.SetRotation(rot);
+	cursorsrt.SetScale3D(FVector::OneVector);
+
+	// Calculate the identity worldsrt as a child of the cursor.
+	childsrt = cursorsrt.Inverse();
+
+	// Move the cursor to the replicated hands.
+	cursorsrt.SetLocation((leftRepl + rightRepl) * 0.5);
+	xAxis = leftRepl - rightRepl;
+	xAxis.Z = 0.0;
+	rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
+	cursorsrt.SetRotation(rot);
+
+	// Calculate the new worldsrt by combining the childsrt and cursorsrt.
+	FTransform worldsrt = childsrt * cursorsrt;
+
+	// Calculate where our pawn would be as a child of the worldsrt model.
+	FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
+
+	// Move the pawn to match the replicated hands.
+	this->SetRelativeTransform(pawnChildOfWorld);
+}
+
+void UWorldGrabber::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	DOREPLIFETIME(UWorldGrabber, currWorldToMeters);
+}

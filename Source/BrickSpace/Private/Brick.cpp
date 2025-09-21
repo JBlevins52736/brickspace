@@ -5,6 +5,7 @@
 #include "AssemblyActor.h"
 #include "Assembly.h"
 #include "Selector.h"
+#include "HandSelector.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePlayerState.h"
 #include <Kismet/GameplayStatics.h>
@@ -54,7 +55,7 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			// Add overlap with other bricks.
 			mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
 			mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
-			GetAndSetMatColorFromPlayer(selector);
+			GetAndSetMatColorFromPlayer();
 		}
 		else {
 			// This attempts to resolve error noticed on release that could be due to an
@@ -386,19 +387,13 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		return false;
 	}
 
-	//// We probably don't have authority over the translucent brick that the grabbed brick just collided with.
-	//if (!brickActor->HasAuthority()) {
-	//	if (playerState == nullptr) {
-	//		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-	//		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-	//	}
-	//	
-	//	playerState->Server_Own(brickActor, playerState);
-	//}
 	if (playerState == nullptr) {
 		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 	}
+	if (!playerState || !assemblerBrick->assemblyActor)
+		return false;
+
 	playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true); // come back to fix this
 
 	if (!brickActor->brick) {
@@ -407,42 +402,24 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 	}
 
 	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
-	//AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
+	playerState->Server_TryAdvanceLayer(assemblerBrick->assemblyActor);
 
-	if (playerState == nullptr) {
-		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-	}
-
-	//if (!assemblyActor)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("assemblyActor null before Brick TryAdvanceLayer call"));
-	//}
-	if (playerState != nullptr && assemblerBrick->assemblyActor) {
-		playerState->Server_TryAdvanceLayer(assemblerBrick->assemblyActor);
-	}
-
-	//if (!brickActor->brick->assemblyActor)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick has no assemblyActor?"));
-	//	return false;
-	//}
-
-	//brickActor->brick->assemblyActor->Server_TryAdvanceLayer();
 	return true;
 }
 
-void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
+void UBrick::GetAndSetMatColorFromPlayer()
 {
+	UHandSelector* handSelecctor = Cast<UHandSelector>(grabbingSelector);
+
 	// If selector handMaterial is null the hand is "clean" it doesn't change brick material.
-	if (!selector->handMaterial)
+	if (!handSelecctor || !handSelecctor->handMaterial)
 		return;
 
-	APawn* pawn = Cast<APawn>(selector->GetOwner());
+	APawn* pawn = Cast<APawn>(handSelecctor->GetOwner());
 	if (pawn->HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
-		brickMaterial = selector->handMaterial;
+		brickMaterial = handSelecctor->handMaterial;
 		OnRep_Material();// This sets the server as the server has authority	
 	}
 	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
@@ -451,21 +428,9 @@ void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
 			APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
 			playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
 		}
-		playerState->Server_ChangeMaterial(GetOwner(), selector->handMaterial, true);
-
-		//playerState->Server_Own(GetOwner(), selector->GetOwner());
-
-		//UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
-		//Server_SetMaterial(selector->handMaterial);
+		playerState->Server_ChangeMaterial(GetOwner(), handSelecctor->handMaterial, true);
 	}
 }
-
-//void UBrick::Server_SetMaterial_Implementation(UMaterialInterface* color)
-//{
-//	UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
-//	brickMaterial = color;
-//	OnRep_Material();// This sets the server as the server has authority
-//}
 
 void UBrick::OnRep_Material()
 {
