@@ -40,7 +40,7 @@ void UWorldGrabber::SetLocalCursor()
 		cursorsrt.SetRotation(rot);
 
 		// Only the server should change WorldToMeters property
-		if (scaleMode /*&& GetOwner()->GetLocalRole() == ROLE_Authority*/)
+		if (scaleMode && GetOwner()->GetLocalRole() == ROLE_Authority)
 		{
 			// Set currBimanualHandDist to the actual distance next.
 			float currBimanualHandDist = (left - right).Length();
@@ -151,18 +151,11 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UWorldGrabber::OnRep_WorldScale()
 {
-	return;
-
-	//if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
-	//{
-	//	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-	//}
-	//else if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
-	//{
-	//	//CalibrateHands();
-	//}
+	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
+		GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
 }
 
+#ifdef BLAH_UNUSED
 void UWorldGrabber::CalibrateHands()
 {
 	if (leftHand == nullptr || rightHand == nullptr || leftHandReplicated == nullptr || rightHandReplicated == nullptr)
@@ -207,6 +200,7 @@ void UWorldGrabber::CalibrateHands()
 	// Move the pawn to match the replicated hands.
 	this->SetRelativeTransform(pawnChildOfWorld);
 }
+#endif
 
 void UWorldGrabber::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

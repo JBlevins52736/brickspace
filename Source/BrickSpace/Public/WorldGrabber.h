@@ -72,6 +72,6 @@ private:
 	UFUNCTION()
 	virtual void OnRep_WorldScale();
 
-	void CalibrateHands();
+	//void CalibrateHands();
 
 };
