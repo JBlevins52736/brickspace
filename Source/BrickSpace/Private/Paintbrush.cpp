@@ -64,6 +64,13 @@ void UPaintbrush::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	APainterActor* painterActor = Cast<APainterActor>(GetOwner());
-	painterActor->Server_Move(clientComponent->GetComponentTransform());
+	if (grabbingSelector == nullptr)
+		return;
+
+	// Grabber base class has already moved the paintbrush tool.
+	// If moved on the listen server client, nothing more needs to be done.
+	// If moved on a remote client, the server needs to be notified.
+	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
+	if (!pawn->HasAuthority())
+		pawn->Server_Move(GetOwner(), clientComponent->GetComponentTransform());
 }

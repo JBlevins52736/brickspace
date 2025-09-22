@@ -89,18 +89,16 @@ void UBrick::ForePinch(USelector* selector, bool state)
 				// Bricks off the wall are always deleted.
 				// When matched the translucent brick is made solid and one brick in the layer has been solved.
 				ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
-				pawn->Server_Delete(GetOwner());
 
-				//ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-				//brickActor->Server_Delete();
-				// 
-				//if (playerState && GetOwner()) {
-				//	playerState->Server_DeleteActor(GetOwner());
-				//}
-				//else {
-				//	UE_LOG(LogTemp, Error, TEXT("playerState or owner null when deleting."));
-				//}
-				//GetOwner()->Destroy(true, true); //  Destroy();	
+				if (pawn->HasAuthority()) {
+					// If already on server, just delete.
+					// The server will replicate the deletion to all clients.
+					GetOwner()->Destroy(true, true);
+				}
+				else {
+					// Ask server to delete.
+					pawn->Server_Delete(GetOwner());
+				}
 			}
 		}
 	}

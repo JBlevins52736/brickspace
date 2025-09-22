@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "BrickSpacePlayerState.h"
 #include "HandSelector.h"
+class UWallBrick;
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -25,6 +26,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_Delete(AActor* TargetActor);
+
+	UFUNCTION(Server, Reliable)
+	void Server_CloneWallBrick(UWallBrick* wallBrick, const FTransform& onWallTransform);
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryAdvanceLayer(AAssemblyActor* assemblyActor);

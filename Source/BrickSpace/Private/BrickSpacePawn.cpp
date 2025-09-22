@@ -4,6 +4,7 @@
 #include "BrickSpacePawn.h"
 #include "HandSelector.h"
 #include "AssemblyActor.h"
+#include "WallBrick.h"
 #include "Net/UnrealNetwork.h"
 
 // Sets default values
@@ -51,6 +52,17 @@ void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 {
 	TargetActor->Destroy(true, true);
 }
+
+void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& onWallTransform)
+{
+	wallBrick->Server_CloneWallBrick(onWallTransform);
+
+	// When we set this from the server it will replicate to all clients.
+	//UWallBrick* wallBrick = clonedBrick->FindComponentByClass<UWallBrick>();
+	//if (wallBrick != nullptr)
+	//    wallBrick->bThresholdReached = true;
+}
+
 
 void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(AAssemblyActor* assemblyActor)
 {
