@@ -38,11 +38,15 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_Grabbable)
 	bool isGrabbable = true;
 
+	void Server_ChangeMaterial(UMaterialInterface* material, bool solid);
+
+
 	UFUNCTION()
 	virtual void OnRep_Grabbable();
 
 	UFUNCTION(Server, Reliable)
 	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
+
 
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;
@@ -66,7 +70,7 @@ public:
 	bool TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks);
 	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
 
-	bool TryMatch( UBrick *assemblerBrick );
+	bool TryMatch( USelector* selector, UBrick *assemblerBrick );
 	bool IsSolved() { return isSolid; }
 
 protected:

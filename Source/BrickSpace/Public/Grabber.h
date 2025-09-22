@@ -22,6 +22,7 @@ public:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	USelector* GetGrabbingSelector() { return grabbingSelector; }
 protected:
 	USelector* grabbingSelector = nullptr;
 	FTransform childsrt;

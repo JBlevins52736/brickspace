@@ -19,17 +19,6 @@ public:
 	//UFUNCTION(Server, Reliable)
 	//void Server_Clone(const FTransform& InitialTransform);
 
-	UFUNCTION(Server, Reliable)
-	void Server_Delete();
-
-	//// Changeing material
-	//UFUNCTION(Server, Reliable)
-	//void Server_ChangeMaterial(UMaterialInterface* material, bool brickIsSolid);
-
-	UFUNCTION(Server, Reliable)
-	void Server_Move(AActor * TargetActor, const FTransform& InitialTransform);
-
-
 	UBrick* brick;
 
 protected:

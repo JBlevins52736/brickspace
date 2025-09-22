@@ -26,7 +26,7 @@ void UTool::ForePinch(USelector* selector, bool state)
 		}
 
 		// We change ownership through the player state which is already owned by the player controller and can call server functions.
-		playerState->Server_Own(GetOwner(), selector->GetOwner());
+		//playerState->Server_Own(GetOwner(), selector->GetOwner());
 	}
 }
 

@@ -7,7 +7,8 @@
 #include "Engine/World.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
-#include "BrickSpacePlayerState.h"
+#include "BrickSpacePawn.h"
+//#include "BrickSpacePlayerState.h"
 #include <Kismet/GameplayStatics.h>
 
 static const FName TAG_SpawnWall(TEXT("spawn wall"));
@@ -33,21 +34,25 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 
     if(!state && !bThresholdReached )
     {
-        if ( !GetOwner()->HasAuthority() ) {
+        //if ( !GetOwner()->HasAuthority() ) {
 
-            if (!playerState) {
-                APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-                playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-            }
-            if (playerState)
-            playerState->Server_Own(GetOwner(), selector->GetOwner());
+        //    if (!playerState) {
+        //        APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
+        //        playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+        //    }
+        //    if (playerState)
+        //    playerState->Server_Own(GetOwner(), selector->GetOwner());
 
-            UE_LOG(LogTemp, Warning, TEXT("WallBrick lost authority to snap back?!") );
-        }
+        //    UE_LOG(LogTemp, Warning, TEXT("WallBrick lost authority to snap back?!") );
+        //}
 
         //clientComponent->SetWorldTransform(InitialTransform);
-        ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-        brickActor->Server_Move(GetOwner(), InitialTransform);
+
+
+        ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
+        if (pawn) {
+            pawn->Server_Move(GetOwner(), InitialTransform);
+        }
     }
 }
 
