@@ -44,7 +44,6 @@ void ABrickSpacePawn::Server_Move_Implementation(AActor* TargetActor, const FTra
 	TargetActor->SetActorTransform(InitialTransform);
 }
 
-
 void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 {
 	TargetActor->Destroy(true, true);
@@ -53,26 +52,11 @@ void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& onWallTransform)
 {
 	wallBrick->Server_CloneWallBrick_Implementation(onWallTransform);
-
-	// When we set this from the server it will replicate to all clients.
-	//UWallBrick* wallBrick = clonedBrick->FindComponentByClass<UWallBrick>();
-	//if (wallBrick != nullptr)
-	//    wallBrick->bThresholdReached = true;
 }
-
 
 void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(AAssemblyActor* assemblyActor)
 {
-	if (!assemblyActor)
-	{
-		// Note: The client tests for null before calling this on the server.
-		// When a valid pointer is passed in an RPC but arrives as null on the server the object referenced must not be replicated.
-		// Actors passed as pointers in an RPC must be replicated to be deserialized (found) on the server.
-		UE_LOG(LogTemp, Warning, TEXT("assemblyActor null in server TryAdvanceLayer call"));
-	}
-	else {
-		UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
-		if (assembly)
-			assembly->TryAdvanceLayer();
-	}
+	UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
+	if (assembly)
+		assembly->TryAdvanceLayer();
 }

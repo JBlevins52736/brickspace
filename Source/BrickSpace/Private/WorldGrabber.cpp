@@ -60,12 +60,12 @@ void UWorldGrabber::SetLocalCursor()
 			currWorldToMeters = initialWorldToMeters * ds;
 
 			GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-			//OnRep_WorldScale();
+			OnRep_WorldScale();
 
-			// Scale the Pawns geometry, Note: WorldToMeters base is 100.
-			float handScale = currWorldToMeters / 100.0;
-			leftHand->SetWorldScale3D(FVector::OneVector * handScale);
-			rightHand->SetWorldScale3D(FVector::OneVector * handScale);
+			//// Scale the Pawns geometry, Note: WorldToMeters base is 100.
+			//float handScale = currWorldToMeters / 100.0;
+			//leftHand->SetWorldScale3D(FVector::OneVector * handScale);
+			//rightHand->SetWorldScale3D(FVector::OneVector * handScale);
 
 		}
 		else
@@ -151,8 +151,14 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UWorldGrabber::OnRep_WorldScale()
 {
-	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
+	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy) {
 		GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+
+		// Scale the Pawns geometry, Note: WorldToMeters base is 100.
+		float handScale = currWorldToMeters / 100.0;
+		leftHand->SetWorldScale3D(FVector::OneVector * handScale);
+		rightHand->SetWorldScale3D(FVector::OneVector * handScale);
+	}
 }
 
 #ifdef BLAH_UNUSED
