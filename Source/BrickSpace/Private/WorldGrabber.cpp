@@ -40,7 +40,7 @@ void UWorldGrabber::SetLocalCursor()
 		cursorsrt.SetRotation(rot);
 
 		// Only the server should change WorldToMeters property
-		if (scaleMode && GetOwner()->GetLocalRole() == ROLE_Authority)
+		if (scaleMode /*&& GetOwner()->GetLocalRole() == ROLE_Authority*/)
 		{
 			// Set currBimanualHandDist to the actual distance next.
 			float currBimanualHandDist = (left - right).Length();
@@ -151,6 +151,8 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UWorldGrabber::OnRep_WorldScale()
 {
+	return;
+
 	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
 	{
 		GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;

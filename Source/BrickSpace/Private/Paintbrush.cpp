@@ -39,21 +39,19 @@ void UPaintbrush::ChangeBrickTouched()
 
 				// Brick is either being grabbed and collided with the brush or the brush is being grabbed and collided with the brick.
 				USelector* selector = (grabbingSelector) ? grabbingSelector : brickTouched->GetGrabbingSelector();
-				ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
-				if (pawn) {
-					if (pawn->HasAuthority()) {
-						brickTouched->Server_ChangeMaterial(brushMaterial, true);
-					}
-					else {
-						pawn->Server_ChangeMaterial(brickTouched, brushMaterial, true);
+				if (selector)
+				{
+					ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
+					if (pawn) {
+						if (pawn->HasAuthority()) {
+							brickTouched->Server_ChangeMaterial(brushMaterial, true);
+						}
+						else {
+							pawn->Server_ChangeMaterial(brickTouched, brushMaterial, true);
+						}
 					}
 				}
 
-				//if (playerState == nullptr) {
-				//	APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-				//	playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-				//}
-				//playerState->Server_ChangeMaterial(brickTouchedActor, brushMaterial, true);
 			}
 		}
 	}
