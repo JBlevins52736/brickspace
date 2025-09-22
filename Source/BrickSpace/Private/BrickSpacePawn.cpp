@@ -60,3 +60,10 @@ void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(AAssemblyActor* asse
 	if (assembly)
 		assembly->TryAdvanceLayer();
 }
+
+void ABrickSpacePawn::Server_MeshScaleUpdate_Implementation(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale)
+{
+	FVector scaleVec = FVector::OneVector * handScale;
+	leftHandMesh->SetWorldScale3D(scaleVec);
+	rightHandMesh->SetWorldScale3D(scaleVec);
+}

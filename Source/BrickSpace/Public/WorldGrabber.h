@@ -72,8 +72,6 @@ private:
 	UFUNCTION()
 	virtual void OnRep_WorldScale();
 
-	UFUNCTION(Server, Reliable)
-	void Server_MeshScaleUpdate(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale);
 
 	//void CalibrateHands();
 

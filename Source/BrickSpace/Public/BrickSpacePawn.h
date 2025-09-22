@@ -33,6 +33,10 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_TryAdvanceLayer(AAssemblyActor* assemblyActor);
 
+	UFUNCTION(Server, Reliable)
+	void Server_MeshScaleUpdate(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale);
+
+
 public:
 
 	void VARLog(FString methodName);

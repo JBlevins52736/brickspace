@@ -3,6 +3,7 @@
 #include "Components/SceneComponent.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "HandSelector.h"
+#include "BrickSpacePawn.h"
 #include "Runtime/MovieSceneTracks/Private/MovieSceneTracksCustomAccessors.h"
 
 // Sets default values for this component's properties
@@ -163,15 +164,10 @@ void UWorldGrabber::OnRep_WorldScale()
 		// Scale the Pawns geometry, Note: WorldToMeters base is 100.
 		float handScale = currWorldToMeters / 100.0;
 		UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
-		Server_MeshScaleUpdate(leftHand, rightHand, handScale);
-	}
-}
 
-void UWorldGrabber::Server_MeshScaleUpdate_Implementation(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale)
-{
-	FVector scaleVec = FVector::OneVector * handScale;
-	leftHandMesh->SetWorldScale3D(scaleVec);
-	rightHandMesh->SetWorldScale3D(scaleVec);
+		ABrickSpacePawn* brickSpacePawn = Cast<ABrickSpacePawn>(GetOwner());
+		brickSpacePawn->Server_MeshScaleUpdate(leftHand, rightHand, handScale);
+	}
 }
 
 #ifdef BLAH_UNUSED
