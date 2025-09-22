@@ -44,7 +44,7 @@ void UWorldGrabber::SetLocalCursor()
 		{
 			// Set currBimanualHandDist to the actual distance next.
 			float currBimanualHandDist = (left - right).Length();
-			
+
 			// The VR Pawn is made larger/smaller in Unreal by changing the WorldToMeters setting.
 			// Pawn geometry like the markers attached to controllers is the responsibility of the application.
 			// https://forums.unrealengine.com/t/changing-the-player-pawn-camera-size/384747/3
@@ -90,14 +90,14 @@ void UWorldGrabber::SetLocalCursor()
 void UWorldGrabber::LWorldGrab(const bool Value)
 {
 	leftGrabbing = Value;
-	//UE_LOG(LogTemp, Warning, TEXT("WorldGrabber LEFT:%s"), *FString((lController != nullptr) ? "GRAB" : "RELEASE"));
+	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber LEFT:%s"), *FString((Value) ? "GRAB" : "RELEASE"));
 	GrabChanged();
 }
 
 void UWorldGrabber::RWorldGrab(const bool Value)
 {
 	rightGrabbing = Value;
-	//UE_LOG(LogTemp, Warning, TEXT("WorldGrabber RIGHT:%s"), *FString((rController != nullptr) ? "GRAB" : "RELEASE"));
+	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber RIGHT:%s"), *FString((Value) ? "GRAB" : "RELEASE"));
 	GrabChanged();
 }
 
@@ -110,7 +110,7 @@ void UWorldGrabber::GrabChanged()
 		PrimaryComponentTick.SetTickFunctionEnable(false);
 		return;
 	}
-	if ( !PrimaryComponentTick.IsTickFunctionEnabled() ) {
+	if (!PrimaryComponentTick.IsTickFunctionEnabled()) {
 		PrimaryComponentTick.SetTickFunctionEnable(true);
 	}
 
@@ -140,7 +140,7 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!scaleMode || leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing) )
+	if (!scaleMode || leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing))
 		return;
 
 	SetLocalCursor();
@@ -151,9 +151,15 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 void UWorldGrabber::OnRep_WorldScale()
 {
-	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy) {
-		GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+	//if (GetOwner()->GetLocalRole() == ROLE_SimulatedProxy) {
+	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
 
+	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber currWorldToMeters:%f"), currWorldToMeters);
+	//}
+
+
+	if (leftHand && rightHand)
+	{
 		// Scale the Pawns geometry, Note: WorldToMeters base is 100.
 		float handScale = currWorldToMeters / 100.0;
 		leftHand->SetWorldScale3D(FVector::OneVector * handScale);
