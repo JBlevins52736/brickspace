@@ -162,9 +162,16 @@ void UWorldGrabber::OnRep_WorldScale()
 	{
 		// Scale the Pawns geometry, Note: WorldToMeters base is 100.
 		float handScale = currWorldToMeters / 100.0;
-		leftHand->SetWorldScale3D(FVector::OneVector * handScale);
-		rightHand->SetWorldScale3D(FVector::OneVector * handScale);
+		UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
+		Server_MeshScaleUpdate(leftHand, rightHand, handScale);
 	}
+}
+
+void UWorldGrabber::Server_MeshScaleUpdate_Implementation(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale)
+{
+	FVector scaleVec = FVector::OneVector * handScale;
+	leftHandMesh->SetWorldScale3D(scaleVec);
+	rightHandMesh->SetWorldScale3D(scaleVec);
 }
 
 #ifdef BLAH_UNUSED
