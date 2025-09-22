@@ -8,7 +8,6 @@
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
 #include "BrickSpacePawn.h"
-//#include "BrickSpacePlayerState.h"
 #include <Kismet/GameplayStatics.h>
 
 static const FName TAG_SpawnWall(TEXT("spawn wall"));
@@ -16,13 +15,11 @@ static const FName TAG_SpawnWall(TEXT("spawn wall"));
 void UWallBrick::BeginPlay()
 {
     Super::BeginPlay();
-    //InitialTransform = clientComponent->GetComponentTransform();
     InitialTransform = clientComponent->GetComponentTransform();
 }
 
 void UWallBrick::ForePinch(USelector* selector, bool state)
 {
-    //InitialTransform = clientComponent->GetComponentTransform();
     Super::ForePinch(selector, state);
 
     if(!state && !bThresholdReached )
@@ -35,16 +32,10 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
     }
 }
 
-void UWallBrick::Server_CloneWallBrick(const FTransform& onWallTransform)
+void UWallBrick::Server_CloneWallBrick_Implementation(const FTransform& onWallTransform)
 {
     AActor* TargetActor = GetOwner();
     AActor* clonedBrick = TargetActor->GetWorld()->SpawnActor<AActor>(TargetActor->GetClass(), onWallTransform);
-
-    // When we set this from the server it will replicate to all clients.
-    //UWallBrick* wallBrick = clonedBrick->FindComponentByClass<UWallBrick>();
-    //if (wallBrick != nullptr)
-    //    wallBrick->bThresholdReached = true;
-
     bThresholdReached = true;
 }
 
@@ -69,7 +60,7 @@ void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
     ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
     if (pawn->HasAuthority())
-        Server_CloneWallBrick(InitialTransform);    // If already on server, just spawn.
+        Server_CloneWallBrick_Implementation(InitialTransform);                // If already on server, just spawn.
     else
         pawn->Server_CloneWallBrick(this, InitialTransform);    // Ask server to spawn.
 

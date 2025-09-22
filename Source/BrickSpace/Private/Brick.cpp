@@ -213,13 +213,13 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	//if (elapsedTick > 100.0) {
 
 	// Apply final brick location to server. 
-	//ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-	//brickActor->Server_Move(GetOwner(), clientComponent->GetComponentTransform());
 
+	// SolveSnaps has already moved the brick.
+	// If moved on the listen server client, nothing more needs to be done.
+	// If moved on a remote client, the server needs to be notified.
 	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
-	if (pawn) {
+	if (!pawn->HasAuthority())
 		pawn->Server_Move(GetOwner(), clientComponent->GetComponentTransform());
-	}
 
 	//	elapsedTick -= 100.0;
 	//}
@@ -411,8 +411,7 @@ void UBrick::GetAndSetMatColorFromPlayer()
 	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(handSelector->GetOwner());
 	if (pawn->HasAuthority())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("listener server client: already has authority on server"));
-		Server_ChangeMaterial(handSelector->handMaterial, true);
+		Server_ChangeMaterial_Implementation(handSelector->handMaterial, true);
 	}
 	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
 	{
@@ -436,7 +435,7 @@ void UBrick::OnRep_Material()
 	}
 }
 
-void UBrick::Server_ChangeMaterial(UMaterialInterface* material, bool solid)
+void UBrick::Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool solid)
 {
 	brickMaterial = material;
 	isSolid = true;
@@ -457,13 +456,6 @@ void UBrick::OnRep_Grabbable()
 		MeshComp->Mobility = (isGrabbable) ? EComponentMobility::Movable : EComponentMobility::Stationary;
 		//UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable"));
 	}
-}
-
-void UBrick::UpdateMaterialOnGrab_Implementation(UMaterialInterface* color, USelector* selector)
-{
-	UE_LOG(LogTemp, Warning, TEXT("Entered server logic for update"))
-		brickMaterial = color;
-
 }
 
 void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

@@ -36,10 +36,7 @@ void ABrickSpacePawn::VARLog(FString methodName)
 
 void ABrickSpacePawn::Server_ChangeMaterial_Implementation(UBrick* brick, UMaterialInterface* material, bool brickIsSolid)
 {
-	//UBrick* brick = TargetActor->FindComponentByClass<UBrick>();
-	//if (brick != nullptr) {
-		brick->Server_ChangeMaterial(material, brickIsSolid);
-	//}
+	brick->Server_ChangeMaterial_Implementation(material, brickIsSolid);
 }
 
 void ABrickSpacePawn::Server_Move_Implementation(AActor* TargetActor, const FTransform& InitialTransform)
@@ -55,7 +52,7 @@ void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 
 void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& onWallTransform)
 {
-	wallBrick->Server_CloneWallBrick(onWallTransform);
+	wallBrick->Server_CloneWallBrick_Implementation(onWallTransform);
 
 	// When we set this from the server it will replicate to all clients.
 	//UWallBrick* wallBrick = clonedBrick->FindComponentByClass<UWallBrick>();

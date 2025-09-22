@@ -42,13 +42,11 @@ void UPaintbrush::ChangeBrickTouched()
 				if (selector)
 				{
 					ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
-					if (pawn) {
-						if (pawn->HasAuthority()) {
-							brickTouched->Server_ChangeMaterial(brushMaterial, true);
-						}
-						else {
-							pawn->Server_ChangeMaterial(brickTouched, brushMaterial, true);
-						}
+					if (pawn->HasAuthority()) {
+						brickTouched->Server_ChangeMaterial_Implementation(brushMaterial, true);
+					}
+					else {
+						pawn->Server_ChangeMaterial(brickTouched, brushMaterial, true);
 					}
 				}
 

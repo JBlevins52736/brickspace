@@ -38,15 +38,10 @@ public:
 	UPROPERTY(ReplicatedUsing = OnRep_Grabbable)
 	bool isGrabbable = true;
 
-	void Server_ChangeMaterial(UMaterialInterface* material, bool solid);
-
-
 	UFUNCTION()
 	virtual void OnRep_Grabbable();
 
-	UFUNCTION(Server, Reliable)
-	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
-
+	void Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool solid);
 
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;
