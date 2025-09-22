@@ -153,14 +153,14 @@ void UWorldGrabber::OnRep_WorldScale()
 {
 	return;
 
-	if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
-	{
-		GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-	}
-	else if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
-	{
-		//CalibrateHands();
-	}
+	//if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
+	//{
+	//	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+	//}
+	//else if (GetOwner()->GetLocalRole() == ROLE_AutonomousProxy)
+	//{
+	//	//CalibrateHands();
+	//}
 }
 
 void UWorldGrabber::CalibrateHands()
