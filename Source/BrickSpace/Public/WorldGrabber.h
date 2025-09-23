@@ -18,12 +18,23 @@ public:
 	// Sets default values for this component's properties
 	UWorldGrabber();
 
+	UFUNCTION(Server, Reliable)
+	void Server_Move(UWorldGrabber* TargetActor, FTransform transform);
+
+	void OnRep_WorldScale( float worldScale );
+
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* leftHand;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* rightHand;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
+	USceneComponent* leftHandReplicated;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
+	USceneComponent* rightHandReplicated;
 
 private:
 
@@ -58,10 +69,8 @@ private:
 	bool scaleMode = false;
 
 	float initialWorldToMeters = 100.0;
-	
-	//UPROPERTY(ReplicatedUsing = OnRep_WorldScale)
 	float currWorldToMeters = 100.0;
-	
-/*	UFUNCTION()
-	virtual void OnRep_WorldScale()*/;
+
+	//void CalibrateHands();
+
 };

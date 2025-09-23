@@ -8,7 +8,6 @@
 #include <vector>
 
 class AAssemblyActor;
-class ABrickSpacePlayerState;
 
 #include "Brick.generated.h"
 
@@ -41,23 +40,24 @@ public:
 	UFUNCTION()
 	virtual void OnRep_Grabbable();
 
+	void Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool solid);
+	void Server_TryAdvanceLayer_Implementation();
+
+
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;
 
-	UPROPERTY(Replicated)
-	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
-
 	UFUNCTION()
 	virtual void OnRep_Material();
+
+	UPROPERTY(Replicated)
+	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
 
 	UPROPERTY(ReplicatedUsing = OnRep_Parent)
 	AAssemblyActor* assemblyActor = nullptr;
 
 	UFUNCTION()
 	virtual void OnRep_Parent();
-
-	UFUNCTION(Server, Reliable)
-	void UpdateMaterialOnGrab(UMaterialInterface* color, USelector* selector);
 
 	FVector GetLocation();
 	FQuat GetQuat();
@@ -66,16 +66,13 @@ public:
 	bool TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks);
 	void ReparentConnectedBricks(USceneComponent *pnt, std::vector<UBrick*> &layerBricks);
 
-	//void Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial);
-	bool TryMatch( UBrick *assemblerBrick );
+	bool TryMatch( USelector* selector, UBrick *assemblerBrick );
 	bool IsSolved() { return isSolid; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void GetAndSetMatColorFromPlayer(USelector* selector);
-
-	ABrickSpacePlayerState* playerState = nullptr;
+	void GetAndSetMatColorFromPlayer();
 
 private:
 	/** called when something enters the sphere component */

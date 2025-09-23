@@ -33,15 +33,6 @@ public:
 	UPROPERTY(EditAnywhere, meta = (Bitmask), Category = "VAR")
 	uint16 selectionFilter = 0xFF;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
-	UStaticMeshComponent* handMesh = nullptr;
-
-	UPROPERTY(ReplicatedUsing = OnRep_Material)
-	UMaterialInterface* handMaterial;
-
-	UFUNCTION()
-	virtual void OnRep_Material();
-
 protected:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))

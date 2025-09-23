@@ -31,17 +31,10 @@ void AAssemblyActor::BeginPlay()
 	}
 }
 
-//void AAssemblyActor::Server_TryAdvanceLayer_Implementation()
-//{
-//	if (assembly) 
-//		assembly->TryAdvanceLayer();
-//}
-
 void AAssemblyActor::Server_Move_Implementation(const FTransform& transform)
 {
 	SetActorTransform(transform);
 }
-
 
 // Called every frame
 void AAssemblyActor::Tick(float DeltaTime)

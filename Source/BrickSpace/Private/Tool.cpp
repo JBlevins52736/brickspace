@@ -2,6 +2,9 @@
 
 
 #include "Tool.h"
+#include <Kismet/GameplayStatics.h>
+#include "BrickSpacePlayerState.h"
+#include "Selector.h"
 
 
 void UTool::BeginPlay()

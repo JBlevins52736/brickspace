@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "BrickSpacePlayerState.h"
-class UHandSelector;
+#include "HandSelector.h"
+class UWallBrick;
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -17,39 +18,27 @@ public:
 	// Sets default values for this pawn's properties
 	ABrickSpacePawn();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	// Create the methods to broadcast the hand color change
-	ABrickSpacePlayerState* playerState = nullptr;
-	float elapsedTickTime = 0.0f;
-
-public:	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	UStaticMeshComponent* rightHand = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	UStaticMeshComponent* leftHand = nullptr;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	float delayInterval = 0.0f;
-
-	void NotifyServerOfHandMatChange(USelector* selector, UMaterialInterface* material);
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeMaterial(UBrick* TargetActor, UMaterialInterface* material, bool isSolid);
 
 	UFUNCTION(Server, Reliable)
-	void ServerUpdatePlayerHandPos(AActor* target, FVector left, FVector right);
+	void Server_Move(AActor* TargetActor, const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
-	void ServerUpdatePlayerHandColor(AActor* target, UMaterialInterface* color, USelector* selector);
+	void Server_Delete(AActor* TargetActor);
+
+	UFUNCTION(Server, Reliable)
+	void Server_CloneWallBrick(UWallBrick* wallBrick, const FTransform& onWallTransform);
+
+	UFUNCTION(Server, Reliable)
+	void Server_TryAdvanceLayer(UBrick* assemblyBrick);
+
+	UFUNCTION(Server, Reliable)
+	void Server_MeshScaleUpdate(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale);
 
 
-	void UpdateHandColor(UMaterialInterface* color, USelector* selector);
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+public:
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
+	void VARLog(FString methodName);
 
 };

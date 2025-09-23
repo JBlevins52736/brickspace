@@ -4,8 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
-#include "Assembly.h"
-
 #include "BrickSpacePlayerState.generated.h"
 
 /**
@@ -18,38 +16,5 @@ class BRICKSPACE_API ABrickSpacePlayerState : public APlayerState
 
 public:
 	virtual void BeginPlay() override;
-
-
-	UFUNCTION(Server, Reliable)
-	void Server_Own(AActor* TargetActor, AActor* pawn);
-
-	//UFUNCTION(Server, Reliable)
-	//void Server_CloneActor(AActor* TargetActor, const FTransform& InitialTransform);
-
-	//UFUNCTION(Server, Reliable)
-	//void Server_MoveActor(AActor* TargetActor, const FTransform& InitialTransform);
-
-	//UFUNCTION(Server, Reliable)
-	//void Server_DeleteActor(AActor* TargetActor);
-
-	UFUNCTION(Server, Reliable)
-	void Server_ChangeMaterial(AActor* TargetActor, UMaterialInterface* material, bool isSolid );
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	AActor* groundplate;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "VAR")
-	AActor* wallOfBricks;
-
-	UAssembly* assembly;
-
-	UFUNCTION(Server, Reliable)
-	void Server_TryAdvanceLayer( AAssemblyActor *assemblyActor );
-
-	UFUNCTION(Server, Reliable)
-	void Server_ChangeHandColor(AActor* target, UMaterialInterface* material);
-
-	//UFUNCTION(Server, Reliable)
-	//void Server_UpdatePlayerHandPos(AActor* target, FTransform leftTransform, FTransform rightTransform);
 
 };

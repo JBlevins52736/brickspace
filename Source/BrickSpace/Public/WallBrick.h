@@ -16,8 +16,7 @@ public:
     UPROPERTY(EditAnywhere, Replicated)
     bool bThresholdReached = false;  // only bool we need
 
-    UFUNCTION(Server, Reliable)
-    void Server_Clone(const FTransform& onWallTransform);
+	void Server_CloneWallBrick_Implementation(const FTransform& onWallTransform);
 
 protected:
     virtual void BeginPlay() override;
@@ -27,11 +26,4 @@ protected:
 
 private:
     FTransform InitialTransform = FTransform::Identity;
-
-    void OnThresholdReached();
-
-    //void SpawnReplacement();
-    //void SpawnReplacementAtHome(USceneComponent* AttachParentIfAny);
-    //void DecoupleFromParent();
-    //USceneComponent* FindSpawnWallAncestor() const;
 };

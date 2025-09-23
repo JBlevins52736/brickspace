@@ -5,7 +5,9 @@
 #include "AssemblyActor.h"
 #include "Assembly.h"
 #include "Selector.h"
+#include "HandSelector.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
+#include "BrickSpacePawn.h"
 #include "BrickSpacePlayerState.h"
 #include <Kismet/GameplayStatics.h>
 #include "Selector.h"
@@ -54,7 +56,7 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			// Add overlap with other bricks.
 			mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
 			mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);
-			GetAndSetMatColorFromPlayer(selector);
+			GetAndSetMatColorFromPlayer();
 		}
 		else {
 			// This attempts to resolve error noticed on release that could be due to an
@@ -74,8 +76,9 @@ void UBrick::ForePinch(USelector* selector, bool state)
 			for (UBrick* brick : overlappedBricks) {
 				if (!brick->isSolid) {
 					attemptOverlapWithTranslucent = true;
-					if (TryMatch(brick))
+					if (TryMatch(selector, brick)) {
 						overlapMatchFound = true;
+					}
 				}
 			}
 
@@ -85,15 +88,17 @@ void UBrick::ForePinch(USelector* selector, bool state)
 
 				// Bricks off the wall are always deleted.
 				// When matched the translucent brick is made solid and one brick in the layer has been solved.
-				ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-				brickActor->Server_Delete();
-				//if (playerState && GetOwner()) {
-				//	playerState->Server_DeleteActor(GetOwner());
-				//}
-				//else {
-				//	UE_LOG(LogTemp, Error, TEXT("playerState or owner null when deleting."));
-				//}
-				//GetOwner()->Destroy(true, true); //  Destroy();	
+				ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
+
+				if (pawn->HasAuthority()) {
+					// If already on server, just delete.
+					// The server will replicate the deletion to all clients.
+					GetOwner()->Destroy(true, true);
+				}
+				else {
+					// Ask server to delete.
+					pawn->Server_Delete(GetOwner());
+				}
 			}
 		}
 	}
@@ -208,37 +213,16 @@ void UBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponent
 	//if (elapsedTick > 100.0) {
 
 	// Apply final brick location to server. 
-	ABrickActor* brickActor = Cast<ABrickActor>(GetOwner());
-	brickActor->Server_Move(GetOwner(), clientComponent->GetComponentTransform());
+
+	// SolveSnaps has already moved the brick.
+	// If moved on the listen server client, nothing more needs to be done.
+	// If moved on a remote client, the server needs to be notified.
+	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
+	if (!pawn->HasAuthority())
+		pawn->Server_Move(GetOwner(), clientComponent->GetComponentTransform());
 
 	//	elapsedTick -= 100.0;
 	//}
-}
-
-void UBrick::GetAndSetMatColorFromPlayer(USelector* selector)
-{
-	// If selector handMaterial is null the hand is "clean" it doesn't change brick material.
-	if (!selector->handMaterial)
-		return;
-
-	APawn* pawn = Cast<APawn>(selector->GetOwner());
-	
-	if (pawn && pawn->IsLocallyControlled() )
-	{
-		if (pawn->HasAuthority() ) 
-		{
-			UE_LOG(LogTemp, Warning, TEXT("I am server for update"));
-			brickMaterial = selector->handMaterial;
-			OnRep_Material();// This sets the server as the server has authority
-		}
-		//else
-		//{
-		//	UE_LOG(LogTemp, Warning, TEXT("Send to server for update"));
-		//	AActor* actor = GetOwner();
-		//	ABrickActor* brickActor = Cast<ABrickActor>(actor);
-		//	//brickActor->Server_ChangeMaterial(selector->handMaterial, brickActor->brick->isSolid); // this allows replication via actor class
-		//}
-	}
 }
 
 FVector UBrick::GetLocation()
@@ -311,26 +295,9 @@ void UBrick::ReparentConnectedBricks(USceneComponent* pnt, std::vector<UBrick*>&
 			studs[studind]->snappedTo->brick->TryReparent(pnt, layerBricks);
 }
 
-//// The architect touches bricks to reveal them.
-//void UBrick::Reveal(UMaterialInterface* revealMaterial, UMaterialInterface* brickMaterial)
-//{
-//	// studs and tubes will not be checked when inactive (revealed)
-//	isSolid = false;
-//
-//	// Only stationary bricks can be revealed
-//	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-//	if (mesh != nullptr)
-//	{
-//		// Add overlap with bricks.
-//		solidMatchMaterial = brickMaterial;
-//		mesh->SetMaterial(0, revealMaterial);
-//		mesh->Mobility = EComponentMobility::Stationary;	// Grabber cannot grab.
-//	}
-//}
-
 // When the assembler snaps a matching brick over a revealed brick it is made real and the snapped brick is destroyed.
 // If the snapped brick doesn't match it is destroyed in an explosion and the revealed brick remains unchanged.
-bool UBrick::TryMatch(UBrick* assemblerBrick)
+bool UBrick::TryMatch(USelector* selector, UBrick* assemblerBrick)
 {
 	// First test: The bricks should be the same type.
 	if (shortName != assemblerBrick->shortName)
@@ -412,50 +379,48 @@ bool UBrick::TryMatch(UBrick* assemblerBrick)
 		return false;
 	}
 
-	//// We probably don't have authority over the translucent brick that the grabbed brick just collided with.
-	//if (!brickActor->HasAuthority()) {
-	//	if (playerState == nullptr) {
-	//		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-	//		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-	//	}
-	//	
-	//	playerState->Server_Own(brickActor, playerState);
-	//}
-	if (playerState == nullptr) {
-		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-	}
-	playerState->Server_ChangeMaterial(brickActor, mesh->GetMaterial(0), true); // come back to fix this
+	if ( !assemblerBrick->assemblyActor)
+		return false;
 
 	if (!brickActor->brick) {
 		UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick is null?"));
 		return false;
 	}
 
-	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
-	//AActor* groundplate = assemblerBrick->clientComponent->GetAttachParent()->GetOwner();
+	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
+	if (pawn->HasAuthority()) {
+		assemblerBrick->Server_ChangeMaterial_Implementation(mesh->GetMaterial(0), true);
+		assemblerBrick->Server_TryAdvanceLayer_Implementation();
+	}
+	else {
+		pawn->Server_ChangeMaterial(assemblerBrick, mesh->GetMaterial(0), true);
 
-	if (playerState == nullptr) {
-		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
+		// Notify server to check if layer is solved and either add the next layer or launch the rocket.
+		pawn->Server_TryAdvanceLayer(assemblerBrick);	
 	}
 
-	//if (!assemblyActor)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("assemblyActor null before Brick TryAdvanceLayer call"));
-	//}
-	if (playerState != nullptr && assemblerBrick->assemblyActor ) {
-		playerState->Server_TryAdvanceLayer(assemblerBrick->assemblyActor);
-	}
 
-	//if (!brickActor->brick->assemblyActor)
-	//{
-	//	UE_LOG(LogTemp, Warning, TEXT("Bricks match: But brickActor->brick has no assemblyActor?"));
-	//	return false;
-	//}
 
-	//brickActor->brick->assemblyActor->Server_TryAdvanceLayer();
 	return true;
+}
+
+void UBrick::GetAndSetMatColorFromPlayer()
+{
+	UHandSelector* handSelector = Cast<UHandSelector>(grabbingSelector);
+
+	// If selector handMaterial is null the hand is "clean" it doesn't change brick material.
+	if (!handSelector || !handSelector->handMaterial)
+		return;
+
+	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(handSelector->GetOwner());
+	if (pawn->HasAuthority())
+	{
+		Server_ChangeMaterial_Implementation(handSelector->handMaterial, true);
+	}
+	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
+	{
+		pawn->Server_ChangeMaterial(this, handSelector->handMaterial, true);
+	}
 }
 
 void UBrick::OnRep_Material()
@@ -474,6 +439,20 @@ void UBrick::OnRep_Material()
 	}
 }
 
+void UBrick::Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool solid)
+{
+	brickMaterial = material;
+	isSolid = true;
+	OnRep_Material();
+}
+
+void UBrick::Server_TryAdvanceLayer_Implementation()
+{
+	UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
+	if (assembly)
+		assembly->TryAdvanceLayer();
+}
+
 void UBrick::OnRep_Grabbable()
 {
 	if (clientComponent == nullptr)
@@ -488,13 +467,6 @@ void UBrick::OnRep_Grabbable()
 		MeshComp->Mobility = (isGrabbable) ? EComponentMobility::Movable : EComponentMobility::Stationary;
 		//UE_LOG(LogTemp, Warning, TEXT("OnRep_Grabbable"));
 	}
-}
-
-void UBrick::UpdateMaterialOnGrab_Implementation(UMaterialInterface* color, USelector* selector) 
-{
-	UE_LOG(LogTemp, Warning, TEXT("Entered server logic for update"))
-	brickMaterial = color;
-
 }
 
 void UBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

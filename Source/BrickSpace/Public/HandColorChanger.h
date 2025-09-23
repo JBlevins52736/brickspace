@@ -5,12 +5,10 @@
 #include "CoreMinimal.h"
 #include "Vodget.h"
 
-class ABrickSpacePlayerState;
-
 #include "HandColorChanger.generated.h"
 
 /**
- * 
+ * Note: Component not currently used
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API UHandColorChanger : public UVodget
@@ -20,7 +18,4 @@ class BRICKSPACE_API UHandColorChanger : public UVodget
 
 	UPROPERTY(EditAnywhere, Category = "VAR")
 	UMaterialInterface* brushMaterial;
-
-private:
-	ABrickSpacePlayerState* playerState;
 };

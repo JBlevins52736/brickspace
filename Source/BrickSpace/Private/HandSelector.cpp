@@ -5,9 +5,11 @@
 
 #include "Vodget.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
-#include "BrickSpacePlayerState.h"
+#include "BrickSpacePawn.h"
+#include "GameFramework/Pawn.h"
 
-UHandSelector::UHandSelector()
+
+UHandSelector::UHandSelector() : handMaterial(nullptr)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -103,8 +105,41 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (hand == nullptr)
+	// Turn tick off in the remote ghosts.
+	APawn* pawn = Cast<APawn>(GetOwner());
+	if (pawn) {
+		if (!pawn->IsLocallyControlled()) {
+			//PrimaryComponentTick.SetTickFunctionEnable(false);
+			return;
+		}
+	}
+
+	if (hand == nullptr) {
+		UE_LOG(LogTemp, Warning, TEXT("Ticking but Hand is nullptr in HandSelector.cpp"));
+
 		return;
+	}
+
+	//if ( !HasAuthority() ) {
+	//	PrimaryComponentTick.SetTickFunctionEnable(false);
+	//	return;
+	//}
+
+	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
+	if (bspawn && handMesh) {
+
+		//VARLog(TEXT("UHandSelector::TickComponent"));
+
+		if (pawn->GetLocalRole() == ROLE_Authority)
+		{
+				handMesh->SetWorldLocation(hand->GetComponentLocation());
+			//Server_MeshPosUpdate_Implementation(this, hand->GetComponentLocation());
+		}
+		else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			Server_MeshPosUpdate( this, hand->GetComponentLocation());
+		}
+	}
 
 	if (!focus_grabbed)
 	{
@@ -144,25 +179,112 @@ void UHandSelector::SetFilter(uint16 filter)
 	//SetHandColor();
 }
 
+#pragma region HAND_MESH_POSITION_REPLICATION
 
-
-//void UHandSelector::SetHandMaterial(UMaterialInterface* material)
+//void UHandSelector::OnRep_MeshPosUpdate()
 //{
-//}
-
-
-
-//void UHandSelector::OnRep_MeshTransformUpdate()
-//{
-//	FVector troubleShoot = handTransform.GetLocation();
-//	//GEngine->AddOnScreenDebugMessage(-1, 1.0, FColor::Red, FString::Printf(TEXT("x: %f y:%f z:%f"),troubleShoot.X, troubleShoot.Y, troubleShoot.Z));
-//	
-//	handMesh->SetWorldTransform(handTransform);
-//}
-
+//	//APawn* pawn = Cast<APawn>(GetOwner());
+//	//if (!pawn) {
+//	//	UE_LOG(LogTemp, Error, TEXT("OnRep_MeshPosUpdate() could not cast owner to pawn in HandSelector.cpp"));
+//	//	return;
+//	//}
 //
-//void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-//{
-//	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-//	DOREPLIFETIME(UHandSelector, handTransform);
+//	//if (handMesh && 
+//	//	pawn->GetLocalRole() == ROLE_SimulatedProxy || 
+//	//	(pawn->GetLocalRole() == ROLE_Authority && !pawn->IsLocallyControlled()) )
+//	if ( handMesh )
+//	{
+//		//VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
+//
+//		handMesh->SetWorldLocation(handPos);
+//	//	else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));	
+//	}
 //}
+#pragma endregion HAND_MESH_POSITION_REPLICATION
+
+void UHandSelector::Server_MeshPosUpdate_Implementation(UHandSelector* handSelector, FVector handPos)
+{
+	//VARLog(TEXT("UHandSelector::Server_MeshPosUpdate_Implementation"));
+
+	//if (handSelector) {
+		//UHandSelector* handSelector = Cast<UHandSelector>(selector);
+
+			handSelector->handMesh->SetWorldLocation(handPos);
+
+		//handSelector->handPos = pos;
+		//handSelector->OnRep_MeshPosUpdate();
+	//}
+}
+
+#pragma region HAND_MATERIAL_CHANGE_REPLICATION
+
+void UHandSelector::SetMaterial(UMaterialInterface* color)
+{
+	VARLog(TEXT("USelector::SetMaterial"));
+
+	APawn* pawn = Cast<APawn>(GetOwner());
+	if (!pawn) {
+		UE_LOG(LogTemp, Error, TEXT("Log() could not cast owner to pawn in HandSelector.cpp"));
+		return;
+	}
+
+	if (pawn->HasAuthority()) {
+		UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from server client"));
+		Server_SetMaterial_Implementation(color);
+	}
+	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy) {
+		UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from remote client"));
+		Server_SetMaterial(color);
+	}
+}
+
+void UHandSelector::Server_SetMaterial_Implementation(UMaterialInterface* color)
+{
+	VARLog(TEXT("USelector::Server_SetMaterial_Implementation"));
+
+	handMaterial = color;
+	OnRep_Material();
+}
+
+void UHandSelector::OnRep_Material()
+{
+	VARLog(TEXT("USelector::OnRep_Material"));
+
+	if (handMaterial)
+		handMesh->SetMaterial(0, handMaterial);
+}
+
+void UHandSelector::VARLog(FString methodName)
+{
+	APawn* pawn = Cast<APawn>(GetOwner());
+	if (!pawn) {
+		UE_LOG(LogTemp, Error, TEXT("Log() could not cast owner to pawn in HandSelector.cpp"));
+		return;
+	}
+
+	FString locstr = (pawn->IsLocallyControlled()) ? TEXT("LocallyControlled") : TEXT("NotLocallyControlled");
+	switch (pawn->GetLocalRole())
+	{
+	case ROLE_Authority:		// Server Actor version: This is also the hosting listen client version.
+		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_Authority: %s"), *methodName, *locstr);
+		break;
+	case ROLE_AutonomousProxy:	// Non-Server Player Actor version: IsLocallyControlled should be true
+		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_AutonomousProxy: %s"), *methodName, *locstr);
+		break;
+	case ROLE_SimulatedProxy:	// Non-Server Ghost
+		UE_LOG(LogTemp, Warning, TEXT("%s: ROLE_SimulatedProxy: %s"), *methodName, *locstr);
+		break;
+	}
+}
+
+
+#pragma endregion HAND_MATERIAL_CHANGE_REPLICATION
+
+
+void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UHandSelector, handMaterial);
+	//DOREPLIFETIME(UHandSelector, handPos);
+}

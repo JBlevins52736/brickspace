@@ -215,7 +215,7 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	SpawnedBrick->OnRep_Material();
 	SpawnedBrick->OnRep_Grabbable();
 	SpawnedBrick->OnRep_Parent();
-	
+
 	return SpawnedBrick;
 }
 
@@ -319,7 +319,7 @@ void UAssembly::CreateAssembly(const int Value)
 void UAssembly::SaveAssembly(const int Value)
 {
 	// Assembly cannot be saved when game mode is active. Developer must call CreateAssembly first.
-	if (GameModeActive || ! GetOwner()->HasAuthority() )
+	if (GameModeActive || !GetOwner()->HasAuthority())
 		return;
 
 
@@ -403,7 +403,7 @@ void UAssembly::SaveAssembly(const int Value)
 
 void UAssembly::Multi_OnSmoke_Implementation(bool val)
 {
-	if(val)
+	if (val)
 		niagaraThrusterEffect->Activate();
 	else
 		niagaraThrusterEffect->Deactivate();
@@ -427,39 +427,21 @@ bool UAssembly::TryRemoveBrick(UBrick* brick)
 void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	// Fly upward at velocityCmPerSec until well over the ceiling (about 10m or 1000cm)
-	//FVector pos = GetComponentLocation();
 	FVector pos = GetOwner()->GetActorLocation();
 	if (pos.Z > 500.0) {
 
-		//niagaraThrusterEffect->Deactivate();
 		Multi_OnSmoke(false);
 
 		PrimaryComponentTick.SetTickFunctionEnable(false);
 		ClearAssembly();
 
-		//FVector scalevec = FVector::OneVector * 0.25f;
-		//FTransform posrot(FQuat::Identity, startPos, scalevec);
 		GetOwner()->SetActorLocation(startPos);
 		LoadAssembly();
 
-		//assemblyActor->Server_Move(posrot);
 		return;
 	}
 
 	pos += FVector::UpVector * velocityCmPerSec * DeltaTime;
 
-	//if (playerState == nullptr) {
-	//	APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-	//	playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-	//	if (!playerState)
-	//		return;
-	//}
-
-	{
-		//FVector scalevec = FVector::OneVector * 0.25f;
-		//FTransform posrot(FQuat::Identity, pos, scalevec);
-		GetOwner()->SetActorLocation(pos);
-		//assemblyActor->Server_Move(posrot);
-		//SetWorldLocation(pos);
-	}
+	GetOwner()->SetActorLocation(pos);
 }
