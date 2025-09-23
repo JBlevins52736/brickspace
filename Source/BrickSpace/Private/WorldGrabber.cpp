@@ -3,6 +3,7 @@
 #include "Components/SceneComponent.h"
 #include "HandSelector.h"
 #include "BrickSpacePawn.h"
+#include "BrickSpaceGameState.h"
 #include <Kismet/GameplayStatics.h>
 
 // Sets default values for this component's properties
@@ -58,8 +59,8 @@ void UWorldGrabber::SetLocalCursor()
 			ds = initialBimanualHandDist / currBimanualHandDist;
 
 			currWorldToMeters = initialWorldToMeters * ds;
-#ifdef BLAH
-			ABrickSpacePlayerState* GameState = Cast<ABrickSpacePlayerState>( UGameplayStatics::GetGameState(GetWorld()) );
+
+			ABrickSpaceGameState* GameState = Cast<ABrickSpaceGameState>( UGameplayStatics::GetGameState(GetWorld()) );
 			if (GameState)
 			{
 				GameState->currWorldToMeters = currWorldToMeters;
@@ -67,7 +68,7 @@ void UWorldGrabber::SetLocalCursor()
 			}
 			//GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
 			//OnRep_WorldScale();
-#endif
+
 
 			//// Scale the Pawns geometry, Note: WorldToMeters base is 100.
 			//float handScale = currWorldToMeters / 100.0;
@@ -75,14 +76,14 @@ void UWorldGrabber::SetLocalCursor()
 			//rightHand->SetWorldScale3D(FVector::OneVector * handScale);
 
 		}
-		else if (scaleMode) {
-			// Scale the Pawns geometry, Note: WorldToMeters base is 100.
-			float handScale = currWorldToMeters / 100.0;
-			UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
+		//else if (scaleMode) {
+		//	// Scale the Pawns geometry, Note: WorldToMeters base is 100.
+		//	float handScale = currWorldToMeters / 100.0;
+		//	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
 
-			ABrickSpacePawn* brickSpacePawn = Cast<ABrickSpacePawn>(GetOwner());
-			brickSpacePawn->Server_MeshScaleUpdate(leftHand, rightHand, handScale);
-		}
+		//	ABrickSpacePawn* brickSpacePawn = Cast<ABrickSpacePawn>(GetOwner());
+		//	brickSpacePawn->Server_MeshScaleUpdate(leftHand, rightHand, handScale);
+		//}
 		else
 		{
 			cursorsrt.SetScale3D(FVector::OneVector);
