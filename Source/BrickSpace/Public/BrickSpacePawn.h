@@ -31,7 +31,7 @@ public:
 	void Server_CloneWallBrick(UWallBrick* wallBrick, const FTransform& onWallTransform);
 
 	UFUNCTION(Server, Reliable)
-	void Server_TryAdvanceLayer(AAssemblyActor* assemblyActor);
+	void Server_TryAdvanceLayer(UBrick* assemblyBrick);
 
 	UFUNCTION(Server, Reliable)
 	void Server_MeshScaleUpdate(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale);

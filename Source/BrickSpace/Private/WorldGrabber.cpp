@@ -1,10 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "WorldGrabber.h"
 #include "Components/SceneComponent.h"
-#include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "HandSelector.h"
 #include "BrickSpacePawn.h"
-#include "Runtime/MovieSceneTracks/Private/MovieSceneTracksCustomAccessors.h"
+#include <Kismet/GameplayStatics.h>
 
 // Sets default values for this component's properties
 UWorldGrabber::UWorldGrabber() :
@@ -59,15 +58,30 @@ void UWorldGrabber::SetLocalCursor()
 			ds = initialBimanualHandDist / currBimanualHandDist;
 
 			currWorldToMeters = initialWorldToMeters * ds;
-
-			GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-			OnRep_WorldScale();
+#ifdef BLAH
+			ABrickSpacePlayerState* GameState = Cast<ABrickSpacePlayerState>( UGameplayStatics::GetGameState(GetWorld()) );
+			if (GameState)
+			{
+				GameState->currWorldToMeters = currWorldToMeters;
+				GameState->OnRep_WorldScale();
+			}
+			//GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+			//OnRep_WorldScale();
+#endif
 
 			//// Scale the Pawns geometry, Note: WorldToMeters base is 100.
 			//float handScale = currWorldToMeters / 100.0;
 			//leftHand->SetWorldScale3D(FVector::OneVector * handScale);
 			//rightHand->SetWorldScale3D(FVector::OneVector * handScale);
 
+		}
+		else if (scaleMode) {
+			// Scale the Pawns geometry, Note: WorldToMeters base is 100.
+			float handScale = currWorldToMeters / 100.0;
+			UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
+
+			ABrickSpacePawn* brickSpacePawn = Cast<ABrickSpacePawn>(GetOwner());
+			brickSpacePawn->Server_MeshScaleUpdate(leftHand, rightHand, handScale);
 		}
 		else
 		{
@@ -150,23 +164,36 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	this->SetRelativeTransform(pawnChildOfWorld);
 }
 
-void UWorldGrabber::OnRep_WorldScale()
+void UWorldGrabber::OnRep_WorldScale(float worldScale)
 {
-	//if (GetOwner()->GetLocalRole() == ROLE_SimulatedProxy) {
-	GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-
+	// The BrickSpaceGameState currWorldToMeters property was just changed by the listening server client.
+	// Update our local copy of currWorldToMeters and scale the local and replicated hand meshes.
+	currWorldToMeters = worldScale;
 	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber currWorldToMeters:%f"), currWorldToMeters);
-	//}
 
+	float handScale = currWorldToMeters / 100.0;
+	FVector scaleVec = FVector::OneVector * handScale;
+	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
 
-	if (leftHand && rightHand)
+	// Scale local hands immediately as local hands are not replicated
+	if (leftHand)
+		leftHand->SetWorldScale3D(scaleVec);
+	if (rightHand)
+		rightHand->SetWorldScale3D(scaleVec);
+
+	// Scale replicated hands via server so all clients are updated.
+	if (leftHandReplicated && rightHandReplicated)
 	{
-		// Scale the Pawns geometry, Note: WorldToMeters base is 100.
-		float handScale = currWorldToMeters / 100.0;
-		UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
-
 		ABrickSpacePawn* brickSpacePawn = Cast<ABrickSpacePawn>(GetOwner());
-		brickSpacePawn->Server_MeshScaleUpdate(leftHand, rightHand, handScale);
+		if (brickSpacePawn->HasAuthority()) {
+			// Scale replicated hands immediately when listen server client is updated. 
+			leftHandReplicated->SetWorldScale3D(scaleVec);
+			rightHandReplicated->SetWorldScale3D(scaleVec);
+		}
+		else {
+			// Have server update replicated mesh scales.
+			brickSpacePawn->Server_MeshScaleUpdate(leftHandReplicated, rightHandReplicated, handScale);
+		}
 	}
 }
 
@@ -216,9 +243,3 @@ void UWorldGrabber::CalibrateHands()
 	this->SetRelativeTransform(pawnChildOfWorld);
 }
 #endif
-
-void UWorldGrabber::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-	DOREPLIFETIME(UWorldGrabber, currWorldToMeters);
-}

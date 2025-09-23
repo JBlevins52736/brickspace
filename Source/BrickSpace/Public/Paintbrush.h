@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Tool.h"
-class ABrickSpacePlayerState;
 #include "Paintbrush.generated.h"
 
 /**

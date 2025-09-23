@@ -8,7 +8,6 @@
 #include <vector>
 
 class AAssemblyActor;
-class ABrickSpacePlayerState;
 
 #include "Brick.generated.h"
 
@@ -42,6 +41,8 @@ public:
 	virtual void OnRep_Grabbable();
 
 	void Server_ChangeMaterial_Implementation(UMaterialInterface* material, bool solid);
+	void Server_TryAdvanceLayer_Implementation();
+
 
 	UPROPERTY(ReplicatedUsing = OnRep_Material)
 	UMaterialInterface* brickMaterial;
@@ -72,8 +73,6 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	void GetAndSetMatColorFromPlayer();
-
-	ABrickSpacePlayerState* playerState = nullptr;
 
 private:
 	/** called when something enters the sphere component */

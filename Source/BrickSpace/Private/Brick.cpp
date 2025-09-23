@@ -379,11 +379,7 @@ bool UBrick::TryMatch(USelector* selector, UBrick* assemblerBrick)
 		return false;
 	}
 
-	if (playerState == nullptr) {
-		APlayerState* PlayerStateAtIndex0 = UGameplayStatics::GetPlayerState(GetWorld(), 0);
-		playerState = Cast<ABrickSpacePlayerState>(PlayerStateAtIndex0);
-	}
-	if (!playerState || !assemblerBrick->assemblyActor)
+	if ( !assemblerBrick->assemblyActor)
 		return false;
 
 	if (!brickActor->brick) {
@@ -392,10 +388,18 @@ bool UBrick::TryMatch(USelector* selector, UBrick* assemblerBrick)
 	}
 
 	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
-	pawn->Server_ChangeMaterial(assemblerBrick, mesh->GetMaterial(0), true); // come back to fix this
+	if (pawn->HasAuthority()) {
+		assemblerBrick->Server_ChangeMaterial_Implementation(mesh->GetMaterial(0), true);
+		assemblerBrick->Server_TryAdvanceLayer_Implementation();
+	}
+	else {
+		pawn->Server_ChangeMaterial(assemblerBrick, mesh->GetMaterial(0), true);
 
-	// Notify server to check if layer is solved and either add the next layer or launch the rocket.
-	pawn->Server_TryAdvanceLayer(assemblerBrick->assemblyActor);
+		// Notify server to check if layer is solved and either add the next layer or launch the rocket.
+		pawn->Server_TryAdvanceLayer(assemblerBrick);	
+	}
+
+
 
 	return true;
 }
@@ -440,6 +444,13 @@ void UBrick::Server_ChangeMaterial_Implementation(UMaterialInterface* material, 
 	brickMaterial = material;
 	isSolid = true;
 	OnRep_Material();
+}
+
+void UBrick::Server_TryAdvanceLayer_Implementation()
+{
+	UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
+	if (assembly)
+		assembly->TryAdvanceLayer();
 }
 
 void UBrick::OnRep_Grabbable()

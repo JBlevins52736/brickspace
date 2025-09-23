@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "Grabber.h"
 #include "Brick.h"
-class ABrickSpacePlayerState;
-
 
 #include "Tool.generated.h"
 
@@ -18,17 +16,11 @@ class BRICKSPACE_API UTool : public UGrabber
 {
 	GENERATED_BODY()
 
-public:
-	virtual void ForePinch(USelector* selector, bool state) override;
-
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void ChangeBrickTouched();
 	
-
 	UBrick *brickTouched = nullptr;
-	ABrickSpacePlayerState* playerState = nullptr;
 
 private:
 	/** called when something enters the sphere component */

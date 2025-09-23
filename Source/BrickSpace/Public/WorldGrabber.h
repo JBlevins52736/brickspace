@@ -18,6 +18,7 @@ public:
 	// Sets default values for this component's properties
 	UWorldGrabber();
 
+	void OnRep_WorldScale( float worldScale );
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
@@ -65,13 +66,7 @@ private:
 	bool scaleMode = false;
 
 	float initialWorldToMeters = 100.0;
-	
-	UPROPERTY(ReplicatedUsing = OnRep_WorldScale)
 	float currWorldToMeters = 100.0;
-	
-	UFUNCTION()
-	virtual void OnRep_WorldScale();
-
 
 	//void CalibrateHands();
 

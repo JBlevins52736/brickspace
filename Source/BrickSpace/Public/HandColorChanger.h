@@ -5,8 +5,6 @@
 #include "CoreMinimal.h"
 #include "Vodget.h"
 
-class ABrickSpacePlayerState;
-
 #include "HandColorChanger.generated.h"
 
 /**
@@ -20,7 +18,4 @@ class BRICKSPACE_API UHandColorChanger : public UVodget
 
 	UPROPERTY(EditAnywhere, Category = "VAR")
 	UMaterialInterface* brushMaterial;
-
-private:
-	ABrickSpacePlayerState* playerState;
 };

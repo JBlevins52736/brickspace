@@ -4,6 +4,7 @@
 #include "BrickSpacePawn.h"
 #include "HandSelector.h"
 #include "AssemblyActor.h"
+#include "Assembly.h"
 #include "WallBrick.h"
 #include "Net/UnrealNetwork.h"
 
@@ -54,8 +55,9 @@ void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick
 	wallBrick->Server_CloneWallBrick_Implementation(onWallTransform);
 }
 
-void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(AAssemblyActor* assemblyActor)
+void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(UBrick* assemblyBrick)
 {
+	AAssemblyActor* assemblyActor = assemblyBrick->assemblyActor;
 	UAssembly* assembly = assemblyActor->FindComponentByClass<UAssembly>();
 	if (assembly)
 		assembly->TryAdvanceLayer();
