@@ -28,14 +28,14 @@ public:
 	virtual void SetFilter(uint16 filter) override;
 
 #pragma region HAND_MESH_POSITION_REPLICATION
-	UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
-	FVector handPos;
+	//UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
+	//FVector handPos;
 
-	UFUNCTION()
-	virtual void OnRep_MeshPosUpdate();
+	//UFUNCTION()
+	//virtual void OnRep_MeshPosUpdate();
 
 	UFUNCTION(Server, Unreliable)
-	void Server_MeshPosUpdate(AActor* target, USelector* selector, FVector pos);
+	void Server_MeshPosUpdate(UHandSelector* selector, FVector pos);
 #pragma endregion HAND_MESH_POSITION_REPLICATION
 
 

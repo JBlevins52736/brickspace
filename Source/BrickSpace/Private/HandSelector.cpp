@@ -126,17 +126,18 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	//}
 
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
-	if (bspawn) {
+	if (bspawn && handMesh) {
 
 		//VARLog(TEXT("UHandSelector::TickComponent"));
 
 		if (pawn->GetLocalRole() == ROLE_Authority)
 		{
-			Server_MeshPosUpdate_Implementation(GetOwner(), this, hand->GetComponentLocation());
+				handMesh->SetWorldLocation(hand->GetComponentLocation());
+			//Server_MeshPosUpdate_Implementation(this, hand->GetComponentLocation());
 		}
 		else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			Server_MeshPosUpdate(GetOwner(), this, hand->GetComponentLocation());
+			Server_MeshPosUpdate( this, hand->GetComponentLocation());
 		}
 	}
 
@@ -180,37 +181,39 @@ void UHandSelector::SetFilter(uint16 filter)
 
 #pragma region HAND_MESH_POSITION_REPLICATION
 
-void UHandSelector::OnRep_MeshPosUpdate()
-{
-	//APawn* pawn = Cast<APawn>(GetOwner());
-	//if (!pawn) {
-	//	UE_LOG(LogTemp, Error, TEXT("OnRep_MeshPosUpdate() could not cast owner to pawn in HandSelector.cpp"));
-	//	return;
-	//}
-
-	//if (handMesh && 
-	//	pawn->GetLocalRole() == ROLE_SimulatedProxy || 
-	//	(pawn->GetLocalRole() == ROLE_Authority && !pawn->IsLocallyControlled()) )
-	if ( handMesh )
-	{
-		//VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
-
-		handMesh->SetWorldLocation(handPos);
-	//	else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));	
-	}
-}
+//void UHandSelector::OnRep_MeshPosUpdate()
+//{
+//	//APawn* pawn = Cast<APawn>(GetOwner());
+//	//if (!pawn) {
+//	//	UE_LOG(LogTemp, Error, TEXT("OnRep_MeshPosUpdate() could not cast owner to pawn in HandSelector.cpp"));
+//	//	return;
+//	//}
+//
+//	//if (handMesh && 
+//	//	pawn->GetLocalRole() == ROLE_SimulatedProxy || 
+//	//	(pawn->GetLocalRole() == ROLE_Authority && !pawn->IsLocallyControlled()) )
+//	if ( handMesh )
+//	{
+//		//VARLog(TEXT("UHandSelector::OnRep_MeshPosUpdate"));
+//
+//		handMesh->SetWorldLocation(handPos);
+//	//	else UE_LOG(LogTemp, Error, TEXT("Hand mesh is nullptr in MeshPosUpdate. HandSelector.cpp"));	
+//	}
+//}
 #pragma endregion HAND_MESH_POSITION_REPLICATION
 
-void UHandSelector::Server_MeshPosUpdate_Implementation(AActor* target, USelector* selector, FVector pos)
+void UHandSelector::Server_MeshPosUpdate_Implementation(UHandSelector* handSelector, FVector handPos)
 {
 	//VARLog(TEXT("UHandSelector::Server_MeshPosUpdate_Implementation"));
 
-	if (selector) {
-		UHandSelector* handSelector = Cast<UHandSelector>(selector);
+	//if (handSelector) {
+		//UHandSelector* handSelector = Cast<UHandSelector>(selector);
 
-		handSelector->handPos = pos;
-		handSelector->OnRep_MeshPosUpdate();
-	}
+			handSelector->handMesh->SetWorldLocation(handPos);
+
+		//handSelector->handPos = pos;
+		//handSelector->OnRep_MeshPosUpdate();
+	//}
 }
 
 #pragma region HAND_MATERIAL_CHANGE_REPLICATION
@@ -283,5 +286,5 @@ void UHandSelector::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLif
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(UHandSelector, handMaterial);
-	DOREPLIFETIME(UHandSelector, handPos);
+	//DOREPLIFETIME(UHandSelector, handPos);
 }
