@@ -18,6 +18,9 @@ public:
 	// Sets default values for this component's properties
 	UWorldGrabber();
 
+	UFUNCTION(Server, Reliable)
+	void Server_Move(UWorldGrabber* TargetActor, FTransform transform);
+
 	void OnRep_WorldScale( float worldScale );
 
 protected:

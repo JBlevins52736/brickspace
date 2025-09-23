@@ -162,7 +162,19 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	SetLocalCursor();
 	FTransform worldsrt = childsrt * cursorsrt;
 	FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
-	this->SetRelativeTransform(pawnChildOfWorld);
+
+	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(GetOwner());
+	if (pawn->HasAuthority()) {
+		SetRelativeTransform(pawnChildOfWorld);
+	}
+	else {
+		Server_Move(this, pawnChildOfWorld);
+	}
+}
+
+void UWorldGrabber::Server_Move_Implementation(UWorldGrabber* WorldGrabber, FTransform transform)
+{
+	WorldGrabber->SetRelativeTransform(transform);
 }
 
 void UWorldGrabber::OnRep_WorldScale(float worldScale)
