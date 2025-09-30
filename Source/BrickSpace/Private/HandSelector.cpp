@@ -9,7 +9,11 @@
 #include "IXRTrackingSystem.h"
 #include "GameFramework/Pawn.h"
 #include "OculusXRInputFunctionLibrary.h"
-
+#include "HeadMountedDisplayFunctionLibrary.h"
+#include "MotionControllerComponent.h"
+#define GRAB_THRESHOLD 30 // this is the squared length of the threshold to determine if you are grabbing.
+#define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
+#define FINGERTIP_INDICIE_INC 5
 
 UHandSelector::UHandSelector() : handMaterial(nullptr)
 {
@@ -54,6 +58,37 @@ UVodget* UHandSelector::DoRaycast()
 	}
 
 	return retval;
+}
+
+void UHandSelector::CheckHandGestures()
+{
+	FXRMotionControllerData controllerData;
+	UMotionControllerComponent* motionHand = Cast<UMotionControllerComponent>(hand->GetAttachParent());
+	if (!motionHand) return;
+	EControllerHand leftOrRight = motionHand->GetTrackingSource(); // find out which hand this selector belongs to.
+	UHeadMountedDisplayFunctionLibrary::GetMotionControllerData(GetWorld(), leftOrRight, controllerData);
+	HandGrabGesture(controllerData);
+	UE_LOG(LogTemp, Warning, TEXT("Exiting check hand gestures"));
+}
+
+void UHandSelector::HandGrabGesture(FXRMotionControllerData& controllerData)
+{
+
+	FVector palmPos = controllerData.PalmPosition;
+	uint8_t correctOrientationForGrab = 0;
+	for (int i = FINGERTIP_INDICIE_INC; i < controllerData.HandKeyPositions.Num(); i += FINGERTIP_INDICIE_INC) // i = 5, thumb tip position, increment by 5 gets each finger tip position.
+	{
+		FVector fingerPos = controllerData.HandKeyPositions[i];
+		FVector direction = fingerPos - palmPos;
+		float squaredLength = FVector::DotProduct(direction, direction);
+		if (squaredLength < GRAB_THRESHOLD) ++correctOrientationForGrab;
+	}
+	if (correctOrientationForGrab == GRAB_FINGER_COUNT) {
+		focusVodget->ForePinch(this, true);
+	}
+	else if (focus_grabbed && correctOrientationForGrab < GRAB_FINGER_COUNT) {
+		focusVodget->ForePinch(this, false);
+	}
 }
 
 // Called when the game starts
@@ -134,6 +169,8 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandTrackingEnabled();
 	if (!focus_grabbed)
 	{
+		
+			
 		// Use a physics raycast to find vodgets in the scene.
 		UVodget* hitVodget = DoRaycast();
 
@@ -152,7 +189,10 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			if (focusVodget != nullptr) {
 				//UE_LOG(LogTemp, Warning, TEXT("Focus TRUE:%s"), *FString(focusVodget->GetOwner()->GetActorLabel()));
 				focusVodget->Focus(this, true);
+				if (handTrackingActive) CheckHandGestures();
 			}
+			
+
 		}
 
 	}

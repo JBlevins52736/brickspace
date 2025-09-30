@@ -24,7 +24,8 @@ public class BrickSpace : ModuleRules
                 "OculusXRHMD",
                 "OculusXRAnchors",
                 "OculusXRColocation",
-                "OculusXRInput"
+                "OculusXRInput",
+                "HeadMountedDisplay"
            });
 
 

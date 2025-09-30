@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Selector.h"
 class ABrickSpacePawn;
+class FXRMotionControllerData;
 #include "HandSelector.generated.h"
 
 /**
@@ -73,5 +74,11 @@ private:
 	FHitResult Hit;
 
 	bool handTrackingActive = false;
+
+	// Handles all gesture commands
+	void CheckHandGestures();
+
+	// Handles grabbing objects
+	void HandGrabGesture(FXRMotionControllerData &controllerData);
 	
 };
