@@ -71,5 +71,7 @@ private:
 
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
+
+	bool handTrackingActive = false;
 	
 };

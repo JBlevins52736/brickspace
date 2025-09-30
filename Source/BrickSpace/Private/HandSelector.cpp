@@ -6,7 +6,9 @@
 #include "Vodget.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePawn.h"
+#include "IXRTrackingSystem.h"
 #include "GameFramework/Pawn.h"
+#include "OculusXRInputFunctionLibrary.h"
 
 
 UHandSelector::UHandSelector() : handMaterial(nullptr)
@@ -109,21 +111,10 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	APawn* pawn = Cast<APawn>(GetOwner());
 	if (pawn) {
 		if (!pawn->IsLocallyControlled()) {
-			//PrimaryComponentTick.SetTickFunctionEnable(false);
 			return;
 		}
 	}
 
-	if (hand == nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("Ticking but Hand is nullptr in HandSelector.cpp"));
-
-		return;
-	}
-
-	//if ( !HasAuthority() ) {
-	//	PrimaryComponentTick.SetTickFunctionEnable(false);
-	//	return;
-	//}
 
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
 	if (bspawn && handMesh) {
@@ -132,15 +123,15 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 		if (pawn->GetLocalRole() == ROLE_Authority)
 		{
-				handMesh->SetWorldLocation(hand->GetComponentLocation());
-			//Server_MeshPosUpdate_Implementation(this, hand->GetComponentLocation());
+			handMesh->SetWorldLocation(hand->GetComponentLocation());
+
 		}
 		else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			Server_MeshPosUpdate( this, hand->GetComponentLocation());
+			Server_MeshPosUpdate(this, hand->GetComponentLocation());
 		}
 	}
-
+	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandTrackingEnabled();
 	if (!focus_grabbed)
 	{
 		// Use a physics raycast to find vodgets in the scene.
@@ -209,11 +200,11 @@ void UHandSelector::Server_MeshPosUpdate_Implementation(UHandSelector* handSelec
 	//if (handSelector) {
 		//UHandSelector* handSelector = Cast<UHandSelector>(selector);
 
-			handSelector->handMesh->SetWorldLocation(handPos);
+	handSelector->handMesh->SetWorldLocation(handPos);
 
-		//handSelector->handPos = pos;
-		//handSelector->OnRep_MeshPosUpdate();
-	//}
+	//handSelector->handPos = pos;
+	//handSelector->OnRep_MeshPosUpdate();
+//}
 }
 
 #pragma region HAND_MATERIAL_CHANGE_REPLICATION
