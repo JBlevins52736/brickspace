@@ -1,4 +1,6 @@
 #include "TimeManager.h"
+#include "BrickSpacePawn.h"
+
 #include "GameFramework/Actor.h"
 
 // Constructor
@@ -24,21 +26,30 @@ void UTimeManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 	{
 		ElapsedTime += DeltaTime;
 		UpdateTextRenderer();
-		// Optional: Log or update text
-		UE_LOG(LogTemp, Log, TEXT("Elapsed Time: %.2f"), ElapsedTime);
+	
 	}
 }
 
-void UTimeManager::StartTimer()
+void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 {
+	// Modify this method to take in a pawn ref
+	// Make an rpc call in the server pawn
+	// Decide if this is the host or a remote client
+	if (pawn->HasAuthority() && pawn->IsLocallyControlled()) {
+		
+		bIsRunning = true;
+		
+	}
+	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy) {
+		pawn->Server_StartStopTimer(this, true);
+	}
 	ElapsedTime = 0.0f;
-	bIsRunning = true;
-	UE_LOG(LogTemp, Log, TEXT("Timer started."));
+	
 }
 
-void UTimeManager::StopTimer()
-{
-	bIsRunning = false;
+void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
+{/*
+	bIsRunning = false;*/
 	UE_LOG(LogTemp, Warning, TEXT("Timer stopped. Final time: %.2f seconds"), ElapsedTime);
 }
 
@@ -54,12 +65,7 @@ void UTimeManager::SetTextRenderer(UTextRenderComponent* InTextRenderer)
 
 void UTimeManager::UpdateTextRenderer()
 {
-	//if (TimerTextRenderer)
-	//{
-	//	// Format to 2 decimal places
-	//	FString TimeString = FString::Printf(TEXT("%.2f"), ElapsedTime);
-	//	TimerTextRenderer->SetText(FText::FromString(TimeString));
-	//}
+	
 	if (TimerTextRenderer)
 	{
 		int TotalMilliseconds = static_cast<int32>(ElapsedTime * 1000.0f);

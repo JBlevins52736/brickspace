@@ -7,6 +7,7 @@
 #include "BrickSpacePlayerState.h"
 #include "HandSelector.h"
 class UWallBrick;
+class UTimeManager;
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -36,6 +37,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_MeshScaleUpdate(USceneComponent* leftHandMesh, USceneComponent* rightHandMesh, float handScale);
 
+	UFUNCTION(Server, Reliable)
+	void Server_StartStopTimer(UTimeManager* timeManager, bool isRunning);
 
 public:
 

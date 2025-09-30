@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/TextRenderComponent.h"
+class ABrickSpacePawn;
+
 #include "TimeManager.generated.h"
 
 
@@ -23,10 +25,10 @@ public:
 
 	// Timer Control
 	UFUNCTION(BlueprintCallable)
-	void StartTimer();
+	void StartTimer(ABrickSpacePawn* Pawn);
 
 	UFUNCTION(BlueprintCallable)
-	void StopTimer();
+	void StopTimer(ABrickSpacePawn* pawn);
 
 	// Get elapsed time
 	UFUNCTION(BlueprintCallable)
@@ -36,12 +38,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetTextRenderer(UTextRenderComponent* InTextRenderer);
 
+	UPROPERTY(Replicated)
+	bool bIsRunning;
+
 private:
 	UPROPERTY()
 	float ElapsedTime;
 
-	UPROPERTY()
-	bool bIsRunning;
 
 	// The text renderer this component will update
 	UPROPERTY()

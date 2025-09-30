@@ -7,6 +7,7 @@
 #include "Assembly.h"
 #include "WallBrick.h"
 #include "Net/UnrealNetwork.h"
+#include "TimeManager.h"
 
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()
@@ -68,4 +69,9 @@ void ABrickSpacePawn::Server_MeshScaleUpdate_Implementation(USceneComponent* lef
 	FVector scaleVec = FVector::OneVector * handScale;
 	leftHandMesh->SetWorldScale3D(scaleVec);
 	rightHandMesh->SetWorldScale3D(scaleVec);
+}
+
+void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeManager, bool isRunning)
+{
+	timeManager->bIsRunning = isRunning;
 }
