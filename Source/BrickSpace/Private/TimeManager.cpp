@@ -50,7 +50,14 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 {/*
 	bIsRunning = false;*/
-	UE_LOG(LogTemp, Warning, TEXT("Timer stopped. Final time: %.2f seconds"), ElapsedTime);
+	if (pawn->HasAuthority() && pawn->IsLocallyControlled()) {
+
+		bIsRunning = false;
+
+	}
+	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy) {
+		pawn->Server_StartStopTimer(this, false);
+	}
 }
 
 float UTimeManager::GetElapsedTime() const
