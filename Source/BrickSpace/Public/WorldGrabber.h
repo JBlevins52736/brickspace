@@ -23,6 +23,12 @@ public:
 
 	void OnRep_WorldScale( float worldScale );
 
+	UFUNCTION(BlueprintCallable, Category = "VAR")
+	void UpdatePosAnchor(FVector pos);
+
+	UFUNCTION(BlueprintCallable, Category = "VAR")
+	void UpdateRotAnchor(FVector pos);
+
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* leftHand;
@@ -52,6 +58,7 @@ private:
 	void ScaleToggle(const bool Value);
 
 	void SetLocalCursor();
+	void UpdateCursors();
 
 	bool leftGrabbing = false;
 	bool rightGrabbing = false;
@@ -72,5 +79,9 @@ private:
 	float currWorldToMeters = 100.0;
 
 	//void CalibrateHands();
+	bool posAnchorSet = false;
+	bool rotAnchorSet = false;
+	FVector posAnchor;
+	FVector rotAnchor;
 
 };

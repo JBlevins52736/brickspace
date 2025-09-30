@@ -2,23 +2,30 @@
 
 
 #include "AlignWorld.h"
+#include "Selector.h"
 
 #include "WorldAlignmentActor.h"
 
 void UAlignWorld::ForePinch(USelector* selector, bool state)
 {
-	Super::ForePinch(selector, state);
+	selector->GrabFocus(state);
+	grabbingSelector = (state) ? selector : nullptr;
 
-	if (!state)
-	{
-		FTransform transform = clientComponent->GetComponentTransform();
-		AActor* actor = GetOwner();
-		AWorldAlignmentActor* worldAlignmentActor = Cast<AWorldAlignmentActor>(actor);
-		if (worldAlignmentActor)
-		{
-			GEngine->AddOnScreenDebugMessage(-1,1, FColor::Red, TEXT("This is working"));
-			worldAlignmentActor->SetAnchorPostions((transform));
-		}
+	if (state) {
+		UE_LOG(LogTemp, Warning, TEXT("AlignWorld button grabbed:"));
+	} 
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("AlignWorld button released:"));
 	}
-	
+
+
+	PrimaryComponentTick.SetTickFunctionEnable(state);	
+}
+
+void UAlignWorld::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	if (grabbingSelector) {
+		//AlignDelegate.Broadcast(grabbingSelector->Cursor().GetLocation());
+		UE_LOG(LogTemp, Warning, TEXT("AlignWorld button broadcasting"));
+	}
 }

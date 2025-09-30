@@ -21,85 +21,98 @@ UWorldGrabber::UWorldGrabber() :
 
 void UWorldGrabber::SetLocalCursor()
 {
-	if (leftGrabbing && rightGrabbing)
-	{
-		FVector left = leftHand->GetComponentLocation();
-		FVector right = rightHand->GetComponentLocation();
-
-		// Set the cursor position to the average world location of both hands
-		cursorsrt.SetLocation((left + right) * 0.5);
-
-		// Set the cursor rotation to the FRotationMatrix::MakeFromXZ where X is the vector between the hands and Z is up.
-		FVector xAxis = left - right;
-
-		if (dollyMode)
-		{
+	if (posAnchorSet) {
+		cursorsrt.SetLocation(posAnchor);
+		if (rotAnchorSet) {
+			FVector xAxis = rotAnchor - posAnchor;
 			xAxis.Z = 0.0;
+			FQuat rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
+			cursorsrt.SetRotation(rot);
 		}
-		FQuat rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
-
-		cursorsrt.SetRotation(rot);
-
-		// Only the server should change WorldToMeters property
-		if (scaleMode && GetOwner()->GetLocalRole() == ROLE_Authority)
+	}
+	else {
+		// Normal world grabbing until pos anchor is set.
+		// Once pos anchor is set we enter into 2 point calibration mode.
+		if (leftGrabbing && rightGrabbing)
 		{
-			// Set currBimanualHandDist to the actual distance next.
-			float currBimanualHandDist = (left - right).Length();
+			FVector left = leftHand->GetComponentLocation();
+			FVector right = rightHand->GetComponentLocation();
 
-			// The VR Pawn is made larger/smaller in Unreal by changing the WorldToMeters setting.
-			// Pawn geometry like the markers attached to controllers is the responsibility of the application.
-			// https://forums.unrealengine.com/t/changing-the-player-pawn-camera-size/384747/3
+			// Set the cursor position to the average world location of both hands
+			cursorsrt.SetLocation((left + right) * 0.5);
 
-			// As scale makes a VR pawn larger or smaller it changes the bimanual hand distance.
-			// The players bimanual hand distance needs to be adjusted to the initial scale.
-			float ds = initialWorldToMeters / currWorldToMeters;
-			currBimanualHandDist *= ds;
+			// Set the cursor rotation to the FRotationMatrix::MakeFromXZ where X is the vector between the hands and Z is up.
+			FVector xAxis = left - right;
 
-			// The direct world scaling ratio is opposite cursor scaling.
-			ds = initialBimanualHandDist / currBimanualHandDist;
-
-			currWorldToMeters = initialWorldToMeters * ds;
-
-			ABrickSpaceGameState* GameState = Cast<ABrickSpaceGameState>( UGameplayStatics::GetGameState(GetWorld()) );
-			if (GameState)
+			if (dollyMode)
 			{
-				GameState->currWorldToMeters = currWorldToMeters;
-				GameState->OnRep_WorldScale();
+				xAxis.Z = 0.0;
 			}
-			//GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
-			//OnRep_WorldScale();
+			FQuat rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
+
+			cursorsrt.SetRotation(rot);
+
+			// Only the server should change WorldToMeters property
+			if (scaleMode && GetOwner()->GetLocalRole() == ROLE_Authority)
+			{
+				// Set currBimanualHandDist to the actual distance next.
+				float currBimanualHandDist = (left - right).Length();
+
+				// The VR Pawn is made larger/smaller in Unreal by changing the WorldToMeters setting.
+				// Pawn geometry like the markers attached to controllers is the responsibility of the application.
+				// https://forums.unrealengine.com/t/changing-the-player-pawn-camera-size/384747/3
+
+				// As scale makes a VR pawn larger or smaller it changes the bimanual hand distance.
+				// The players bimanual hand distance needs to be adjusted to the initial scale.
+				float ds = initialWorldToMeters / currWorldToMeters;
+				currBimanualHandDist *= ds;
+
+				// The direct world scaling ratio is opposite cursor scaling.
+				ds = initialBimanualHandDist / currBimanualHandDist;
+
+				currWorldToMeters = initialWorldToMeters * ds;
+
+				ABrickSpaceGameState* GameState = Cast<ABrickSpaceGameState>(UGameplayStatics::GetGameState(GetWorld()));
+				if (GameState)
+				{
+					GameState->currWorldToMeters = currWorldToMeters;
+					GameState->OnRep_WorldScale();
+				}
+				//GetWorld()->GetWorldSettings()->WorldToMeters = currWorldToMeters;
+				//OnRep_WorldScale();
 
 
-			//// Scale the Pawns geometry, Note: WorldToMeters base is 100.
-			//float handScale = currWorldToMeters / 100.0;
-			//leftHand->SetWorldScale3D(FVector::OneVector * handScale);
-			//rightHand->SetWorldScale3D(FVector::OneVector * handScale);
+				//// Scale the Pawns geometry, Note: WorldToMeters base is 100.
+				//float handScale = currWorldToMeters / 100.0;
+				//leftHand->SetWorldScale3D(FVector::OneVector * handScale);
+				//rightHand->SetWorldScale3D(FVector::OneVector * handScale);
 
+			}
+			//else if (scaleMode) {
+			//	// Scale the Pawns geometry, Note: WorldToMeters base is 100.
+			//	float handScale = currWorldToMeters / 100.0;
+			//	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
+
+			//	ABrickSpacePawn* brickSpacePawn = Cast<ABrickSpacePawn>(GetOwner());
+			//	brickSpacePawn->Server_MeshScaleUpdate(leftHand, rightHand, handScale);
+			//}
+			else
+			{
+				cursorsrt.SetScale3D(FVector::OneVector);
+			}
 		}
-		//else if (scaleMode) {
-		//	// Scale the Pawns geometry, Note: WorldToMeters base is 100.
-		//	float handScale = currWorldToMeters / 100.0;
-		//	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber handScale:%f"), handScale);
-
-		//	ABrickSpacePawn* brickSpacePawn = Cast<ABrickSpacePawn>(GetOwner());
-		//	brickSpacePawn->Server_MeshScaleUpdate(leftHand, rightHand, handScale);
-		//}
-		else
+		else if (leftGrabbing)
 		{
+			cursorsrt = leftHand->GetComponentTransform();
+			cursorsrt.SetRotation(FQuat::Identity);
 			cursorsrt.SetScale3D(FVector::OneVector);
 		}
-	}
-	else if (leftGrabbing)
-	{
-		cursorsrt = leftHand->GetComponentTransform();
-		cursorsrt.SetRotation(FQuat::Identity);
-		cursorsrt.SetScale3D(FVector::OneVector);
-	}
-	else if (rightGrabbing)
-	{
-		cursorsrt = rightHand->GetComponentTransform();
-		cursorsrt.SetRotation(FQuat::Identity);
-		cursorsrt.SetScale3D(FVector::OneVector);
+		else if (rightGrabbing)
+		{
+			cursorsrt = rightHand->GetComponentTransform();
+			cursorsrt.SetRotation(FQuat::Identity);
+			cursorsrt.SetScale3D(FVector::OneVector);
+		}
 	}
 }
 
@@ -151,14 +164,41 @@ void UWorldGrabber::GrabChanged()
 void UWorldGrabber::DollyToggle(const bool Value) { dollyMode = !dollyMode; }
 void UWorldGrabber::ScaleToggle(const bool Value) { scaleMode = !scaleMode; }
 
-// Called every frame
-void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!scaleMode || leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing))
+void UWorldGrabber::UpdatePosAnchor(FVector pos)
+{
+	UE_LOG(LogTemp, Warning, TEXT("UpdatePosAnchor receiving"));
+
+	posAnchor = pos;
+	if (posAnchorSet) {
+		UpdateCursors();
+	}
+	else {
+		posAnchorSet = true;
+		SetLocalCursor();
+		childsrt = cursorsrt.Inverse();
+	}
+}
+
+void UWorldGrabber::UpdateRotAnchor(FVector pos)
+{
+	if (!posAnchorSet)
 		return;
 
+	rotAnchor = pos;
+	if (rotAnchorSet)
+	{
+		UpdateCursors();
+	}
+	else {
+		rotAnchorSet = true;
+		SetLocalCursor();
+		childsrt = cursorsrt.Inverse();
+	}
+}
+
+void UWorldGrabber::UpdateCursors()
+{
 	SetLocalCursor();
 	FTransform worldsrt = childsrt * cursorsrt;
 	FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
@@ -170,6 +210,17 @@ void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	else {
 		Server_Move(this, pawnChildOfWorld);
 	}
+}
+
+// Called every frame
+void UWorldGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!scaleMode || leftHand == nullptr || rightHand == nullptr || !(leftGrabbing || rightGrabbing))
+		return;
+
+	UpdateCursors();
 }
 
 void UWorldGrabber::Server_Move_Implementation(UWorldGrabber* WorldGrabber, FTransform transform)
