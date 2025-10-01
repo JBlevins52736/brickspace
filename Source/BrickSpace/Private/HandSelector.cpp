@@ -9,7 +9,7 @@
 #include "IXRTrackingSystem.h"
 #include "GameFramework/Pawn.h"
 #include "OculusXRInputFunctionLibrary.h"
-#include "HeadMountedDisplayFunctionLibrary.h"
+#include "OculusXRHandComponent.h"
 #include "MotionControllerComponent.h"
 #define GRAB_THRESHOLD 30 // this is the squared length of the threshold to determine if you are grabbing.
 #define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
@@ -62,33 +62,19 @@ UVodget* UHandSelector::DoRaycast()
 
 void UHandSelector::CheckHandGestures()
 {
-	FXRMotionControllerData controllerData;
-	UMotionControllerComponent* motionHand = Cast<UMotionControllerComponent>(hand->GetAttachParent());
-	if (!motionHand) return;
-	EControllerHand leftOrRight = motionHand->GetTrackingSource(); // find out which hand this selector belongs to.
-	UHeadMountedDisplayFunctionLibrary::GetMotionControllerData(GetWorld(), leftOrRight, controllerData);
-	HandGrabGesture(controllerData);
-	UE_LOG(LogTemp, Warning, TEXT("Exiting check hand gestures"));
+
+	// Start performing bone lookups by name because Meta doesnt know what a fixed size array is apparently
+
+
+	
+	
+	
 }
 
-void UHandSelector::HandGrabGesture(FXRMotionControllerData& controllerData)
+void UHandSelector::HandGrabGesture()
 {
 
-	FVector palmPos = controllerData.PalmPosition;
-	uint8_t correctOrientationForGrab = 0;
-	for (int i = FINGERTIP_INDICIE_INC; i < controllerData.HandKeyPositions.Num(); i += FINGERTIP_INDICIE_INC) // i = 5, thumb tip position, increment by 5 gets each finger tip position.
-	{
-		FVector fingerPos = controllerData.HandKeyPositions[i];
-		FVector direction = fingerPos - palmPos;
-		float squaredLength = FVector::DotProduct(direction, direction);
-		if (squaredLength < GRAB_THRESHOLD) ++correctOrientationForGrab;
-	}
-	if (correctOrientationForGrab == GRAB_FINGER_COUNT) {
-		focusVodget->ForePinch(this, true);
-	}
-	else if (focus_grabbed && correctOrientationForGrab < GRAB_FINGER_COUNT) {
-		focusVodget->ForePinch(this, false);
-	}
+
 }
 
 // Called when the game starts
@@ -189,13 +175,14 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			if (focusVodget != nullptr) {
 				//UE_LOG(LogTemp, Warning, TEXT("Focus TRUE:%s"), *FString(focusVodget->GetOwner()->GetActorLabel()));
 				focusVodget->Focus(this, true);
-				if (handTrackingActive) CheckHandGestures();
+				
 			}
 			
 
 		}
 
 	}
+	if (handTrackingActive && focusVodget) CheckHandGestures();
 
 }
 
@@ -208,6 +195,22 @@ void UHandSelector::SetFilter(uint16 filter)
 
 	Super::SetFilter(filter);
 	//SetHandColor();
+}
+
+void UHandSelector::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (skRef) 
+	{
+		boneIndicies.Add(skRef->GetBoneIndex(FName("Thumb Tip")));
+		boneIndicies.Add(skRef->GetBoneIndex(FName("Index Tip")));
+		boneIndicies.Add(skRef->GetBoneIndex(FName("Middle Tip")));
+		boneIndicies.Add(skRef->GetBoneIndex(FName("Ring Tip")));
+		boneIndicies.Add(skRef->GetBoneIndex(FName("Pinky Tip")));
+		palmIndex = skRef->GetBoneIndex(FName("Wrist Root"));
+	}
+
 }
 
 #pragma region HAND_MESH_POSITION_REPLICATION

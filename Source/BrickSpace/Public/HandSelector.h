@@ -5,7 +5,8 @@
 #include "CoreMinimal.h"
 #include "Selector.h"
 class ABrickSpacePawn;
-class FXRMotionControllerData;
+class UOculusXRHandComponent;
+struct FXRMotionControllerData;
 #include "HandSelector.generated.h"
 
 /**
@@ -27,6 +28,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void SetFilter(uint16 filter) override;
+	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	UOculusXRHandComponent* skRef = nullptr; // skRef is the component I need to get bone positions because for some reason this needs to exist
 
 #pragma region HAND_MESH_POSITION_REPLICATION
 	//UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
@@ -72,6 +77,8 @@ private:
 
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
+	TArray<uint32_t> boneIndicies; // references my hands
+	uint32_t palmIndex = 0; // need these to reference my hands
 
 	bool handTrackingActive = false;
 
@@ -79,6 +86,6 @@ private:
 	void CheckHandGestures();
 
 	// Handles grabbing objects
-	void HandGrabGesture(FXRMotionControllerData &controllerData);
+	void HandGrabGesture();
 	
 };
