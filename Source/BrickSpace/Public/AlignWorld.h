@@ -25,7 +25,7 @@ public:
 	FPosChangeDelegate AlignDelegate;
 
 private:
-
+	FTransform childsrt;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	USelector* grabbingSelector = nullptr;
 };

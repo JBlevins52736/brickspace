@@ -9,23 +9,21 @@
 void UAlignWorld::ForePinch(USelector* selector, bool state)
 {
 	selector->GrabFocus(state);
-	grabbingSelector = (state) ? selector : nullptr;
-
-	if (state) {
-		UE_LOG(LogTemp, Warning, TEXT("AlignWorld button grabbed:"));
-	} 
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("AlignWorld button released:"));
+	if (state)
+	{
+		grabbingSelector = selector;
+		childsrt = clientComponent->GetComponentTransform() * selector->Cursor().Inverse();
 	}
-
-
+	else {
+		grabbingSelector = nullptr;
+	}
 	PrimaryComponentTick.SetTickFunctionEnable(state);	
 }
 
 void UAlignWorld::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	if (grabbingSelector) {
-		//AlignDelegate.Broadcast(grabbingSelector->Cursor().GetLocation());
-		UE_LOG(LogTemp, Warning, TEXT("AlignWorld button broadcasting"));
+		FTransform worldsrt = childsrt * grabbingSelector->Cursor();
+		AlignDelegate.Broadcast(worldsrt.GetLocation());
 	}
 }
