@@ -39,7 +39,7 @@ public:
 	void SetTextRenderer(UTextRenderComponent* InTextRenderer);
 
 	UPROPERTY(Replicated)
-	bool bIsRunning;
+	bool bIsRunning = false;
 
 private:
 	UPROPERTY()
