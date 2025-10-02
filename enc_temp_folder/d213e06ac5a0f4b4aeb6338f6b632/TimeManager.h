@@ -3,12 +3,9 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/TextRenderComponent.h"
-
 class ABrickSpacePawn;
 
-
 #include "TimeManager.generated.h"
-
 
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
@@ -44,7 +41,6 @@ public:
 	UPROPERTY(Replicated)
 	bool bIsRunning = false;
 
-
 private:
 	UPROPERTY()
 	float ElapsedTime;
@@ -56,5 +52,4 @@ private:
 
 	// Internal helper
 	void UpdateTextRenderer();
-
 };

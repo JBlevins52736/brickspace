@@ -87,6 +87,7 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 			ElapsedTime = 0.0f;
 			UpdateTextRenderer();
 			UE_LOG(LogTemp, Warning, TEXT("Timer reset to 0."));
+			/*pawn->Server_StartStopTimer_Implementation(this, true);*/
 		}
 		else
 		{
@@ -126,3 +127,5 @@ void UTimeManager::UpdateTextRenderer()
 		TimerTextRenderer->SetText(FText::FromString(TimeString));
 	}
 }
+
+

@@ -44,8 +44,16 @@ public:
     FOnButtonReleased OnReleased;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
-    UTimeManager* timer;
+    UTimeManager* timer; 
+    
+    UPROPERTY()
+    bool isPressed = false;
 private:
     void Press();
     void Release();
+    void DoRelease();
+
+    FTimerHandle ReleaseDelayHandle;
+    float ReleaseDelayDuration = 0.2f; // delay in seconds
+
 };

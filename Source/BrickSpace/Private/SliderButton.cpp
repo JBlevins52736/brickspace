@@ -15,7 +15,7 @@ void USliderButton::BeginPlay()
 }
 void USliderButton::Focus(USelector* cursor, bool state)
 {
-   
+    // Let parent handle focus registration
     Super::Focus(cursor, state);
     
     ABrickSpacePawn* BrickPawn = nullptr;
@@ -32,8 +32,8 @@ void USliderButton::Focus(USelector* cursor, bool state)
     if (!LaunchButton && !StartButton) return;
 
     if (state)
-    {   
-        if (LaunchButton) 
+    {     // Move to pressed target
+        if (LaunchButton && !isPressed) 
         {
             Press();
             if (timer) 
@@ -41,7 +41,7 @@ void USliderButton::Focus(USelector* cursor, bool state)
                 timer->StopTimer(BrickPawn);
             }
         }
-        else if (StartButton)
+        else if (StartButton && !isPressed)
         {
             Press();
             if (timer)
@@ -59,15 +59,40 @@ void USliderButton::Focus(USelector* cursor, bool state)
 void USliderButton::Press()
 {
     UE_LOG(LogTemp, Log, TEXT("%s pressed!"), *GetName());
-    OnPressed.Broadcast();
+    OnPressed.Broadcast(); // Call Blueprint-bound event
+    isPressed = true;
 }
 
+//void USliderButton::Release()
+//{
+//
+//
+//    UE_LOG(LogTemp, Log, TEXT("%s released!"), *GetName());
+//    OnReleased.Broadcast(); // Call Blueprint-bound event
+//
+//
+//    
+//}
 void USliderButton::Release()
 {
+    // Ignore if already waiting for release
+    if (GetWorld()->GetTimerManager().IsTimerActive(ReleaseDelayHandle))
+        return;
 
+    // Set a timer to actually release after delay
+    if (GetWorld())
+    {
+        GetWorld()->GetTimerManager().SetTimer(
+            ReleaseDelayHandle, this, &USliderButton::DoRelease, ReleaseDelayDuration, false
+        );
+    }
+}
 
-    UE_LOG(LogTemp, Log, TEXT("%s released!"), *GetName());
-    OnReleased.Broadcast(); 
+void USliderButton::DoRelease()
+{
+    UE_LOG(LogTemp, Log, TEXT("%s released after delay!"), *GetName());
+    OnReleased.Broadcast();
+    isPressed = false; // allow next press
 }
 
 void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
