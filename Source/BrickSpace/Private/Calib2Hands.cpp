@@ -68,5 +68,8 @@ void UCalib2Hands::ActiveChanged()
 
 		// Move the cursor to the servers hands.
 		UpdateCursors();
+
+		// World grabbing is always disabled for clients.
+		activeMode = false;
 	}
 }
