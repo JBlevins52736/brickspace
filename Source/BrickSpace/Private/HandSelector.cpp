@@ -11,7 +11,7 @@
 #include "OculusXRInputFunctionLibrary.h"
 #include "OculusXRHandComponent.h"
 #include "MotionControllerComponent.h"
-#define GRAB_THRESHOLD 30 // this is the squared length of the threshold to determine if you are grabbing.
+#define GRAB_THRESHOLD 90 // this is the squared length of the threshold to determine if you are grabbing.
 #define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
 #define FINGERTIP_INDICIE_INC 5
 
@@ -64,16 +64,30 @@ void UHandSelector::CheckHandGestures()
 {
 
 	// Start performing bone lookups by name because Meta doesnt know what a fixed size array is apparently
+	FVector palmVector = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
+	HandGrabGesture(palmVector);
 
-
-	
-	
-	
 }
 
-void UHandSelector::HandGrabGesture()
+void UHandSelector::HandGrabGesture(const FVector& palmPos)
 {
+	int correctOrientation = 0; // this indicates correct position for hand grab
+	FVector currentPos = FVector::Zero();
+	FVector directionPalmToFinger = FVector::Zero();
+	float squaredLengthAvg = 0;
+	float squaredLengthTotalFingers = 0;
+	for (int i = 0; i < boneNames.Num(); i++) {
 
+		currentPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
+		directionPalmToFinger = currentPos - palmPos;
+		squaredLengthTotalFingers += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
+	
+	}
+	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
+	if (squaredLengthAvg < GRAB_THRESHOLD) focusVodget->ForePinch(this, true);
+	else if (focusVodget && focus_grabbed && squaredLengthAvg >= GRAB_THRESHOLD) focusVodget->ForePinch(this, false);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("Squared Length: %f"), squaredLengthAvg));
 
 }
 
@@ -155,8 +169,8 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandTrackingEnabled();
 	if (!focus_grabbed)
 	{
-		
-			
+
+
 		// Use a physics raycast to find vodgets in the scene.
 		UVodget* hitVodget = DoRaycast();
 
@@ -175,9 +189,9 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			if (focusVodget != nullptr) {
 				//UE_LOG(LogTemp, Warning, TEXT("Focus TRUE:%s"), *FString(focusVodget->GetOwner()->GetActorLabel()));
 				focusVodget->Focus(this, true);
-				
+
 			}
-			
+
 
 		}
 
@@ -200,17 +214,27 @@ void UHandSelector::SetFilter(uint16 filter)
 void UHandSelector::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (skRef) 
+#if WITH_EDITOR
+	if (skRef)
 	{
-		boneIndicies.Add(skRef->GetBoneIndex(FName("Thumb Tip")));
-		boneIndicies.Add(skRef->GetBoneIndex(FName("Index Tip")));
-		boneIndicies.Add(skRef->GetBoneIndex(FName("Middle Tip")));
-		boneIndicies.Add(skRef->GetBoneIndex(FName("Ring Tip")));
-		boneIndicies.Add(skRef->GetBoneIndex(FName("Pinky Tip")));
-		palmIndex = skRef->GetBoneIndex(FName("Wrist Root"));
+		boneNames.Add(FName("Thumb Tip"));
+		boneNames.Add(FName("Index Tip"));
+		boneNames.Add(FName("Middle Tip"));
+		boneNames.Add(FName("Ring Tip"));
+		boneNames.Add(FName("Pinky Tip"));
+		palmName = FName("Wrist Root");
+	}
+#else 
+	if (skRef) {
+		boneNames.Add(FName("Thumb_Tip"));
+		boneNames.Add(FName("Index_Tip"));
+		boneNames.Add(FName("Middle_Tip"));
+		boneNames.Add(FName("Ring_Tip"));
+		boneNames.Add(FName("Pinky_Tip"));
+		palmName = FName("Wrist_Root");
 	}
 
+#endif
 }
 
 #pragma region HAND_MESH_POSITION_REPLICATION

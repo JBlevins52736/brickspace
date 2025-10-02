@@ -77,8 +77,8 @@ private:
 
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
-	TArray<uint32_t> boneIndicies; // references my hands
-	uint32_t palmIndex = 0; // need these to reference my hands
+	TArray<FName> boneNames; // references my hands
+	FName palmName = FName("Wrist Root"); // need these to reference my hands
 
 	bool handTrackingActive = false;
 
@@ -86,6 +86,6 @@ private:
 	void CheckHandGestures();
 
 	// Handles grabbing objects
-	void HandGrabGesture();
+	void HandGrabGesture(const FVector& palmPos);
 	
 };
