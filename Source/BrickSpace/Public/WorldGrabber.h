@@ -21,7 +21,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_Move(UWorldGrabber* TargetActor, FTransform transform);
 
-	void OnRep_WorldScale( float worldScale );
+	virtual void SetWorldToMeters(float worldScale);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
@@ -30,12 +30,18 @@ protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* rightHand;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
-	USceneComponent* leftHandReplicated;
+	virtual void ActiveChanged();
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
-	USceneComponent* rightHandReplicated;
+	void UpdateCursors();
+	virtual void SetLocalCursor();
+	FTransform childsrt;
+	FTransform cursorsrt;
+	bool dollyMode = true;
+	bool scaleMode = false;
+	bool activeMode = false;
 
+	float initialWorldToMeters = 100.0;
+	float currWorldToMeters = 100.0;
 private:
 
 	// Bluprint mappable world grabber input functions
@@ -51,26 +57,17 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void ScaleToggle(const bool Value);
 
-	void SetLocalCursor();
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void ActivateToggle(const bool Value);
 
 	bool leftGrabbing = false;
 	bool rightGrabbing = false;
 
-	FTransform childsrt;
-	FTransform cursorsrt;
 	float initialBimanualHandDist;
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void GrabChanged();
-
-	bool dollyMode = true;
-	bool scaleMode = false;
-
-	float initialWorldToMeters = 100.0;
-	float currWorldToMeters = 100.0;
-
-	//void CalibrateHands();
 
 };

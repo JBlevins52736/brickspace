@@ -2,7 +2,7 @@
 
 
 #include "BrickSpaceGameState.h"
-#include "WorldGrabber.h"
+#include "WorldGrabberReplicated.h"
 #include <Kismet/GameplayStatics.h>
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 
@@ -14,7 +14,7 @@ void ABrickSpaceGameState::OnRep_WorldScale()
 
 		if (APlayerController* LocalPlayerController = UGameplayStatics::GetPlayerController(World, 0))
 		{
-			UWorldGrabber* worldGrabber = Cast<UWorldGrabber>(LocalPlayerController->GetPawn()->GetRootComponent());
+			UWorldGrabberReplicated* worldGrabber = Cast<UWorldGrabberReplicated>(LocalPlayerController->GetPawn()->GetRootComponent());
 			if (worldGrabber)
 				worldGrabber->OnRep_WorldScale( currWorldToMeters );	
 		}
