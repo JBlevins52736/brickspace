@@ -15,7 +15,7 @@ void USliderButton::BeginPlay()
 }
 void USliderButton::Focus(USelector* cursor, bool state)
 {
-   
+    // Let parent handle focus registration
     Super::Focus(cursor, state);
     
     ABrickSpacePawn* BrickPawn = nullptr;
@@ -32,7 +32,7 @@ void USliderButton::Focus(USelector* cursor, bool state)
     if (!LaunchButton && !StartButton) return;
 
     if (state)
-    {   
+    {     // Move to pressed target
         if (LaunchButton) 
         {
             Press();
@@ -59,7 +59,7 @@ void USliderButton::Focus(USelector* cursor, bool state)
 void USliderButton::Press()
 {
     UE_LOG(LogTemp, Log, TEXT("%s pressed!"), *GetName());
-    OnPressed.Broadcast();
+    OnPressed.Broadcast(); // Call Blueprint-bound event
 }
 
 void USliderButton::Release()
@@ -67,7 +67,7 @@ void USliderButton::Release()
 
 
     UE_LOG(LogTemp, Log, TEXT("%s released!"), *GetName());
-    OnReleased.Broadcast(); 
+    OnReleased.Broadcast(); // Call Blueprint-bound event
 }
 
 void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
