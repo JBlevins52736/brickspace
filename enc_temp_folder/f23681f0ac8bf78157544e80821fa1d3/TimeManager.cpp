@@ -44,8 +44,8 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 	// Decide if this is the host or a remote client
 	if (!pawn) return;
 
-	bool bHasAuth = pawn->HasAuthority() && pawn->IsLocallyControlled();
-	bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
+	bool bHasAuth = pawn->HasAuthority() /*&& pawn->IsLocallyControlled()*/;
+	//bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
 
 	if (bHasAuth)
 	{
@@ -63,10 +63,22 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 			UE_LOG(LogTemp, Warning, TEXT("Timer started/resumed. ElapsedTime: %.2f"), ElapsedTime);
 		}
 	}
-	else if (bIsClient)
+	else /*if (bIsClient)*/
 	{
-		pawn->Server_StartStopTimer(this, bIsRunning);
-
+		
+		// TOGGLE LOGIC
+		if (bIsRunning)
+		{
+			// Pause
+			pawn->Server_StartStopTimer(this, false);
+			UE_LOG(LogTemp, Warning, TEXT("Timer paused. ElapsedTime: %.2f"), ElapsedTime);
+		}
+		else
+		{
+			// Start or Resume (but don't reset time!)
+			pawn->Server_StartStopTimer(this, true);
+			UE_LOG(LogTemp, Warning, TEXT("Timer started/resumed. ElapsedTime: %.2f"), ElapsedTime);
+		}
 	}
 	
 }
@@ -75,8 +87,8 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 {
 	if (!pawn) return;
 
-	bool bHasAuth = pawn->HasAuthority() && pawn->IsLocallyControlled();
-	bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
+	bool bHasAuth = pawn->HasAuthority() /*&& pawn->IsLocallyControlled()*/;
+	//bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
 
 	// Only allow reset when paused
 	if (bHasAuth) 
@@ -93,9 +105,20 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 			bIsRunning = false;
 		}
 	}
-	else if (bIsClient)
+	else /*if (bIsClient)*/
 	{
-		pawn->Server_StartStopTimer(this, false);
+		
+		if (!bIsRunning)
+		{
+			ElapsedTime = 0.0f;
+			UpdateTextRenderer();
+			UE_LOG(LogTemp, Warning, TEXT("Timer reset to 0."));
+			/*pawn->Server_StartStopTimer_Implementation(this, true);*/
+		}
+		else
+		{
+			pawn->Server_StartStopTimer(this, false);
+		}
 	}
 }
 
@@ -107,6 +130,11 @@ float UTimeManager::GetElapsedTime() const
 void UTimeManager::SetTextRenderer(UTextRenderComponent* InTextRenderer)
 {
 	TimerTextRenderer = InTextRenderer;
+}
+
+void UTimeManager::OnRep_Running()
+{
+	
 }
 
 void UTimeManager::UpdateTextRenderer()

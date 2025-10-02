@@ -46,9 +46,14 @@ public:
 
 	UFUNCTION()
 	virtual void OnRep_Running();
-private:
-	UPROPERTY()
+
+	UPROPERTY(ReplicatedUsing = OnRep_ElapsedTime)
 	float ElapsedTime;
+
+	UFUNCTION()
+	void OnRep_ElapsedTime();
+private:
+	
 
 
 	// The text renderer this component will update

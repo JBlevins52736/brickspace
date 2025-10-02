@@ -74,4 +74,5 @@ void ABrickSpacePawn::Server_MeshScaleUpdate_Implementation(USceneComponent* lef
 void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeManager, bool isRunning)
 {
 	timeManager->bIsRunning = isRunning;
+	timeManager->OnRep_Running();
 }

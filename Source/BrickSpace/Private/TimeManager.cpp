@@ -11,6 +11,7 @@ UTimeManager::UTimeManager()
 	ElapsedTime = 0.0f;
 	bIsRunning = false;
 	TimerTextRenderer = nullptr;
+	SetIsReplicatedByDefault(true);
 }
 
 void UTimeManager::BeginPlay()
@@ -22,20 +23,19 @@ void UTimeManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (bIsRunning)
+	// Only tick on server/authority
+	if (bIsRunning && GetOwner() && GetOwner()->HasAuthority())
 	{
 		ElapsedTime += DeltaTime;
 		UpdateTextRenderer();
-	
 	}
 }
 
 void UTimeManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
 	DOREPLIFETIME(UTimeManager, bIsRunning);
-}
+	DOREPLIFETIME(UTimeManager, ElapsedTime);  
 
 void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 {
@@ -62,10 +62,12 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 			bIsRunning = true;
 			UE_LOG(LogTemp, Warning, TEXT("Timer started/resumed. ElapsedTime: %.2f"), ElapsedTime);
 		}
+		// Force update on server
+		UpdateTextRenderer();
 	}
 	else /*if (bIsClient)*/
 	{
-		pawn->Server_StartStopTimer(this, true);
+		pawn->Server_StartStopTimer(this, !bIsRunning); // Toggle based on current state
 
 	}
 	
@@ -90,7 +92,9 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 		}
 		else
 		{
+			// Stop the timer
 			bIsRunning = false;
+			UpdateTextRenderer();
 		}
 	}
 	else /*if (bIsClient)*/
@@ -107,12 +111,21 @@ float UTimeManager::GetElapsedTime() const
 void UTimeManager::SetTextRenderer(UTextRenderComponent* InTextRenderer)
 {
 	TimerTextRenderer = InTextRenderer;
+	UpdateTextRenderer();
 }
 
 void UTimeManager::OnRep_Running()
 {
-
+	UpdateTextRenderer();
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_Running called. bIsRunning: %d, ElapsedTime: %.2f"), bIsRunning, ElapsedTime);
 }
+
+void UTimeManager::OnRep_ElapsedTime()
+{
+	// Update display when elapsed time replicates
+	UpdateTextRenderer();
+}
+
 
 void UTimeManager::UpdateTextRenderer()
 {
