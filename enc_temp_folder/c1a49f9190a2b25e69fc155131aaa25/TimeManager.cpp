@@ -47,7 +47,7 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 	bool bHasAuth = pawn->HasAuthority() && pawn->IsLocallyControlled();
 	bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
 
-	if (bHasAuth || bIsClient)
+	if (bHasAuth)
 	{
 		// TOGGLE LOGIC
 		if (bIsRunning)
@@ -62,12 +62,11 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 			bIsRunning = true;
 			UE_LOG(LogTemp, Warning, TEXT("Timer started/resumed. ElapsedTime: %.2f"), ElapsedTime);
 		}
+	}
+	else if (bIsClient)
+	{
+		pawn->Server_StartStopTimer(this, bIsRunning);
 
-		// Sync to server
-		if (bIsClient)
-		{
-			pawn->Server_StartStopTimer(this, bIsRunning);
-		}
 	}
 	
 }
@@ -80,21 +79,21 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 	bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
 
 	// Only allow reset when paused
-	if (bHasAuth || bIsClient) 
+	if (bHasAuth) 
 	{
 		if (!bIsRunning)
 		{
 			ElapsedTime = 0.0f;
 			UpdateTextRenderer();
 			UE_LOG(LogTemp, Warning, TEXT("Timer reset to 0."));
-			pawn->Server_StartStopTimer_Implementation(this, true);
+			/*pawn->Server_StartStopTimer_Implementation(this, true);*/
 		}
 		else
 		{
 			bIsRunning = false;
 		}
 	}
-	if (bIsClient)
+	else if (bIsClient)
 	{
 		pawn->Server_StartStopTimer(this, false);
 	}
@@ -127,3 +126,5 @@ void UTimeManager::UpdateTextRenderer()
 		TimerTextRenderer->SetText(FText::FromString(TimeString));
 	}
 }
+
+

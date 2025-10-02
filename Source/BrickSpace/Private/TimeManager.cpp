@@ -44,10 +44,10 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 	// Decide if this is the host or a remote client
 	if (!pawn) return;
 
-	bool bHasAuth = pawn->HasAuthority() && pawn->IsLocallyControlled();
-	bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
+	bool bHasAuth = pawn->HasAuthority() /*&& pawn->IsLocallyControlled()*/;
+	//bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
 
-	if (bHasAuth || bIsClient)
+	if (bHasAuth)
 	{
 		// TOGGLE LOGIC
 		if (bIsRunning)
@@ -62,12 +62,11 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 			bIsRunning = true;
 			UE_LOG(LogTemp, Warning, TEXT("Timer started/resumed. ElapsedTime: %.2f"), ElapsedTime);
 		}
+	}
+	else /*if (bIsClient)*/
+	{
+		pawn->Server_StartStopTimer(this, true);
 
-		// Sync to server
-		if (bIsClient)
-		{
-			pawn->Server_StartStopTimer(this, bIsRunning);
-		}
 	}
 	
 }
@@ -76,11 +75,11 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 {
 	if (!pawn) return;
 
-	bool bHasAuth = pawn->HasAuthority() && pawn->IsLocallyControlled();
-	bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
+	bool bHasAuth = pawn->HasAuthority() /*&& pawn->IsLocallyControlled()*/;
+	//bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
 
 	// Only allow reset when paused
-	if (bHasAuth || bIsClient) 
+	if (bHasAuth) 
 	{
 		if (!bIsRunning)
 		{
@@ -94,7 +93,7 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 			bIsRunning = false;
 		}
 	}
-	if (bIsClient)
+	else /*if (bIsClient)*/
 	{
 		pawn->Server_StartStopTimer(this, false);
 	}
@@ -108,6 +107,11 @@ float UTimeManager::GetElapsedTime() const
 void UTimeManager::SetTextRenderer(UTextRenderComponent* InTextRenderer)
 {
 	TimerTextRenderer = InTextRenderer;
+}
+
+void UTimeManager::OnRep_Running()
+{
+
 }
 
 void UTimeManager::UpdateTextRenderer()

@@ -41,10 +41,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetTextRenderer(UTextRenderComponent* InTextRenderer);
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_Running )
 	bool bIsRunning = false;
 
-
+	UFUNCTION()
+	virtual void OnRep_Running();
 private:
 	UPROPERTY()
 	float ElapsedTime;
