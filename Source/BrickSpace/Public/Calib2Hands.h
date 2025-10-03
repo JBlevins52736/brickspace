@@ -15,7 +15,6 @@ class BRICKSPACE_API UCalib2Hands : public UWorldGrabberReplicated
 	GENERATED_BODY()
 	
 public:
-	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	virtual void ActiveChanged() override;
 
 protected:

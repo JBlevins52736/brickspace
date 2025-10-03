@@ -40,8 +40,11 @@ protected:
 	bool scaleMode = false;
 	bool activeMode = false;
 
-	float initialWorldToMeters = 100.0;
 	float currWorldToMeters = 100.0;
+	float initialWorldToMeters = 100.0;
+
+	void StartWorldScaling(FVector lhand, FVector rhand);
+	void ChangeWorldScaling(FVector lhand, FVector rhand);
 private:
 
 	// Bluprint mappable world grabber input functions
