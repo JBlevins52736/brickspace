@@ -35,7 +35,8 @@ void UTimeManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UTimeManager, bIsRunning);
-	DOREPLIFETIME(UTimeManager, ElapsedTime);  
+	DOREPLIFETIME(UTimeManager, ElapsedTime);
+}
 
 void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 {
