@@ -84,12 +84,12 @@ void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		/*if (!bIsRunning)
-		{*/
+		if (!bIsRunning)
+		{
 			ElapsedTime = 0.0f;
 			UE_LOG(LogTemp, Warning, TEXT("Server reset timer to 0."));
 			UpdateTextRenderer();
-		/*}*/
+		}
 	}
 	else
 	{

@@ -42,7 +42,7 @@ public:
 protected:
 
 	USelector* grabbingSelector = nullptr;
-	float initialGrabZ = 0.0f; // initial local cursor position at grab
+	float initialGrabX = 0.0f; // initial local cursor position at grab
 	FRotator initialRotation;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")

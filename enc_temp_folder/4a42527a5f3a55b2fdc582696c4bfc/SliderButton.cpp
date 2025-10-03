@@ -51,11 +51,7 @@ void USliderButton::Focus(USelector* cursor, bool state)
         }
         else if (ResetButton && !isPressed)
         {
-            Press();
-            if (timer)
-            {
-                timer->ResetTimer(BrickPawn);
-            }
+            timer->ResetTimer(BrickPawn);
         }
     }
     else
