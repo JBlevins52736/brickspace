@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Selector.h"
 class ABrickSpacePawn;
+class UOculusXRHandComponent;
+struct FXRMotionControllerData;
 #include "HandSelector.generated.h"
 
 /**
@@ -26,6 +28,10 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void SetFilter(uint16 filter) override;
+	virtual void BeginPlay() override;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	UOculusXRHandComponent* skRef = nullptr; // skRef is the component I need to get bone positions because for some reason this needs to exist
 
 #pragma region HAND_MESH_POSITION_REPLICATION
 	//UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
@@ -66,10 +72,20 @@ protected:
 
 private:
 	UVodget* DoRaycast();
-
+	void CalculateHandSize();
 	float ratioHitEyeOverHandEye = 0.0;
-
+	float relativeHandSizeSquared = 0;
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
+	TArray<FName> boneNames; // references my hands
+	FName palmName = FName("Wrist Root"); // need these to reference my hands
+
+	bool handTrackingActive = false;
+
+	// Handles all gesture commands
+	void CheckHandGestures();
+
+	// Handles grabbing objects
+	void HandGrabGesture(const FVector& palmPos);
 	
 };

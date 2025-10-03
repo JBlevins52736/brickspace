@@ -52,7 +52,7 @@ void UBrick::ForePinch(USelector* selector, bool state)
 	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
 	if (mesh != nullptr)
 	{
-		if (state) {
+		if (state && mesh) {
 			// Add overlap with other bricks.
 			mesh->OnComponentBeginOverlap.AddDynamic(this, &UBrick::OnOverlapBegin);
 			mesh->OnComponentEndOverlap.AddDynamic(this, &UBrick::OnOverlapEnd);

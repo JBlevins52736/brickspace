@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "AlignWorld.h"
 #include "Net/UnrealNetwork.h"
+#include "BrickSpacePawn.h"
 
 // Sets default values
 AWorldAlignmentActor::AWorldAlignmentActor()
@@ -45,53 +46,30 @@ void AWorldAlignmentActor::SetAnchorPostions(FTransform anchorPostion)
 	}
 	else
 	{
-		FTransform offsetTransform = anchorPostion * GetParentActor()->GetTransform().Inverse();
-		startTransform = offsetTransform;;
+		
+		startTransform = anchorPostion;
 	}
 
 	if (!endTransform.Equals(FTransform::Identity) && !startTransform.Equals(FTransform::Identity) && HasAuthority())
 	{
 		
-		FVector dirBetweenAnchors = startTransform.GetLocation()-endTransform.GetLocation();
-		FRotator rotBetweenAnchors = dirBetweenAnchors.Rotation();
-		beginTransferTransform = startTransform;
-		endTransferTransform = endTransform;
-		TArray<AActor*> worldActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), worldActors);
-		USceneComponent* directionalLightTargetComp = nullptr;
-		for (AActor* actor : worldActors)
-		{
-			if (actor == this) continue;
-			if (actor->FindComponentByClass<UBrickEreaser>() != nullptr) // wall
-			{
-				actor->SetActorLocation(endTransform.GetLocation());
-				actor->SetActorRotation(rotBetweenAnchors);
-				USceneComponent* rootComp = actor->GetRootComponent();
-				if (rootComp)
-				{
-					rootComp->SetMobility(EComponentMobility::Static);
-					
-				}
-				
+		FVector fwdAnchorRefDir = endTransform.GetLocation() - startTransform.GetLocation();
+		AController* controller = GetWorld()->GetFirstPlayerController();
+		APlayerController* playerCont = Cast<APlayerController>(controller);
+		if (playerCont) {
+			AActor* actor = playerCont->GetPawn();
+			ABrickSpacePawn* serverPawn = Cast<ABrickSpacePawn>(actor);
+			serverPawn->SetActorLocation(startTransform.GetLocation());
+			TArray<AActor*> actors;
+			UGameplayStatics::GetAllActorsWithTag(GetWorld(), FName("manufacturer"), actors);
+			if (actors.Num() > 0) {
+				FVector dirToWall = actors[0]->GetActorLocation() - serverPawn->GetActorLocation();
+				dirToWall.Z = 0;
+				fwdAnchorRefDir.Z = 0;
+				FQuat rotToWall = FQuat::FindBetweenVectors(dirToWall, fwdAnchorRefDir);
+				serverPawn->SetActorRotation(rotToWall);
 			}
-			else if (actor->FindComponentByClass<UAlignWorld>() != nullptr) // ground plate
-			{
-				actor->SetActorLocation(startTransform.GetLocation());
-				actor->SetActorRotation(rotBetweenAnchors);
-				USceneComponent* rootComp = actor->GetRootComponent();
-				if (rootComp)
-				{
-					rootComp->SetMobility(EComponentMobility::Static);
-				}
-			}
-			else if (actor->GetName().StartsWith("DirectionalLight"))
-			{
-				actor->GetRootComponent()->SetMobility(EComponentMobility::Movable);
-				FVector direction = endTransform.GetLocation() - actor->GetActorLocation();
-				FRotator rotDirection = direction.Rotation();
-				actor->SetActorRotation(rotDirection);
-				
-			}
+
 		}
 		
 	}
