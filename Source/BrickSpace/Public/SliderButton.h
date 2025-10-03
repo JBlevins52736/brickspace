@@ -35,6 +35,10 @@ public:
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
     USceneComponent* LaunchButton;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+    USceneComponent* ResetButton;
    
     // Blueprint events
     UPROPERTY(BlueprintAssignable, Category = "Button")

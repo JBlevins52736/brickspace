@@ -45,31 +45,17 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 	// Decide if this is the host or a remote client
 	if (!pawn) return;
 
-	bool bHasAuth = pawn->HasAuthority() /*&& pawn->IsLocallyControlled()*/;
-	//bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
-
-	if (bHasAuth)
+	if (pawn->HasAuthority())
 	{
-		// TOGGLE LOGIC
-		if (bIsRunning)
-		{
-			// Pause
-			bIsRunning = false;
-			UE_LOG(LogTemp, Warning, TEXT("Timer paused. ElapsedTime: %.2f"), ElapsedTime);
-		}
-		else
-		{
-			// Start or Resume (but don't reset time!)
-			bIsRunning = true;
-			UE_LOG(LogTemp, Warning, TEXT("Timer started/resumed. ElapsedTime: %.2f"), ElapsedTime);
-		}
-		// Force update on server
+		// Toggle
+		bIsRunning = !bIsRunning;
+		UE_LOG(LogTemp, Warning, TEXT("Server toggled timer. Running: %d"), bIsRunning);
 		UpdateTextRenderer();
 	}
-	else /*if (bIsClient)*/
+	else
 	{
-		pawn->Server_StartStopTimer(this, !bIsRunning); // Toggle based on current state
-
+		// Tell the server "toggle my timer"
+		pawn->Server_StartStopTimer(this, !bIsRunning);
 	}
 	
 }
@@ -78,30 +64,39 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 {
 	if (!pawn) return;
 
-	bool bHasAuth = pawn->HasAuthority() /*&& pawn->IsLocallyControlled()*/;
-	//bool bIsClient = pawn->GetLocalRole() == ROLE_AutonomousProxy;
-
-	// Only allow reset when paused
-	if (bHasAuth) 
+	if (pawn->HasAuthority())
 	{
-		if (!bIsRunning)
-		{
-			ElapsedTime = 0.0f;
-			UpdateTextRenderer();
-			UE_LOG(LogTemp, Warning, TEXT("Timer reset to 0."));
-			/*pawn->Server_StartStopTimer_Implementation(this, true);*/
-		}
-		else
-		{
-			// Stop the timer
-			bIsRunning = false;
-			UpdateTextRenderer();
-		}
+		bIsRunning = false;
+		UE_LOG(LogTemp, Warning, TEXT("Server stopped timer. ElapsedTime: %.2f"), ElapsedTime);
+		UpdateTextRenderer();
 	}
-	else /*if (bIsClient)*/
+	else
 	{
 		pawn->Server_StartStopTimer(this, false);
 	}
+}
+
+
+// Reset = clears time (only allowed when not running)
+void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
+{
+	if (!pawn) return;
+
+	if (pawn->HasAuthority())
+	{
+		/*if (!bIsRunning)
+		{*/
+			ElapsedTime = 0.0f;
+			UE_LOG(LogTemp, Warning, TEXT("Server reset timer to 0."));
+			UpdateTextRenderer();
+		/*}*/
+	}
+	else
+	{
+		// request reset from server
+		pawn->Server_ResetTimer();
+	}
+
 }
 
 float UTimeManager::GetElapsedTime() const

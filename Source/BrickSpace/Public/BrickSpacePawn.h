@@ -40,8 +40,13 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_StartStopTimer(UTimeManager* timeManager, bool isRunning);
 
+	UFUNCTION(Server, Reliable)
+	void Server_ResetTimer();
+
+
 public:
 
 	void VARLog(FString methodName);
+
 
 };

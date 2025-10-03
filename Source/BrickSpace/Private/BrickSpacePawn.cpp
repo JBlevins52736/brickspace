@@ -87,3 +87,14 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: bIsRunning=%d, ElapsedTime=%.2f"),
 		timeManager->bIsRunning, timeManager->ElapsedTime);
 }
+
+void ABrickSpacePawn::Server_ResetTimer_Implementation()
+{
+	if (UTimeManager* TimeManager = FindComponentByClass<UTimeManager>())
+	{
+		TimeManager->ElapsedTime = 0.0f;
+		TimeManager->bIsRunning = false;
+		TimeManager->UpdateTextRenderer();
+		UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Timer reset to 0."));
+	}
+}

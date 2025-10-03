@@ -29,7 +29,7 @@ void USliderButton::Focus(USelector* cursor, bool state)
         }
     }
 
-    if (!LaunchButton && !StartButton) return;
+    if (!LaunchButton && !StartButton && !ResetButton) return;
 
     if (state)
     {     // Move to pressed target
@@ -48,6 +48,10 @@ void USliderButton::Focus(USelector* cursor, bool state)
             {
                 timer->StartTimer(BrickPawn);
             }
+        }
+        else if (ResetButton && !isPressed)
+        {
+            timer->ResetTimer(BrickPawn);
         }
     }
     else

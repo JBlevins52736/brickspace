@@ -33,6 +33,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StopTimer(ABrickSpacePawn* pawn);
 
+	UFUNCTION(BlueprintCallable)
+	void ResetTimer(ABrickSpacePawn* pawn);
+
 	// Get elapsed time
 	UFUNCTION(BlueprintCallable)
 	float GetElapsedTime() const;
@@ -52,6 +55,8 @@ public:
 
 	UFUNCTION()
 	void OnRep_ElapsedTime();
+	
+	void UpdateTextRenderer();
 private:
 	
 
@@ -61,6 +66,6 @@ private:
 	UTextRenderComponent* TimerTextRenderer;
 
 	// Internal helper
-	void UpdateTextRenderer();
+	
 
 };
