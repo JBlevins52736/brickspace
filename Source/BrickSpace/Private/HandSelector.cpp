@@ -11,7 +11,7 @@
 #include "OculusXRInputFunctionLibrary.h"
 #include "OculusXRHandComponent.h"
 #include "MotionControllerComponent.h"
-#define GRAB_THRESHOLD 90 // this is the squared length of the threshold to determine if you are grabbing.
+#define GRAB_THRESHOLD 120 // this is the squared length of the threshold to determine if you are grabbing.
 #define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
 #define FINGERTIP_INDICIE_INC 5
 
@@ -60,6 +60,15 @@ UVodget* UHandSelector::DoRaycast()
 	return retval;
 }
 
+void UHandSelector::CalculateHandSize()
+{
+	FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
+	FVector middleIdx = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::ComponentSpace);
+	FVector directionToMiddleIdx = middleIdx - palmPos;
+	relativeHandSizeSquared = FVector::DotProduct(directionToMiddleIdx, directionToMiddleIdx);
+	
+}
+
 void UHandSelector::CheckHandGestures()
 {
 
@@ -71,11 +80,13 @@ void UHandSelector::CheckHandGestures()
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
 {
+	if (relativeHandSizeSquared <= 0) CalculateHandSize();
 	int correctOrientation = 0; // this indicates correct position for hand grab
 	FVector currentPos = FVector::Zero();
 	FVector directionPalmToFinger = FVector::Zero();
 	float squaredLengthAvg = 0;
 	float squaredLengthTotalFingers = 0;
+	float relativeGrabThreshold = relativeHandSizeSquared * 0.5f;
 	for (int i = 0; i < boneNames.Num(); i++) {
 
 		currentPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
@@ -84,10 +95,10 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 	
 	}
 	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
-	if (squaredLengthAvg < GRAB_THRESHOLD) focusVodget->ForePinch(this, true);
-	else if (focusVodget && focus_grabbed && squaredLengthAvg >= GRAB_THRESHOLD) focusVodget->ForePinch(this, false);
+	if (squaredLengthAvg < relativeGrabThreshold && focusVodget) focusVodget->ForePinch(this, true);
+	else if (focusVodget && focus_grabbed && squaredLengthAvg > relativeGrabThreshold) focusVodget->ForePinch(this, false);
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("Squared Length: %f"), squaredLengthAvg));
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("Squared Length: %f, RelativeThreshold: %f"), squaredLengthAvg, relativeGrabThreshold));
 
 }
 
@@ -235,6 +246,7 @@ void UHandSelector::BeginPlay()
 	}
 
 #endif
+	CalculateHandSize();
 }
 
 #pragma region HAND_MESH_POSITION_REPLICATION
@@ -310,6 +322,7 @@ void UHandSelector::OnRep_Material()
 
 	if (handMaterial)
 		handMesh->SetMaterial(0, handMaterial);
+	
 }
 
 void UHandSelector::VARLog(FString methodName)

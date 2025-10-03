@@ -72,9 +72,9 @@ protected:
 
 private:
 	UVodget* DoRaycast();
-
+	void CalculateHandSize();
 	float ratioHitEyeOverHandEye = 0.0;
-
+	float relativeHandSizeSquared = 0;
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
 	TArray<FName> boneNames; // references my hands
