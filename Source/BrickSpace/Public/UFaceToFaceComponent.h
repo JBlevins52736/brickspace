@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Components/SceneComponent.h"
 #include "UFaceToFaceComponent.generated.h"
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class BRICKSPACE_API UUFaceToFaceComponent : public UActorComponent
+class BRICKSPACE_API UUFaceToFaceComponent : public USceneComponent
 {
 	GENERATED_BODY()
 
@@ -25,7 +25,8 @@ protected:
 
 private:	 
 	 TArray<UUFaceToFaceComponent*> Registry;
-	bool DetectEyeContact(AActor* other);
+	bool DetectEyeContact(UUFaceToFaceComponent* other);
+	void SomebodyJoinedOrLeft();
 		
 	
 };
