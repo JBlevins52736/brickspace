@@ -27,18 +27,27 @@ UVodget* UHandSelector::DoRaycast()
 	UVodget* retval = nullptr;
 
 	// You can use this to customize various properties about the trace
+	FVector StartPos = FVector::Zero();
+	FVector EndPos = FVector::Zero();
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
+	if (handTrackingActive) 
+	{
+		CalculateEyeHandPosBoneData(StartPos, EndPos); // This is necessary, the default eye hand ray places the location at your wrist, we need the point in your hand. RS
+	}
+	else {
 
-	FVector EyePos = centerEye->GetComponentLocation();
-	FVector HandPos = hand->GetComponentLocation();
+		FVector EyePos = centerEye->GetComponentLocation();
+		FVector HandPos = hand->GetComponentLocation();
 
-	FVector ray = HandPos - EyePos;
-	ray.Normalize();
-	ray *= 20.0;
+		FVector ray = HandPos - EyePos;
+		ray.Normalize();
+		ray *= 20.0;
 
-	FVector StartPos = HandPos - ray;
-	FVector EndPos = HandPos + ray;
+		StartPos = HandPos - ray;
+		EndPos = HandPos + ray;
+	}
+	
 
 	if (GetWorld()) { // ECC_WorldDynamic ECC_PhysicsBody ECC_Visibility
 		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, ECC_PhysicsBody, Params, FCollisionResponseParams());
@@ -66,7 +75,8 @@ void UHandSelector::CalculateHandSize()
 	FVector middleIdx = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::ComponentSpace);
 	FVector directionToMiddleIdx = middleIdx - palmPos;
 	relativeHandSizeSquared = FVector::DotProduct(directionToMiddleIdx, directionToMiddleIdx);
-	
+	rayCastPosition = (palmPos + middleIdx) * 0.5f;
+
 }
 
 void UHandSelector::CheckHandGestures()
@@ -80,7 +90,7 @@ void UHandSelector::CheckHandGestures()
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
 {
-	if (relativeHandSizeSquared <= 0) CalculateHandSize();
+
 	int correctOrientation = 0; // this indicates correct position for hand grab
 	FVector currentPos = FVector::Zero();
 	FVector directionPalmToFinger = FVector::Zero();
@@ -92,7 +102,7 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 		currentPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
 		directionPalmToFinger = currentPos - palmPos;
 		squaredLengthTotalFingers += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
-	
+
 	}
 	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
 	if (squaredLengthAvg < relativeGrabThreshold && focusVodget) focusVodget->ForePinch(this, true);
@@ -102,9 +112,40 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 
 }
 
+void UHandSelector::CalculateEyeHandPosBoneData(FVector& startVector, FVector& endPos)
+{
+	FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
+	FVector middleIdx = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::WorldSpace);
+	FVector midPointVec = (middleIdx + palmPos) * 0.5f;
+	FVector eyePos = centerEye->GetComponentLocation();
+	FVector ray = midPointVec - eyePos;
+	ray.Normalize();
+	ray *= 20.0;
+
+	startVector = midPointVec - ray;
+	endPos = midPointVec + ray;
+}
+
+inline FVector UHandSelector::GetHandMidpointPos()
+{
+	FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
+	FVector middleIdx = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::WorldSpace);
+	return (palmPos + middleIdx) * 0.5f;
+}
+
 // Called when the game starts
 void UHandSelector::SetCursor()
 {
+	if (handTrackingActive) 
+	{
+		FTransform transform = FTransform::Identity;
+		FVector midPoint = GetHandMidpointPos();
+		transform.SetLocation(midPoint);
+		transform.SetRotation(skRef->GetBoneQuaternion(palmName, EBoneSpaces::WorldSpace));
+		transform.SetScale3D(FVector::OneVector);
+		cursor = transform;
+	}
+	else
 	cursor = hand->GetComponentTransform();
 
 	// Search for Vodget components when focus is not grabbed.
@@ -160,8 +201,8 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			return;
 		}
 	}
-
-
+	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandTrackingEnabled();
+	if (relativeHandSizeSquared <= 0 && handTrackingActive) CalculateHandSize();
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
 	if (bspawn && handMesh) {
 
@@ -177,7 +218,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			Server_MeshPosUpdate(this, hand->GetComponentLocation());
 		}
 	}
-	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandTrackingEnabled();
+
 	if (!focus_grabbed)
 	{
 
@@ -322,7 +363,7 @@ void UHandSelector::OnRep_Material()
 
 	if (handMaterial)
 		handMesh->SetMaterial(0, handMaterial);
-	
+
 }
 
 void UHandSelector::VARLog(FString methodName)
