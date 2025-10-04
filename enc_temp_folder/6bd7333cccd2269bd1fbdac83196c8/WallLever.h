@@ -23,10 +23,11 @@ class BRICKSPACE_API UWallLever : public UVodget
 public:	
 	// Sets default values for this component's properties
 	UWallLever();
+
 	virtual void Focus(USelector* cursor, bool state) override;
 	virtual void ForePinch(USelector* cursor, bool state) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	void UpdateLeverFromSelector(class USelector* cursor);
 
 
 	// Event broadcast when lever moves (0.0–1.0)
@@ -42,7 +43,7 @@ public:
 protected:
 
 	USelector* grabbingSelector = nullptr;
-	float initialGrabX = 0.0f; // initial local cursor position at grab
+	float initialGrabZ = 0.0f; // initial local cursor position at grab
 	FRotator initialRotation;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")

@@ -13,7 +13,7 @@
 class UStaticMeshComponent;
 class USelector;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLeverMoved, float, LeverValue);
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCrankTurn);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BRICKSPACE_API UWallLever : public UVodget
@@ -23,15 +23,14 @@ class BRICKSPACE_API UWallLever : public UVodget
 public:	
 	// Sets default values for this component's properties
 	UWallLever();
+
 	virtual void Focus(USelector* cursor, bool state) override;
 	virtual void ForePinch(USelector* cursor, bool state) override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void UpdateLeverFromSelector(class USelector* cursor);
 
 
 
-	// Event broadcast when lever moves (0.0–1.0)
-	UPROPERTY(BlueprintAssignable, Category = "Lever Events")
-	FOnLeverMoved LeverDelegate;
 
 	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Handle")
@@ -39,14 +38,30 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
 	USceneComponent* LeverArm;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever Target")
+	USceneComponent* WallToMove;
+
+	FVector WallStartLocation;
+
+	// Crank settings
+	int MaxCrankSteps = 50;       // total units to move
+	int CurrentCrankStep = 0;    // how many steps currently applied
+	float CrankUnit = 5.f;       // distance per step
+	float CrankSpeed = 5.f;      // units per second
+	// Internals
+	bool bCrankingForward = false; // moving down
+	bool bCrankingBackward = false; // moving up
+	float CrankTargetZ = 0.f;
 protected:
 
+	virtual void BeginPlay() override;
 	USelector* grabbingSelector = nullptr;
 	float initialGrabZ = 0.0f; // initial local cursor position at grab
 	FRotator initialRotation;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
-	float MinPitch = -45.0f;
+	float MinPitch = -90.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
 	float MaxPitch = 45.0f;

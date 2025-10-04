@@ -55,7 +55,7 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 	else
 	{
 		// Tell the server "toggle my timer"
-		pawn->Server_StartStopTimer(this, !bIsRunning);
+		pawn->Server_StartStopTimer(this, true);
 	}
 	
 }

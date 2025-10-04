@@ -4,6 +4,7 @@
 #include "Grabber.h"
 #include "Selector.h"
 #include "BrickSpacePlayerState.h"
+#include "WallLever.h"
 
 void UGrabber::Focus(USelector* selector, bool state)
 {
@@ -41,8 +42,25 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 {
 	// ToDo: While grabbing operation is active convert the childsrt that was set when grabbing began back
 	// to world space and set the clients world transform to the result.
-	if (grabbingSelector != nullptr) {
-		//UE_LOG(LogTemp, Warning, TEXT("Grabber FocusUpdate:%s"), *FString(GetOwner()->GetActorLabel()));
+	//if (grabbingSelector != nullptr) {
+	//	//UE_LOG(LogTemp, Warning, TEXT("Grabber FocusUpdate:%s"), *FString(GetOwner()->GetActorLabel()));
+	//	FTransform worldsrt = childsrt * grabbingSelector->Cursor();
+	//	clientComponent->SetWorldTransform(worldsrt);
+	//}
+
+	if (!grabbingSelector || !clientComponent) return;
+
+	AActor* Owner = clientComponent->GetOwner();
+	if (!Owner) return;
+
+	// Case 1: Lever
+	if (UWallLever* Lever = Owner->FindComponentByClass<UWallLever>())
+	{
+		Lever->UpdateLeverFromSelector(grabbingSelector);
+	}
+	// Case 2: Free-move object
+	else
+	{
 		FTransform worldsrt = childsrt * grabbingSelector->Cursor();
 		clientComponent->SetWorldTransform(worldsrt);
 	}
