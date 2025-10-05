@@ -26,6 +26,7 @@ void UWorldGrabber::SetLocalCursor()
 	// Once pos anchor is set we enter into 2 point calibration mode.
 	if (leftGrabbing && rightGrabbing)
 	{
+
 		FVector left = leftHand->GetComponentLocation();
 		FVector right = rightHand->GetComponentLocation();
 
@@ -46,25 +47,7 @@ void UWorldGrabber::SetLocalCursor()
 		// Only the server should change WorldToMeters property
 		if (scaleMode)
 		{
-			// Set currBimanualHandDist to the actual distance next.
-			float currBimanualHandDist = (left - right).Length();
-
-			// The VR Pawn is made larger/smaller in Unreal by changing the WorldToMeters setting.
-			// Pawn geometry like the markers attached to controllers is the responsibility of the application.
-			// https://forums.unrealengine.com/t/changing-the-player-pawn-camera-size/384747/3
-
-			// As scale makes a VR pawn larger or smaller it changes the bimanual hand distance.
-			// The players bimanual hand distance needs to be adjusted to the initial scale.
-			float ds = initialWorldToMeters / currWorldToMeters;
-			currBimanualHandDist *= ds;
-
-			// The direct world scaling ratio is opposite cursor scaling.
-			ds = initialBimanualHandDist / currBimanualHandDist;
-
-			float worldScale = initialWorldToMeters * ds;
-
-			SetWorldToMeters(worldScale);
-
+			ChangeWorldScaling(leftHand->GetComponentLocation(), rightHand->GetComponentLocation());
 		}
 		else
 		{
@@ -83,6 +66,34 @@ void UWorldGrabber::SetLocalCursor()
 		cursorsrt.SetRotation(FQuat::Identity);
 		cursorsrt.SetScale3D(FVector::OneVector);
 	}
+}
+
+void UWorldGrabber::StartWorldScaling(FVector lhand, FVector rhand)
+{
+	initialBimanualHandDist = (lhand - rhand).Length();
+	initialWorldToMeters = currWorldToMeters;
+}
+
+void UWorldGrabber::ChangeWorldScaling(FVector lhand, FVector rhand)
+{
+	// Set currBimanualHandDist to the actual distance next.
+	float currBimanualHandDist = (lhand - rhand).Length();
+
+	// The VR Pawn is made larger/smaller in Unreal by changing the WorldToMeters setting.
+	// Pawn geometry like the markers attached to controllers is the responsibility of the application.
+	// https://forums.unrealengine.com/t/changing-the-player-pawn-camera-size/384747/3
+
+	// As scale makes a VR pawn larger or smaller it changes the bimanual hand distance.
+	// The players bimanual hand distance needs to be adjusted to the initial scale.
+	float ds = initialWorldToMeters / currWorldToMeters;
+	currBimanualHandDist *= ds;
+
+	// The direct world scaling ratio is opposite cursor scaling.
+	ds = initialBimanualHandDist / currBimanualHandDist;
+
+	float worldScale = initialWorldToMeters * ds;
+
+	SetWorldToMeters(worldScale);
 }
 
 void UWorldGrabber::LWorldGrab(const bool Value)
@@ -111,6 +122,7 @@ void UWorldGrabber::RWorldGrab(const bool Value)
 	GrabChanged();
 }
 
+
 void UWorldGrabber::GrabChanged()
 {
 	if (leftHand == nullptr || rightHand == nullptr)
@@ -123,12 +135,7 @@ void UWorldGrabber::GrabChanged()
 	if (leftGrabbing && rightGrabbing)
 	{
 		// Save the distance between hands when bimanual scaling is enabled. 
-		FVector left = leftHand->GetComponentLocation();
-		FVector right = rightHand->GetComponentLocation();
-		initialBimanualHandDist = (left - right).Length();
-		if (scaleMode) {
-			initialWorldToMeters = currWorldToMeters;
-		}
+		StartWorldScaling(leftHand->GetComponentLocation(), rightHand->GetComponentLocation());
 	}
 
 	SetLocalCursor();
