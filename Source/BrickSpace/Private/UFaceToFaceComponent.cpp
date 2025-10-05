@@ -24,18 +24,21 @@ void UUFaceToFaceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	APawn* pawn = Cast<APawn>(GetOwner());
-	if (pawn && pawn->IsLocallyControlled())
+	APawn* PawnOwner = Cast<APawn>(GetOwner());
+	if (PawnOwner && PawnOwner->IsLocallyControlled())
+	{
 		SomebodyJoinedOrLeft();
+	}
+	Registry.Add(this);
 
 	// ...
-	Registry.Add(this);
 }
 
 void UUFaceToFaceComponent::EndPlay(EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 	Registry.Remove(this);
+	// Registry.Add(this);
 }
 
 void UUFaceToFaceComponent::SomebodyJoinedOrLeft()
@@ -48,7 +51,7 @@ void UUFaceToFaceComponent::SomebodyJoinedOrLeft()
 	{
 		// Update our local registry of all the other pawns.
 		TArray<AActor*> FoundActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacter::StaticClass(), FoundActors);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
 
 		// Now, FoundActors contains all ACharacter instances in the level.
 		// You can iterate through this array and cast to ACharacter if needed.
@@ -83,7 +86,7 @@ void UUFaceToFaceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// ...
-	AActor* Owner = GetOwner();
+	//AActor* Owner = GetOwner();
 	FVector Start, Forward;
 	Start = GetComponentLocation();
 	Forward = GetForwardVector();
@@ -92,17 +95,21 @@ void UUFaceToFaceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	// Draw debug line 
 	FVector End = Start + Forward * 1000.0f;
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
 
 
 	for (UUFaceToFaceComponent* othercomp : Registry) {
 		//AActor* Other = othercomp->GetOwner();
-		if (DetectEyeContact(othercomp)) {
-			//Other->overlay;
-			GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, "Bruh its  working");
-		}
-		else {
-			GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, "Bruh its not working");
+		if (othercomp != this) {
+			FString phrase = othercomp->GetOwner()->GetName();
+			if (DetectEyeContact(othercomp)) {
+				//Other->overlay;
+				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, "Bruh its  working");
+			}
+			else {
+				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Red, "Bruh its not working");
+
+			}
 		}
 	}
 
@@ -125,7 +132,7 @@ bool UUFaceToFaceComponent::DetectEyeContact(UUFaceToFaceComponent* other)
 	float DotA = FVector::DotProduct(Owner_F, OtoT);
 	float DotB = FVector::DotProduct(Target_F, TtoO);
 	float DotOpp = FVector::DotProduct(Owner_F, Target_F);
-
+	FString Name = GetOwner()->GetName();
 	FString dota = "othpos:" + FString::SanitizeFloat(othpos.X) + "," + FString::SanitizeFloat(othpos.Y) + "," + FString::SanitizeFloat(othpos.Z);
 	FString dotb = "mypos" + FString::SanitizeFloat(mypos.X) + "," + FString::SanitizeFloat(mypos.Y) + "," + FString::SanitizeFloat(mypos.Z);
 	FString dotopp = "mydir:" + FString::SanitizeFloat(Owner_F.X) + "," + FString::SanitizeFloat(Owner_F.Y) + "," + FString::SanitizeFloat(Owner_F.Z);
@@ -135,18 +142,19 @@ bool UUFaceToFaceComponent::DetectEyeContact(UUFaceToFaceComponent* other)
 	//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, dotb,true);
 	//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, dotopp,true);
 	//GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, dototot, true);
+	UE_LOG(LogTemp, Warning, TEXT("%s"), *Name);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *dota);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *dotb);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *dotopp);
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *dototot);
 
 	//float Threshold = FMath::Cos(FMath::DegreesToRadians(90.0f));
-	float Threshold = FMath::Cos(PI / 2.0f);
+	float AngleThreshold = 10.0f;
+	float CosThresh = FMath::Cos(FMath::DegreesToRadians(AngleThreshold));
 
+	bool ISFaceToFace = (DotA >= CosThresh) && (DotB >= CosThresh) && (DotOpp <= -CosThresh);
 
-	//bool ISFaceToFace = (DotA >= Threshold) && (DotB >= Threshold) && (-DotOpp >= Threshold);
-
-	bool ISFaceToFace = (DotA >= Threshold);
+	//bool ISFaceToFace = (DotA >= Threshold);
 	return ISFaceToFace;
 
 	//AActor* Owner = GetOwner();
