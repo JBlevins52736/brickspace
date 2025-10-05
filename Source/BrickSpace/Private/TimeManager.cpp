@@ -48,7 +48,7 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 	if (pawn->HasAuthority())
 	{
 		// Toggle
-		bIsRunning = !bIsRunning;
+		bIsRunning = true;
 		UE_LOG(LogTemp, Warning, TEXT("Server toggled timer. Running: %d"), bIsRunning);
 		UpdateTextRenderer();
 	}
@@ -57,6 +57,7 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 		// Tell the server "toggle my timer"
 		pawn->Server_StartStopTimer(this, true);
 	}
+
 	
 }
 
@@ -74,6 +75,7 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 	{
 		pawn->Server_StartStopTimer(this, false);
 	}
+
 }
 
 

@@ -70,23 +70,17 @@ void ABrickSpacePawn::Server_MeshScaleUpdate_Implementation(USceneComponent* lef
 	leftHandMesh->SetWorldScale3D(scaleVec);
 	rightHandMesh->SetWorldScale3D(scaleVec);
 }
-
 void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeManager, bool isRunning)
 {
 	if (!timeManager) return;
 
 	// Set the running state
 	timeManager->bIsRunning = isRunning;
-
-	// If stopping and not running, reset elapsed time
-	if (!isRunning && !timeManager->bIsRunning)
-	{
-		timeManager->ElapsedTime = 0.0f;
-	}
-
+	timeManager->UpdateTextRenderer();
 	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: bIsRunning=%d, ElapsedTime=%.2f"),
 		timeManager->bIsRunning, timeManager->ElapsedTime);
 }
+
 
 void ABrickSpacePawn::Server_ResetTimer_Implementation()
 {
