@@ -18,14 +18,7 @@ UWallLever::UWallLever()
 void UWallLever::BeginPlay()
 {
 	Super::BeginPlay();
-	if (!WallToMove)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("WallToMove not assigned!"));
-		return;
-	}
 
-	WallStartLocation = WallToMove->GetRelativeLocation();
-	CrankTargetZ = WallStartLocation.Z;
 }
 
 void UWallLever::Focus(USelector* cursor, bool state)
@@ -78,51 +71,32 @@ void UWallLever::UpdateLeverFromSelector(USelector* cursor)
 	// Smooth lever rotation (same as before)
 	FVector worldPos = cursor->Cursor().GetLocation();
 	FVector localPos = GetComponentTransform().InverseTransformPosition(worldPos);
-	float grabAxis = localPos.Y;
+	float grabAxis = localPos.Z;
 	float delta = grabAxis - initialGrabZ;
-	float rotationDelta = delta * Sensitivity;
-	float targetAngle = FMath::Clamp(initialRotation.Pitch + rotationDelta, MinPitch, MaxPitch);
+	float rotationDelta = -delta * Sensitivity; // Fixed the inversion
+	float targetAngle = FMath::Clamp(initialRotation.Roll + rotationDelta, MinPitch, MaxPitch);
 
 	FRotator currentRot = LeverArm->GetRelativeRotation();
 	FRotator targetRot = currentRot;
 	targetRot.Roll = targetAngle; // adjust axis
 	FRotator smoothedRot = FMath::RInterpTo(currentRot, targetRot, GetWorld()->GetDeltaSeconds(), 10.f);
 	LeverArm->SetRelativeRotation(smoothedRot);
-
-	// Normalized lever value
-	/*float normalized = (targetAngle - MinPitch) / (MaxPitch - MinPitch);*/
-	float normalized = FMath::Clamp(normalized, MinPitch, MaxPitch);
 	/*LeverDelegate.Broadcast(normalized);*/
+	// *** FIX: Log the actual smoothed rotation's roll component for consistent values ***
+	float normalized = smoothedRot.Roll; // Use the smoothed value for logging
+	normalized = FMath::Clamp(normalized, MinPitch, MaxPitch);
+	OnLeverMoved.Broadcast(normalized);
 	UE_LOG(LogTemp, Log, TEXT("Rotation:%f"), normalized);
-	// Crank logic
-	if (!WallToMove) return;
 
-	float threshold = MinPitch - 10.f;
-
-	if (normalized >= threshold && CurrentCrankStep < MaxCrankSteps)
-	{
-		bCrankingForward = true;
-		bCrankingBackward = false;
-	}
-	else if (normalized <= (MaxPitch - 10.f) && CurrentCrankStep > 0)
-	{
-		bCrankingForward = false;
-		bCrankingBackward = true;
-	}
-
-	FVector Wall = WallToMove->GetRelativeLocation();
-	UE_LOG(LogTemp, Log, TEXT("Cube Z value:%f"),Wall.Z );
 }
+
+
 // Called every frame
 void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!WallToMove) {
-		
-			UE_LOG(LogTemp, Log, TEXT("Wall Not Found"));
-			return;
-	}
+	
 
 	// Update lever rotation if being grabbed
 	if (grabbingSelector)
@@ -130,26 +104,4 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 		UpdateLeverFromSelector(grabbingSelector);
 	}
 
-	FVector loc = WallToMove->GetRelativeLocation();
-
-	// Crank down
-	if (bCrankingForward && CurrentCrankStep < MaxCrankSteps)
-	{
-		CrankTargetZ -= CrankUnit;
-		CurrentCrankStep++;
-		bCrankingForward = false; // wait for next lever trigger
-	}
-
-	// Crank up
-	if (bCrankingBackward && CurrentCrankStep > 0)
-	{
-		CrankTargetZ += CrankUnit;
-		CurrentCrankStep--;
-		bCrankingBackward = false; // wait for next lever trigger
-	}
-
-	// Smoothly move wall toward target
-	loc.Z = FMath::FInterpTo(loc.Z, CrankTargetZ, DeltaTime, CrankSpeed);
-	WallToMove->SetRelativeLocation(loc);
-	UE_LOG(LogTemp, Log, TEXT("Wall Z: %f, Target Z: %f, CurrentStep: %d"), loc.Z, CrankTargetZ, CurrentCrankStep);
 }

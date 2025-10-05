@@ -13,7 +13,8 @@
 class UStaticMeshComponent;
 class USelector;
 
-//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnCrankTurn);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLeverMoved, float, NormalizedRotation);
+
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BRICKSPACE_API UWallLever : public UVodget
@@ -30,7 +31,8 @@ public:
 	void UpdateLeverFromSelector(class USelector* cursor);
 
 
-
+	UPROPERTY(BlueprintAssignable, Category = "Lever Events")
+	FOnLeverMoved OnLeverMoved;
 
 	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Handle")
@@ -39,20 +41,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
 	USceneComponent* LeverArm;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever Target")
-	USceneComponent* WallToMove;
-
-	FVector WallStartLocation;
-
-	// Crank settings
-	int MaxCrankSteps = 50;       // total units to move
-	int CurrentCrankStep = 0;    // how many steps currently applied
-	float CrankUnit = 5.f;       // distance per step
-	float CrankSpeed = 5.f;      // units per second
-	// Internals
-	bool bCrankingForward = false; // moving down
-	bool bCrankingBackward = false; // moving up
-	float CrankTargetZ = 0.f;
 protected:
 
 	virtual void BeginPlay() override;
@@ -71,10 +59,6 @@ protected:
 
 private:
 
-
-
-	void UpdateLeverRotation();
-	void BroadcastLeverValue();
 		
 	
 };
