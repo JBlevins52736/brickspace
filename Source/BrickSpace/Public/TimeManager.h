@@ -17,7 +17,7 @@ class BRICKSPACE_API UTimeManager : public UActorComponent
 	GENERATED_BODY()
 
 public:
-	// Constructor
+
 	UTimeManager();
 
 protected:
@@ -26,7 +26,6 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// Timer Control
 	UFUNCTION(BlueprintCallable)
 	void StartTimer(ABrickSpacePawn* Pawn);
 
@@ -36,11 +35,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ResetTimer(ABrickSpacePawn* pawn);
 
-	// Get elapsed time
 	UFUNCTION(BlueprintCallable)
 	float GetElapsedTime() const;
 
-	// Set text renderer to update
 	UFUNCTION(BlueprintCallable)
 	void SetTextRenderer(UTextRenderComponent* InTextRenderer);
 
@@ -58,14 +55,8 @@ public:
 	
 	void UpdateTextRenderer();
 private:
-	
 
-
-	// The text renderer this component will update
 	UPROPERTY()
 	UTextRenderComponent* TimerTextRenderer;
-
-	// Internal helper
-	
 
 };

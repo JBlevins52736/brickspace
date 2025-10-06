@@ -24,37 +24,34 @@ void UWallLever::BeginPlay()
 void UWallLever::Focus(USelector* cursor, bool state)
 {
 	UVodget::Focus(cursor, state);
-	// Optional: highlight lever when focused
+
 }
 
 void UWallLever::ForePinch(USelector* cursor, bool state)
 {
-	if (state) // Begin grab
+	if (state) 
 	{
 		if (cursor)
 		{
 			grabbingSelector = cursor;
 
-			// Use selector cursor transform
 			FVector worldPos = cursor->Cursor().GetLocation();
 
-			// Convert into local slider space
 			FVector localPos = GetComponentTransform().InverseTransformPosition(worldPos);
 
 			initialRotation = LeverArm->GetRelativeRotation();
-			// Save initial grab value along Z
+	
 			initialGrabZ = localPos.Z;
 
 			cursor->GrabFocus(true);
 
-			// Remove highlight overlay when grabbed
 			if (UMeshComponent* MeshComp = Cast<UMeshComponent>(clientComponent))
 			{
 				MeshComp->SetOverlayMaterial(nullptr);
 			}
 		}
 	}
-	else // End grab
+	else 
 	{
 		if (grabbingSelector)
 		{
@@ -68,37 +65,31 @@ void UWallLever::UpdateLeverFromSelector(USelector* cursor)
 {
 	if (!cursor || !LeverArm) return;
 
-	// Smooth lever rotation (same as before)
+
 	FVector worldPos = cursor->Cursor().GetLocation();
 	FVector localPos = GetComponentTransform().InverseTransformPosition(worldPos);
 	float grabAxis = localPos.Z;
 	float delta = grabAxis - initialGrabZ;
-	float rotationDelta = -delta * Sensitivity; // Fixed the inversion
+	float rotationDelta = -delta * Sensitivity; 
 	float targetAngle = FMath::Clamp(initialRotation.Roll + rotationDelta, MinPitch, MaxPitch);
 
 	FRotator currentRot = LeverArm->GetRelativeRotation();
 	FRotator targetRot = currentRot;
-	targetRot.Roll = targetAngle; // adjust axis
+	targetRot.Roll = targetAngle; 
 	FRotator smoothedRot = FMath::RInterpTo(currentRot, targetRot, GetWorld()->GetDeltaSeconds(), 10.f);
 	LeverArm->SetRelativeRotation(smoothedRot);
-	/*LeverDelegate.Broadcast(normalized);*/
-	// *** FIX: Log the actual smoothed rotation's roll component for consistent values ***
-	float normalized = smoothedRot.Roll; // Use the smoothed value for logging
+
+	float normalized = smoothedRot.Roll;
 	normalized = FMath::Clamp(normalized, MinPitch, MaxPitch);
 	OnLeverMoved.Broadcast(normalized);
 	UE_LOG(LogTemp, Log, TEXT("Rotation:%f"), normalized);
 
 }
 
-
-// Called every frame
 void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	
-
-	// Update lever rotation if being grabbed
 	if (grabbingSelector)
 	{
 		UpdateLeverFromSelector(grabbingSelector);

@@ -10,7 +10,6 @@ class USelector;
 class ABrickSpacePawn;
 
 
-// Delegates for Blueprint events
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnButtonPressed);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnButtonReleased);
 
@@ -53,6 +52,7 @@ public:
     UPROPERTY()
     bool isPressed = false;
 private:
+
     void Press();
     void Release();
     void DoRelease();

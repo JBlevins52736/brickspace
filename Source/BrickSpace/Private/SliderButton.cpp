@@ -15,7 +15,7 @@ void USliderButton::BeginPlay()
 }
 void USliderButton::Focus(USelector* cursor, bool state)
 {
-    // Let parent handle focus registration
+   
     Super::Focus(cursor, state);
     
     ABrickSpacePawn* BrickPawn = nullptr;
@@ -32,7 +32,7 @@ void USliderButton::Focus(USelector* cursor, bool state)
     if (!LaunchButton && !StartButton && !ResetButton) return;
 
     if (state)
-    {     // Move to pressed target
+    {    
         if (LaunchButton && !isPressed) 
         {
             Press();
@@ -67,27 +67,17 @@ void USliderButton::Focus(USelector* cursor, bool state)
 void USliderButton::Press()
 {
     UE_LOG(LogTemp, Log, TEXT("%s pressed!"), *GetName());
-    OnPressed.Broadcast(); // Call Blueprint-bound event
+    OnPressed.Broadcast();
     isPressed = true;
 }
 
-//void USliderButton::Release()
-//{
-//
-//
-//    UE_LOG(LogTemp, Log, TEXT("%s released!"), *GetName());
-//    OnReleased.Broadcast(); // Call Blueprint-bound event
-//
-//
-//    
-//}
+
 void USliderButton::Release()
 {
-    // Ignore if already waiting for release
+ 
     if (GetWorld()->GetTimerManager().IsTimerActive(ReleaseDelayHandle))
         return;
 
-    // Set a timer to actually release after delay
     if (GetWorld())
     {
         GetWorld()->GetTimerManager().SetTimer(
@@ -100,7 +90,7 @@ void USliderButton::DoRelease()
 {
     UE_LOG(LogTemp, Log, TEXT("%s released after delay!"), *GetName());
     OnReleased.Broadcast();
-    isPressed = false; // allow next press
+    isPressed = false; 
 }
 
 void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

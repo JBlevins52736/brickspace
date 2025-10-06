@@ -3,7 +3,7 @@
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/Actor.h"
 
-// Constructor
+
 UTimeManager::UTimeManager()
 {
 	PrimaryComponentTick.bCanEverTick = true;
@@ -23,7 +23,7 @@ void UTimeManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Only tick on server/authority
+	
 	if (bIsRunning && GetOwner() && GetOwner()->HasAuthority())
 	{
 		ElapsedTime += DeltaTime;
@@ -47,14 +47,14 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		// Toggle
+	
 		bIsRunning = true;
 		UE_LOG(LogTemp, Warning, TEXT("Server toggled timer. Running: %d"), bIsRunning);
 		UpdateTextRenderer();
 	}
 	else
 	{
-		// Tell the server "toggle my timer"
+	
 		pawn->Server_StartStopTimer(this, true);
 	}
 
@@ -95,7 +95,7 @@ void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 	}
 	else
 	{
-		// request reset from server
+	
 		pawn->Server_ResetTimer();
 	}
 
@@ -120,7 +120,7 @@ void UTimeManager::OnRep_Running()
 
 void UTimeManager::OnRep_ElapsedTime()
 {
-	// Update display when elapsed time replicates
+
 	UpdateTextRenderer();
 }
 

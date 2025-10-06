@@ -7,9 +7,6 @@
 #include "Vodget.h"
 #include "WallLever.generated.h"
 
-
-
-
 class UStaticMeshComponent;
 class USelector;
 
@@ -22,19 +19,21 @@ class BRICKSPACE_API UWallLever : public UVodget
 	GENERATED_BODY()
 
 public:	
-	// Sets default values for this component's properties
+
 	UWallLever();
 
 	virtual void Focus(USelector* cursor, bool state) override;
+	
 	virtual void ForePinch(USelector* cursor, bool state) override;
+	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
 	void UpdateLeverFromSelector(class USelector* cursor);
 
 
 	UPROPERTY(BlueprintAssignable, Category = "Lever Events")
 	FOnLeverMoved OnLeverMoved;
 
-	// Components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Handle")
 	USceneComponent* HandleSphere;
 
@@ -45,7 +44,7 @@ protected:
 
 	virtual void BeginPlay() override;
 	USelector* grabbingSelector = nullptr;
-	float initialGrabZ = 0.0f; // initial local cursor position at grab
+	float initialGrabZ = 0.0f; 
 	FRotator initialRotation;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
