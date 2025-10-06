@@ -6,8 +6,14 @@
 #include "Vodget.h"
 #include "Net/UnrealNetwork.h" // Required for DOREPLIFETIME
 #include "BrickSpacePawn.h"
+#include "IXRTrackingSystem.h"
 #include "GameFramework/Pawn.h"
-
+#include "OculusXRInputFunctionLibrary.h"
+#include "OculusXRHandComponent.h"
+#include "MotionControllerComponent.h"
+#define GRAB_THRESHOLD 120 // this is the squared length of the threshold to determine if you are grabbing.
+#define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
+#define FINGERTIP_INDICIE_INC 5
 
 UHandSelector::UHandSelector() : handMaterial(nullptr)
 {
@@ -52,6 +58,48 @@ UVodget* UHandSelector::DoRaycast()
 	}
 
 	return retval;
+}
+
+void UHandSelector::CalculateHandSize()
+{
+	FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
+	FVector middleIdx = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::ComponentSpace);
+	FVector directionToMiddleIdx = middleIdx - palmPos;
+	relativeHandSizeSquared = FVector::DotProduct(directionToMiddleIdx, directionToMiddleIdx);
+	
+}
+
+void UHandSelector::CheckHandGestures()
+{
+
+	// Start performing bone lookups by name because Meta doesnt know what a fixed size array is apparently
+	FVector palmVector = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
+	HandGrabGesture(palmVector);
+
+}
+
+void UHandSelector::HandGrabGesture(const FVector& palmPos)
+{
+	if (relativeHandSizeSquared <= 0) CalculateHandSize();
+	int correctOrientation = 0; // this indicates correct position for hand grab
+	FVector currentPos = FVector::Zero();
+	FVector directionPalmToFinger = FVector::Zero();
+	float squaredLengthAvg = 0;
+	float squaredLengthTotalFingers = 0;
+	float relativeGrabThreshold = relativeHandSizeSquared * 0.5f;
+	for (int i = 0; i < boneNames.Num(); i++) {
+
+		currentPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
+		directionPalmToFinger = currentPos - palmPos;
+		squaredLengthTotalFingers += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
+	
+	}
+	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
+	if (squaredLengthAvg < relativeGrabThreshold && focusVodget) focusVodget->ForePinch(this, true);
+	else if (focusVodget && focus_grabbed && squaredLengthAvg > relativeGrabThreshold) focusVodget->ForePinch(this, false);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("Squared Length: %f, RelativeThreshold: %f"), squaredLengthAvg, relativeGrabThreshold));
+
 }
 
 // Called when the game starts
@@ -109,21 +157,10 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	APawn* pawn = Cast<APawn>(GetOwner());
 	if (pawn) {
 		if (!pawn->IsLocallyControlled()) {
-			//PrimaryComponentTick.SetTickFunctionEnable(false);
 			return;
 		}
 	}
 
-	if (hand == nullptr) {
-		UE_LOG(LogTemp, Warning, TEXT("Ticking but Hand is nullptr in HandSelector.cpp"));
-
-		return;
-	}
-
-	//if ( !HasAuthority() ) {
-	//	PrimaryComponentTick.SetTickFunctionEnable(false);
-	//	return;
-	//}
 
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
 	if (bspawn && handMesh) {
@@ -132,17 +169,19 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 		if (pawn->GetLocalRole() == ROLE_Authority)
 		{
-				handMesh->SetWorldLocation(hand->GetComponentLocation());
-			//Server_MeshPosUpdate_Implementation(this, hand->GetComponentLocation());
+			handMesh->SetWorldLocation(hand->GetComponentLocation());
+
 		}
 		else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
 		{
-			Server_MeshPosUpdate( this, hand->GetComponentLocation());
+			Server_MeshPosUpdate(this, hand->GetComponentLocation());
 		}
 	}
-
+	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandTrackingEnabled();
 	if (!focus_grabbed)
 	{
+
+
 		// Use a physics raycast to find vodgets in the scene.
 		UVodget* hitVodget = DoRaycast();
 
@@ -161,10 +200,14 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			if (focusVodget != nullptr) {
 				//UE_LOG(LogTemp, Warning, TEXT("Focus TRUE:%s"), *FString(focusVodget->GetOwner()->GetActorLabel()));
 				focusVodget->Focus(this, true);
+
 			}
+
+
 		}
 
 	}
+	if (handTrackingActive && focusVodget) CheckHandGestures();
 
 }
 
@@ -177,6 +220,33 @@ void UHandSelector::SetFilter(uint16 filter)
 
 	Super::SetFilter(filter);
 	//SetHandColor();
+}
+
+void UHandSelector::BeginPlay()
+{
+	Super::BeginPlay();
+#if WITH_EDITOR
+	if (skRef)
+	{
+		boneNames.Add(FName("Thumb Tip"));
+		boneNames.Add(FName("Index Tip"));
+		boneNames.Add(FName("Middle Tip"));
+		boneNames.Add(FName("Ring Tip"));
+		boneNames.Add(FName("Pinky Tip"));
+		palmName = FName("Wrist Root");
+	}
+#else 
+	if (skRef) {
+		boneNames.Add(FName("Thumb_Tip"));
+		boneNames.Add(FName("Index_Tip"));
+		boneNames.Add(FName("Middle_Tip"));
+		boneNames.Add(FName("Ring_Tip"));
+		boneNames.Add(FName("Pinky_Tip"));
+		palmName = FName("Wrist_Root");
+	}
+
+#endif
+	CalculateHandSize();
 }
 
 #pragma region HAND_MESH_POSITION_REPLICATION
@@ -209,11 +279,11 @@ void UHandSelector::Server_MeshPosUpdate_Implementation(UHandSelector* handSelec
 	//if (handSelector) {
 		//UHandSelector* handSelector = Cast<UHandSelector>(selector);
 
-			handSelector->handMesh->SetWorldLocation(handPos);
+	handSelector->handMesh->SetWorldLocation(handPos);
 
-		//handSelector->handPos = pos;
-		//handSelector->OnRep_MeshPosUpdate();
-	//}
+	//handSelector->handPos = pos;
+	//handSelector->OnRep_MeshPosUpdate();
+//}
 }
 
 #pragma region HAND_MATERIAL_CHANGE_REPLICATION
@@ -252,6 +322,7 @@ void UHandSelector::OnRep_Material()
 
 	if (handMaterial)
 		handMesh->SetMaterial(0, handMaterial);
+	
 }
 
 void UHandSelector::VARLog(FString methodName)

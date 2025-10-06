@@ -15,9 +15,7 @@ class BRICKSPACE_API UCalib2Pt : public UWorldGrabberReplicated
 	GENERATED_BODY()
 	
 public:
-
-	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
-	void EnableToggle(const bool Value);
+	virtual void ActiveChanged() override;
 
 	UFUNCTION(BlueprintCallable, Category = "VAR")
 	void UpdatePosAnchor(FVector pos);
@@ -30,7 +28,6 @@ protected:
 	
 private:
 
-	//void CalibrateHands();
 	bool posAnchorSet = false;
 	bool rotAnchorSet = false;
 	FVector posAnchor;

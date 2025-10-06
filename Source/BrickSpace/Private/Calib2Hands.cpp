@@ -30,20 +30,6 @@ void UCalib2Hands::ActiveChanged()
 	// Clients calibrate to the servers hands immediately and don't need tick update.
 	if (activeMode) {
 
-		// If either hand is not assigned then do nothing.
-		if (leftHand == nullptr || rightHand == nullptr)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Calib2Hands::HandsTouchingServers: leftHand or rightHand not assigned."));
-			return;
-		}
-
-		leftPos = leftHand->GetComponentLocation();
-		rightPos = rightHand->GetComponentLocation();
-		SetLocalCursor();
-
-		// Calculate the identity worldsrt as a child of the cursor.
-		childsrt = cursorsrt.Inverse();
-
 		// Get the servers simulated hand locations from its pawn
 		APlayerController* ListenServerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
 		APawn* ListenServerPawn = ListenServerController->GetPawn();
@@ -64,7 +50,23 @@ void UCalib2Hands::ActiveChanged()
 			return;
 		}
 		handComponent = Cast<USceneComponent>(actorComponent);
-		rightPos = handComponent->GetComponentLocation();
+		rightPos = handComponent->GetComponentLocation();		
+		
+		SetLocalCursor();
+
+		// Calculate the identity worldsrt as a child of the cursor.
+		childsrt = cursorsrt.Inverse();
+
+		// If either hand is not assigned then do nothing.
+		if (leftHand == nullptr || rightHand == nullptr)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Calib2Hands::HandsTouchingServers: leftHand or rightHand not assigned."));
+			return;
+		}
+
+		// My left hand is where the hosts right hand is and vis-versa
+		rightPos = leftHand->GetComponentLocation();
+		leftPos = rightHand->GetComponentLocation();
 
 		// Move the cursor to the servers hands.
 		UpdateCursors();

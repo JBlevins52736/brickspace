@@ -22,7 +22,7 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 {
     Super::ForePinch(selector, state);
 
-    if(!state && !bThresholdReached && selector)
+    if(!state && !bThresholdReached && selector && grabbingSelector)
     {
         ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
         if (pawn->HasAuthority())
