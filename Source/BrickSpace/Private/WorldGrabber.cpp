@@ -102,7 +102,7 @@ void UWorldGrabber::GrabChanged()
 		UE_LOG(LogTemp, Error, TEXT("WorldGrabber::GrabChanged: leftHand or rightHand not assigned."));
 		return;
 	}
-
+	if (!leftGrabbing && !rightGrabbing) HandTrackActivateToggle(false);
 	// This is the very moment that bimanual grabbing begins.
 	if (leftGrabbing && rightGrabbing)
 	{
@@ -120,6 +120,12 @@ void UWorldGrabber::ScaleToggle(const bool Value) { scaleMode = !scaleMode; }
 void UWorldGrabber::ActivateToggle(const bool Value)
 { 
 	activeMode = !activeMode;
+	ActiveChanged();
+}
+
+void UWorldGrabber::HandTrackActivateToggle(const bool value)
+{
+	activeMode = value;
 	ActiveChanged();
 }
 

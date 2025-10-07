@@ -46,7 +46,7 @@ protected:
 	virtual void GrabChanged();
 	void StartWorldScaling(FVector lhand, FVector rhand);
 	void ChangeWorldScaling(FVector lhand, FVector rhand);
-private:
+public:
 
 	// Bluprint mappable world grabber input functions
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
@@ -64,6 +64,8 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void ActivateToggle(const bool Value);
 
+	void HandTrackActivateToggle(const bool value);
+private:
 	bool leftGrabbing = false;
 	bool rightGrabbing = false;
 
