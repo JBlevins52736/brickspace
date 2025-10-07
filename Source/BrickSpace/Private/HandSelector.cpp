@@ -86,7 +86,7 @@ void UHandSelector::CheckHandGestures()
 	// Start performing bone lookups by name because Meta doesnt know what a fixed size array is apparently
 	FVector palmVector = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
 	HandGrabGesture(palmVector);
-	PinchGesture(palmVector);
+	//PinchGesture(palmVector); // this is interfering with the grabbing need separete object type or function call.
 	FlickGesture(palmVector);
 }
 
@@ -107,7 +107,7 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 
 	}
 	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
-	if (squaredLengthAvg < relativeGrabThreshold && focusVodget) focusVodget->ForePinch(this, true);
+	if (squaredLengthAvg < relativeGrabThreshold && focusVodget && !focus_grabbed) focusVodget->ForePinch(this, true);
 	else if (focusVodget && focus_grabbed && squaredLengthAvg > relativeGrabThreshold) focusVodget->ForePinch(this, false);
 
 
@@ -129,8 +129,8 @@ void UHandSelector::PinchGesture(const FVector& palmPos)
 		remainingFingerSquaredLenght += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
 	}
 	float reaminingFingerAvgDist = remainingFingerSquaredLenght / 3;
-	if (reaminingFingerAvgDist < relativeGrabThreshold && focusVodget && distanceSqauredThumbToIndex < 0.5f) focusVodget->ForePinch(this, true);
-	else if (reaminingFingerAvgDist >= relativeGrabThreshold && focus_grabbed && focusVodget && distanceSqauredThumbToIndex >= 0.5f) focusVodget->ForePinch(this, false);
+	if (reaminingFingerAvgDist > relativeGrabThreshold && focusVodget && distanceSqauredThumbToIndex < 0.5f) focusVodget->ForePinch(this, true);
+	else if (focus_grabbed && focusVodget && distanceSqauredThumbToIndex >= 0.5f) focusVodget->ForePinch(this, false);
 
 }
 
@@ -176,7 +176,7 @@ void UHandSelector::WorldGrabGesture(const FVector& palmPos)
 		return;
 	}
 	
-	worldGrabber->ActivateToggle(true);
+	worldGrabber->HandTrackActivateToggle(true);
 	for (int i = 1; i < boneNames.Num(); i++)
 	{
 		FVector fingerPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
@@ -187,7 +187,7 @@ void UHandSelector::WorldGrabGesture(const FVector& palmPos)
 	float relativeGrabThreshold = relativeHandSizeSquared * 0.5f;
 	float squaredLengthAvg = squaredLengthOfFingers / 4;// number of fingers to average
 	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("SquaredLengthAvg: %f, Relative comp: %f "), squaredLengthAvg, relativeGrabThreshold));
-	if (!isUsingWorldGrabber && squaredLengthAvg < relativeGrabThreshold) // Activate world grabber
+	if (!isUsingWorldGrabber && squaredLengthAvg < relativeGrabThreshold && lengthThumbSquared > relativeGrabThreshold) // Activate world grabber
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, TEXT("Entered world grab activate"));
 		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
@@ -201,7 +201,7 @@ void UHandSelector::WorldGrabGesture(const FVector& palmPos)
 			isUsingWorldGrabber = true;
 		}
 	}
-	else if (isUsingWorldGrabber && squaredLengthAvg >= relativeGrabThreshold) // Deactivate world grabber
+	else if (isUsingWorldGrabber && squaredLengthAvg >= relativeGrabThreshold ) // Deactivate world grabber
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, TEXT("Entered world grab deactivate"));
 		
@@ -356,7 +356,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	}
 	if (handTrackingActive && focusVodget) CheckHandGestures();
-	if (handTrackingActive && bspawn)
+	if (handTrackingActive && bspawn && !focus_grabbed)
 	{
 		FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
 		WorldGrabGesture(palmPos);
