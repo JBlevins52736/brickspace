@@ -75,7 +75,7 @@ private:
 	void CalculateHandSize();
 	// Handles all gesture commands
 	void CheckHandGestures();
-
+	void UpdatePalmTrackingPoint();
 	// Handles grabbing objects
 	void HandGrabGesture(const FVector& palmPos);
 	void WorldGrabGesture(const FVector& palmPos);
@@ -89,9 +89,10 @@ private:
 	FHitResult Hit;
 	TArray<FName> boneNames; // references my hands
 	FName palmName = FName("Wrist Root"); // need these to reference my hands
+	FVector palmPreviousState = FVector::Zero();
 	FVector rayCastPosition = FVector::Zero();
 	bool handTrackingActive = false;
 	bool isUsingWorldGrabber = false;
-
+	bool palmInMotion = false;
 
 };

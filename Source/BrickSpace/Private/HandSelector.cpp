@@ -90,6 +90,18 @@ void UHandSelector::CheckHandGestures()
 	FlickGesture(palmVector);
 }
 
+void UHandSelector::UpdatePalmTrackingPoint()
+{
+	FVector currentPalmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
+	if (currentPalmPos.IsNearlyZero()) return;
+	FVector directionPrevPalmCurrPalm = currentPalmPos - palmPreviousState;
+	float sqrMagnitude = FVector::DotProduct(directionPrevPalmCurrPalm, directionPrevPalmCurrPalm);
+	if (sqrMagnitude > 2.0f) palmInMotion = true;
+	else palmInMotion = false;
+	palmPreviousState = currentPalmPos;
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("difference prev curr: %f"), sqrMagnitude));
+}
+
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
 {
 
@@ -355,7 +367,12 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		}
 
 	}
-	if (handTrackingActive && focusVodget) CheckHandGestures();
+	if (handTrackingActive && focusVodget) 
+	{
+		UpdatePalmTrackingPoint();
+		if (!palmInMotion) CheckHandGestures(); // checking for palm in motion or low motion
+
+	}
 	if (handTrackingActive && bspawn && !focus_grabbed)
 	{
 		FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
