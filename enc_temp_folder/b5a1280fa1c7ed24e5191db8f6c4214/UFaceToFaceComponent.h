@@ -27,9 +27,6 @@ private:
 	 TArray<UUFaceToFaceComponent*> Registry;
 	bool DetectEyeContact(UUFaceToFaceComponent* other);
 	void SomebodyJoinedOrLeft();
-	TMap<UUFaceToFaceComponent*, float> EyeContactTimers;
-	float HoldSeconds = 0.7f;
-	float AngleThreshold = 10.0f;
 		
 	
 };

@@ -102,19 +102,9 @@ void UUFaceToFaceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 		//AActor* Other = othercomp->GetOwner();
 		if (othercomp != this) {
 			FString phrase = othercomp->GetOwner()->GetName();
-			bool EyeContact = DetectEyeContact(othercomp);
-			float& Timer = EyeContactTimers.FindOrAdd(othercomp);
-			if (EyeContact) {
-				Timer += DeltaTime;
-			}
-			else { Timer = 0.0f; }
-			if ((Timer >= HoldSeconds)) {
+			if (DetectEyeContact(othercomp)) {
 				//Other->overlay;
-				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, "Bruh its  working (held >= 0.7s)");
-			}
-			else if (EyeContact) {
-				FString Msg = "Maintaining eye contact: %.2fs / %.2fs" + FString::SanitizeFloat(Timer, HoldSeconds);
-				GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, Msg);
+				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, "Bruh its  working");
 			}
 			else {
 				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Red, "Bruh its not working");
@@ -159,7 +149,7 @@ bool UUFaceToFaceComponent::DetectEyeContact(UUFaceToFaceComponent* other)
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *dototot);
 
 	//float Threshold = FMath::Cos(FMath::DegreesToRadians(90.0f));
-	
+	float AngleThreshold = 10.0f;
 	float CosThresh = FMath::Cos(FMath::DegreesToRadians(AngleThreshold));
 
 	bool ISFaceToFace = (DotA >= CosThresh) && (DotB >= CosThresh) && (DotOpp <= -CosThresh);
