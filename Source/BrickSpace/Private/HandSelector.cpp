@@ -32,7 +32,7 @@ UVodget* UHandSelector::DoRaycast()
 	FVector EndPos = FVector::Zero();
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
-	if (handTrackingActive) 
+	if (handTrackingActive)
 	{
 		CalculateEyeHandPosBoneData(StartPos, EndPos); // This is necessary, the default eye hand ray places the location at your wrist, we need the point in your hand. RS
 	}
@@ -48,7 +48,7 @@ UVodget* UHandSelector::DoRaycast()
 		StartPos = HandPos - ray;
 		EndPos = HandPos + ray;
 	}
-	
+
 
 	if (GetWorld()) { // ECC_WorldDynamic ECC_PhysicsBody ECC_Visibility
 		bool bHit = GetWorld()->LineTraceSingleByChannel(Hit, StartPos, EndPos, ECC_PhysicsBody, Params, FCollisionResponseParams());
@@ -110,7 +110,7 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 	if (squaredLengthAvg < relativeGrabThreshold && focusVodget) focusVodget->ForePinch(this, true);
 	else if (focusVodget && focus_grabbed && squaredLengthAvg > relativeGrabThreshold) focusVodget->ForePinch(this, false);
 
-	
+
 
 }
 
@@ -121,17 +121,17 @@ void UHandSelector::PinchGesture(const FVector& palmPos)
 	FVector directionThumbToIndex = indexPos - thumbPos;
 	float distanceSqauredThumbToIndex = FVector::DotProduct(directionThumbToIndex, directionThumbToIndex);
 	float remainingFingerSquaredLenght = 0;
-	
-	
-		for (int i = 2; i < boneNames.Num(); i++) {
-			FVector fingertipPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
-			FVector directionPalmToFinger = fingertipPos - palmPos;
-			remainingFingerSquaredLenght += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
-		}
-		float reaminingFingerAvgDist = remainingFingerSquaredLenght / 3;
-		if (reaminingFingerAvgDist < relativeHandSizeSquared && focusVodget && distanceSqauredThumbToIndex < 0.5f) focusVodget->ForePinch(this, true);
-		else if (reaminingFingerAvgDist >= relativeHandSizeSquared && focus_grabbed && focusVodget && distanceSqauredThumbToIndex >= 0.5f) focusVodget->ForePinch(this, false);
-	
+	float relativeGrabThreshold = relativeHandSizeSquared * 0.5f;
+
+	for (int i = 2; i < boneNames.Num(); i++) {
+		FVector fingertipPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
+		FVector directionPalmToFinger = fingertipPos - palmPos;
+		remainingFingerSquaredLenght += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
+	}
+	float reaminingFingerAvgDist = remainingFingerSquaredLenght / 3;
+	if (reaminingFingerAvgDist < relativeGrabThreshold && focusVodget && distanceSqauredThumbToIndex < 0.5f) focusVodget->ForePinch(this, true);
+	else if (reaminingFingerAvgDist >= relativeGrabThreshold && focus_grabbed && focusVodget && distanceSqauredThumbToIndex >= 0.5f) focusVodget->ForePinch(this, false);
+
 }
 
 void UHandSelector::FlickGesture(const FVector& palmPos)
@@ -144,19 +144,39 @@ void UHandSelector::FlickGesture(const FVector& palmPos)
 	// check the squaredLength against the wrist distance. Ensure idx finger is moved enough to trigger all events.
 	directionThumbToIdx.Normalize();
 	float projectionPointAlongVector = FVector::DotProduct(directionThumbToIdx, thumbPos);
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, FString::Printf(TEXT("projectedDistance: %f"), projectionPointAlongVector));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, FString::Printf(TEXT("projectedDistance: %f"), projectionPointAlongVector));
 }
 
 void UHandSelector::WorldGrabGesture(const FVector& palmPos)
 {
 	float squaredLengthOfFingers = 0;
-	FVector thumbTipPos = skRef->GetBoneLocation(boneNames[0], EBoneSpaces::ComponentSpace);
-	FVector dirOfThumb = thumbTipPos - palmPos;
+	FVector thumbTipPos = skRef->GetBoneLocation(boneNames[0], EBoneSpaces::WorldSpace);
+	FVector palmPosWorld = skRef->GetComponentTransform().TransformPosition(palmPos);
+	FVector dirOfThumb = thumbTipPos - palmPosWorld;
 	float lengthThumbSquared = FVector::DotProduct(dirOfThumb, dirOfThumb);
 	dirOfThumb.Normalize();
 	float dotOfThumbToWorldUp = FVector::DotProduct(dirOfThumb, FVector::UpVector); // I need to get the dir vector in world space and make this comp.
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, FString::Printf(TEXT("up dot: %f"), dotOfThumbToWorldUp));
-	if (dotOfThumbToWorldUp > 0.1f || dotOfThumbToWorldUp < -0.1f) return;
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, FString::Printf(TEXT("up dot: %f"), dotOfThumbToWorldUp));
+	UWorldGrabber* worldGrabber = Cast<UWorldGrabber>(GetOwner()->GetRootComponent());
+	if (dotOfThumbToWorldUp < 0.5f)
+	{
+		if (!isUsingWorldGrabber) return;
+		
+
+		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
+		if (motionCont->GetTrackingSource() == EControllerHand::Right)
+		{
+			worldGrabber->RWorldGrab(false);
+			isUsingWorldGrabber = false;
+		}
+		else {
+			worldGrabber->LWorldGrab(false);
+			isUsingWorldGrabber = false;
+		}
+		return;
+	}
+	
+	worldGrabber->ActivateToggle(true);
 	for (int i = 1; i < boneNames.Num(); i++)
 	{
 		FVector fingerPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
@@ -164,19 +184,38 @@ void UHandSelector::WorldGrabGesture(const FVector& palmPos)
 		float squaredLength = FVector::DotProduct(direction, direction);
 		squaredLengthOfFingers += squaredLength;
 	}
+	float relativeGrabThreshold = relativeHandSizeSquared * 0.5f;
 	float squaredLengthAvg = squaredLengthOfFingers / 4;// number of fingers to average
-	if (!isUsingWorldGrabber && squaredLengthAvg < relativeHandSizeSquared && lengthThumbSquared > relativeHandSizeSquared)
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("SquaredLengthAvg: %f, Relative comp: %f "), squaredLengthAvg, relativeGrabThreshold));
+	if (!isUsingWorldGrabber && squaredLengthAvg < relativeGrabThreshold) // Activate world grabber
 	{
-		UWorldGrabber* worldGrabber = Cast<UWorldGrabber>(GetOwner()->GetRootComponent());
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, TEXT("Entered world grab activate"));
 		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
-		if (motionCont->GetTrackingSource() == EControllerHand::Right) worldGrabber->RWorldGrab(true);
-		else worldGrabber->LWorldGrab(true);
+		if (motionCont->GetTrackingSource() == EControllerHand::Right)
+		{
+			worldGrabber->RWorldGrab(true);
+			isUsingWorldGrabber = true;
+		}
+		else {
+			worldGrabber->LWorldGrab(true);
+			isUsingWorldGrabber = true;
+		}
 	}
-	else if (isUsingWorldGrabber && squaredLengthAvg >= relativeHandSizeSquared) {
-		UWorldGrabber* worldGrabber = Cast<UWorldGrabber>(GetOwner()->GetRootComponent());
+	else if (isUsingWorldGrabber && squaredLengthAvg >= relativeGrabThreshold) // Deactivate world grabber
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, TEXT("Entered world grab deactivate"));
+		
+
 		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
-		if (motionCont->GetTrackingSource() == EControllerHand::Right) worldGrabber->RWorldGrab(false);
-		else worldGrabber->LWorldGrab(false);
+		if (motionCont->GetTrackingSource() == EControllerHand::Right)
+		{
+			worldGrabber->RWorldGrab(false);
+			isUsingWorldGrabber = false;
+		}
+		else {
+			worldGrabber->LWorldGrab(false);
+			isUsingWorldGrabber = false;
+		}
 	}
 }
 
@@ -214,31 +253,31 @@ void UHandSelector::SetCursor()
 		cursor = transform;
 	}
 	else
-	cursor = hand->GetComponentTransform();
+		cursor = hand->GetComponentTransform();
 
 	// Search for Vodget components when focus is not grabbed.
-	if (focusVodget != nullptr) {
-		if (focus_grabbed) {
-			// Set cursor to the scaled world grab location when focusVodget exists and focus is grabbed.
-			//FVector EyePos = head->GetComponentTransform().TransformPosition(dominantEyeOffset);
-			FVector EyePos = centerEye->GetComponentLocation();
-			FVector HandPos = hand->GetComponentLocation();
+	//if (focusVodget != nullptr) {
+	//	if (focus_grabbed) {
+	//		// Set cursor to the scaled world grab location when focusVodget exists and focus is grabbed.
+	//		//FVector EyePos = head->GetComponentTransform().TransformPosition(dominantEyeOffset);
+	//		FVector EyePos = centerEye->GetComponentLocation();
+	//		FVector HandPos = hand->GetComponentLocation();
 
-			// The current eye-hand dir.
-			FVector eyeHandDir = (HandPos - EyePos);
+	//		// The current eye-hand dir.
+	//		FVector eyeHandDir = (HandPos - EyePos);
 
-			// Note: eyeHandDir is scaled by multiplying by ratio of initial hit-Eye over hand-eye distances
-			FVector eyeHitVec = eyeHandDir * ratioHitEyeOverHandEye;
+	//		// Note: eyeHandDir is scaled by multiplying by ratio of initial hit-Eye over hand-eye distances
+	//		FVector eyeHitVec = eyeHandDir * ratioHitEyeOverHandEye;
 
-			cursor.SetLocation(EyePos + eyeHitVec);
-		}
-		else
-		{
-			// Set cursor to hit point when focusVodget exists.
-			//FVector worldHitVec = cursor.TransformPosition(localHitVec);
-			cursor.SetLocation(Hit.ImpactPoint);
-		}
-	}
+	//		cursor.SetLocation(EyePos + eyeHitVec);
+	//	}
+	//	else
+	//	{
+	//		// Set cursor to hit point when focusVodget exists.
+	//		//FVector worldHitVec = cursor.TransformPosition(localHitVec);
+	//		cursor.SetLocation(Hit.ImpactPoint);
+	//	}
+	//}
 }
 
 void UHandSelector::GrabFocus(bool val)
@@ -317,7 +356,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	}
 	if (handTrackingActive && focusVodget) CheckHandGestures();
-	if (handTrackingActive)
+	if (handTrackingActive && bspawn)
 	{
 		FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
 		WorldGrabGesture(palmPos);

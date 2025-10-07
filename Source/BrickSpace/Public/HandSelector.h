@@ -81,6 +81,8 @@ private:
 	void WorldGrabGesture(const FVector& palmPos);
 	void CalculateEyeHandPosBoneData(FVector& startVector, FVector& endPos);
 	inline FVector GetHandMidpointPos();
+	void PinchGesture(const FVector& palmPos);
+	void FlickGesture(const FVector& palmPos);
 	float ratioHitEyeOverHandEye = 0.0;
 	float relativeHandSizeSquared = 0;
 	// The hit result gets populated by the line trace
@@ -91,13 +93,5 @@ private:
 	bool handTrackingActive = false;
 	bool isUsingWorldGrabber = false;
 
-	// Handles all gesture commands
-	void CheckHandGestures();
 
-	// Handles grabbing objects
-	void HandGrabGesture(const FVector& palmPos);
-	
-
-	void PinchGesture(const FVector& palmPos);
-	void FlickGesture(const FVector& palmPos);
 };

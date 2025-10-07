@@ -147,7 +147,7 @@ void UWorldGrabber::DollyToggle(const bool Value) { dollyMode = !dollyMode; }
 void UWorldGrabber::ScaleToggle(const bool Value) { scaleMode = !scaleMode; }
 void UWorldGrabber::ActivateToggle(const bool Value)
 { 
-	activeMode = !activeMode;
+	activeMode = Value;
 	ActiveChanged();
 }
 
