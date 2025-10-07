@@ -75,6 +75,7 @@ void UHandSelector::CheckHandGestures()
 	// Start performing bone lookups by name because Meta doesnt know what a fixed size array is apparently
 	FVector palmVector = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
 	HandGrabGesture(palmVector);
+	PinchGesture(palmVector);
 
 }
 
@@ -100,6 +101,27 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 
 	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("Squared Length: %f, RelativeThreshold: %f"), squaredLengthAvg, relativeGrabThreshold));
 
+}
+
+void UHandSelector::PinchGesture(const FVector& palmPos)
+{
+	FVector thumbPos = skRef->GetBoneLocation(boneNames[0], EBoneSpaces::ComponentSpace);
+	FVector indexPos = skRef->GetBoneLocation(boneNames[1], EBoneSpaces::ComponentSpace);
+	FVector directionThumbToIndex = indexPos - thumbPos;
+	float distanceSqauredThumbToIndex = FVector::DotProduct(directionThumbToIndex, directionThumbToIndex);
+	float remainingFingerSquaredLenght = 0;
+	
+	
+		for (int i = 2; i < boneNames.Num(); i++) {
+			FVector fingertipPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
+			FVector directionPalmToFinger = fingertipPos - palmPos;
+			remainingFingerSquaredLenght += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
+		}
+		float reaminingFingerAvgDist = remainingFingerSquaredLenght / 3;
+		if (reaminingFingerAvgDist < relativeHandSizeSquared && focusVodget && distanceSqauredThumbToIndex < 0.5f) focusVodget->ForePinch(this, true);
+		else if (reaminingFingerAvgDist >= relativeHandSizeSquared && focus_grabbed && focusVodget && distanceSqauredThumbToIndex >= 0.5f) focusVodget->ForePinch(this, false);
+	
+	
 }
 
 // Called when the game starts

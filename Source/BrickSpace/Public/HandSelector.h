@@ -88,4 +88,6 @@ private:
 	// Handles grabbing objects
 	void HandGrabGesture(const FVector& palmPos);
 	
+
+	void PinchGesture(const FVector& palmPos);
 };
