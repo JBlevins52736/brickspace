@@ -1,10 +1,11 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "Blueprint/UserWidget.h"
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "UFaceToFaceComponent.generated.h"
+
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -23,13 +24,19 @@ protected:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+
 private:	 
 	 TArray<UUFaceToFaceComponent*> Registry;
 	bool DetectEyeContact(UUFaceToFaceComponent* other);
 	void SomebodyJoinedOrLeft();
+	bool DetectEyeContactHeld(UUFaceToFaceComponent* Other, float DeltaTime);
+	void ShowFaceWidget(bool bShow);
+	//void ShowFaceWidget(bool bShow);
 	TMap<UUFaceToFaceComponent*, float> EyeContactTimers;
 	float HoldSeconds = 0.7f;
 	float AngleThreshold = 10.0f;
-		
+	//UPROPERTY(EditAnywhere, Category = "VAR_UI")
+	TSubclassOf<UUserWidget> FaceWidgetClass;
+	UUserWidget* ActiveWidget = nullptr;
 	
 };

@@ -91,34 +91,27 @@ void UUFaceToFaceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	Start = GetComponentLocation();
 	Forward = GetForwardVector();
 
-
 	// Draw debug line 
 	FVector End = Start + Forward * 1000.0f;
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
-	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
+	
 
 
 	for (UUFaceToFaceComponent* othercomp : Registry) {
 		//AActor* Other = othercomp->GetOwner();
 		if (othercomp != this) {
 			FString phrase = othercomp->GetOwner()->GetName();
-			bool EyeContact = DetectEyeContact(othercomp);
-			float& Timer = EyeContactTimers.FindOrAdd(othercomp);
+			bool EyeContact = DetectEyeContactHeld(othercomp,DeltaTime);
 			if (EyeContact) {
-				Timer += DeltaTime;
-			}
-			else { Timer = 0.0f; }
-			if ((Timer >= HoldSeconds)) {
-				//Other->overlay;
+				ShowFaceWidget(true);
 				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, "Bruh its  working (held >= 0.7s)");
 			}
-			else if (EyeContact) {
-				FString Msg = "Maintaining eye contact: %.2fs / %.2fs" + FString::SanitizeFloat(Timer, HoldSeconds);
-				GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, Msg);
-			}
 			else {
-				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Red, "Bruh its not working");
-
+				ShowFaceWidget(false);
+				 float* TimerPtr = EyeContactTimers.Find(othercomp);
+				float t = TimerPtr ? *TimerPtr : 0.f;
+				FString Msg = "Maintaining eye contact: %.2fs / %.2fs" + FString::SanitizeFloat(t, HoldSeconds);
+				GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, Msg);
 			}
 		}
 	}
@@ -208,4 +201,50 @@ bool UUFaceToFaceComponent::DetectEyeContact(UUFaceToFaceComponent* other)
 
 	//      
 }
+
+
+bool UUFaceToFaceComponent::DetectEyeContactHeld(UUFaceToFaceComponent* other, float DeltaTime)
+{
+	if (!other) return false;
+
+	const bool bRaw = DetectEyeContact(other); // your existing logic
+
+	float& Timer = EyeContactTimers.FindOrAdd(other);
+	Timer = bRaw ? (Timer + DeltaTime) : 0.f;
+
+	return (Timer >= HoldSeconds);
+}
+
+void UUFaceToFaceComponent::ShowFaceWidget(bool bShow)
+{
+	if (!FaceWidgetClass) return;
+
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (!OwnerPawn) return;
+
+	APlayerController* PC = Cast<APlayerController>(OwnerPawn->GetController());
+	if (!PC) return;
+
+	if (bShow)
+	{
+		if (!ActiveWidget)
+		{
+			ActiveWidget = CreateWidget<UUserWidget>(PC, FaceWidgetClass);
+			if (ActiveWidget)
+			{
+				ActiveWidget->AddToViewport();
+			}
+		}
+	}
+	else
+	{
+		if (ActiveWidget)
+		{
+			ActiveWidget->RemoveFromParent();
+			ActiveWidget = nullptr;
+		}
+	}
+}
+
+
 
