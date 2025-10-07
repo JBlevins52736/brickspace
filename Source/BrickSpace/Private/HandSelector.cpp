@@ -76,7 +76,7 @@ void UHandSelector::CheckHandGestures()
 	FVector palmVector = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
 	HandGrabGesture(palmVector);
 	PinchGesture(palmVector);
-
+	FlickGesture(palmVector);
 }
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
@@ -99,7 +99,7 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 	if (squaredLengthAvg < relativeGrabThreshold && focusVodget) focusVodget->ForePinch(this, true);
 	else if (focusVodget && focus_grabbed && squaredLengthAvg > relativeGrabThreshold) focusVodget->ForePinch(this, false);
 
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("Squared Length: %f, RelativeThreshold: %f"), squaredLengthAvg, relativeGrabThreshold));
+	
 
 }
 
@@ -121,7 +121,19 @@ void UHandSelector::PinchGesture(const FVector& palmPos)
 		if (reaminingFingerAvgDist < relativeHandSizeSquared && focusVodget && distanceSqauredThumbToIndex < 0.5f) focusVodget->ForePinch(this, true);
 		else if (reaminingFingerAvgDist >= relativeHandSizeSquared && focus_grabbed && focusVodget && distanceSqauredThumbToIndex >= 0.5f) focusVodget->ForePinch(this, false);
 	
-	
+}
+
+void UHandSelector::FlickGesture(const FVector& palmPos)
+{
+	FVector thumbPos = skRef->GetBoneLocation(boneNames[0], EBoneSpaces::ComponentSpace);
+	FVector indexPos = skRef->GetBoneLocation(boneNames[1], EBoneSpaces::ComponentSpace);
+	FVector directionThumbToIdx = indexPos - thumbPos;
+	// Get direction wrist to thumb.
+	// use thumbToIdx look for negative result
+	// check the squaredLength against the wrist distance. Ensure idx finger is moved enough to trigger all events.
+	directionThumbToIdx.Normalize();
+	float projectionPointAlongVector = FVector::DotProduct(directionThumbToIdx, thumbPos);
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, FString::Printf(TEXT("projectedDistance: %f"), projectionPointAlongVector));
 }
 
 // Called when the game starts
@@ -229,8 +241,8 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		}
 
 	}
-	if (handTrackingActive && focusVodget) CheckHandGestures();
-
+	if (handTrackingActive) CheckHandGestures();
+	
 }
 
 void UHandSelector::SetFilter(uint16 filter)

@@ -90,4 +90,5 @@ private:
 	
 
 	void PinchGesture(const FVector& palmPos);
+	void FlickGesture(const FVector& palmPos);
 };
