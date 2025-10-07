@@ -16,48 +16,58 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnButtonReleased);
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API USliderButton : public UVodget
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
-    USliderButton();
+	USliderButton();
 
 protected:
-    virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
 public:
-    virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-    virtual void Focus(USelector* cursor, bool state) override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void Focus(USelector* cursor, bool state) override;
 
-    // The mesh or component that moves when the button is pressed
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-    USceneComponent* StartButton;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button|Type")
+	USceneComponent* StartButton;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-    USceneComponent* LaunchButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button|Type")
+	USceneComponent* LaunchButton;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button|Type")
+	USceneComponent* ResetButton;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-    USceneComponent* ResetButton;
-   
-    // Blueprint events
-    UPROPERTY(BlueprintAssignable, Category = "Button")
-    FOnButtonPressed OnPressed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	float MaxDepressionDistance = 5.0f;
 
-    UPROPERTY(BlueprintAssignable, Category = "Button")
-    FOnButtonReleased OnReleased;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	float PressThreshold = 3.0f;
 
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
-    UTimeManager* timer; 
-    
-    UPROPERTY()
-    bool isPressed = false;
+	// Blueprint events
+	UPROPERTY(BlueprintAssignable, Category = "Button")
+	FOnButtonPressed OnPressed;
+
+	//UPROPERTY(BlueprintAssignable, Category = "Button")
+	//FOnButtonReleased OnReleased;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
+	UTimeManager* timer;
+
+	UPROPERTY()
+	bool isPressed = false;
+
 private:
+	FVector InitialLocalLocationStart;
+	FVector InitialLocalLocationLaunch;
+	FVector InitialLocalLocationReset;
+	FVector InitialLocalLocation;
+	
 
-    void Press();
-    void Release();
-    void DoRelease();
 
-    FTimerHandle ReleaseDelayHandle;
-    float ReleaseDelayDuration = 0.2f; // delay in seconds
+
+	void Press();
+
+
 
 };

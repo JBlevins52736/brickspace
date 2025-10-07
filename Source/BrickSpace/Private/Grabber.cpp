@@ -50,18 +50,7 @@ void UGrabber::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompone
 
 	if (!grabbingSelector || !clientComponent) return;
 
-	AActor* Owner = clientComponent->GetOwner();
-	if (!Owner) return;
-
-	// Case 1: Lever
-	if (UWallLever* Lever = Owner->FindComponentByClass<UWallLever>())
-	{
-		Lever->UpdateLeverFromSelector(grabbingSelector);
-	}
-	// Case 2: Free-move object
-	else
-	{
 		FTransform worldsrt = childsrt * grabbingSelector->Cursor();
 		clientComponent->SetWorldTransform(worldsrt);
-	}
+	
 }

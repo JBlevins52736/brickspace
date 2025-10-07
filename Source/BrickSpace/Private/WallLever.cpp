@@ -29,29 +29,30 @@ void UWallLever::Focus(USelector* cursor, bool state)
 
 void UWallLever::ForePinch(USelector* cursor, bool state)
 {
-	if (state) 
+	if (state) // Grab begin
 	{
-		if (cursor)
+		if (cursor && clientComponent)
 		{
 			grabbingSelector = cursor;
 
+			// Get cursor's world position
 			FVector worldPos = cursor->Cursor().GetLocation();
 
+			// Transform to the lever's local space (using the component's transform)
 			FVector localPos = GetComponentTransform().InverseTransformPosition(worldPos);
 
-			initialRotation = LeverArm->GetRelativeRotation();
-	
-			initialGrabZ = localPos.Z;
+			// SAVE the initial vector in the rotational plane (Y and Z)
+			// The X-axis is the axis of rotation, so we zero out X.
+			grabvec = FVector(0.0f, localPos.Y, localPos.Z);
+
+			// Optionally save the current rotation if needed for clamping logic later, 
+			// but the FQuat logic handles the delta itself.
+			// initialRotation = LeverArm->GetRelativeRotation(); 
 
 			cursor->GrabFocus(true);
-
-			if (UMeshComponent* MeshComp = Cast<UMeshComponent>(clientComponent))
-			{
-				MeshComp->SetOverlayMaterial(nullptr);
-			}
 		}
 	}
-	else 
+	else // Grab end
 	{
 		if (grabbingSelector)
 		{
@@ -59,31 +60,46 @@ void UWallLever::ForePinch(USelector* cursor, bool state)
 			grabbingSelector = nullptr;
 		}
 	}
-
 }
 void UWallLever::UpdateLeverFromSelector(USelector* cursor)
 {
-	if (!cursor || !LeverArm) return;
+	if (!cursor || !clientComponent) return; // Use clientComponent for rotation
 
-
+	// 1. Get current vector in the rotational plane (Y and Z)
 	FVector worldPos = cursor->Cursor().GetLocation();
 	FVector localPos = GetComponentTransform().InverseTransformPosition(worldPos);
-	float grabAxis = localPos.Z;
-	float delta = grabAxis - initialGrabZ;
-	float rotationDelta = -delta * Sensitivity; 
-	float targetAngle = FMath::Clamp(initialRotation.Roll + rotationDelta, MinPitch, MaxPitch);
+	FVector currVec(0.0f, localPos.Y, localPos.Z); // Assuming rotation is around the local X (Roll) axis
 
-	FRotator currentRot = LeverArm->GetRelativeRotation();
-	FRotator targetRot = currentRot;
-	targetRot.Roll = targetAngle; 
-	FRotator smoothedRot = FMath::RInterpTo(currentRot, targetRot, GetWorld()->GetDeltaSeconds(), 10.f);
-	LeverArm->SetRelativeRotation(smoothedRot);
+	// 2. Calculate the delta rotation quaternion
+	FQuat deltaRot = FQuat::FindBetweenVectors(grabvec, currVec);
 
-	float normalized = smoothedRot.Roll;
-	normalized = FMath::Clamp(normalized, MinPitch, MaxPitch);
-	OnLeverMoved.Broadcast(normalized);
-	UE_LOG(LogTemp, Log, TEXT("Rotation:%f"), normalized);
+	// 3. Apply the delta rotation to the lever's current rotation
+	FQuat newRot = deltaRot * clientComponent->GetRelativeRotation().Quaternion();
 
+	// 4. Apply the rotation to the component
+	clientComponent->SetRelativeRotation(newRot);
+
+	// 5. Clamping the Rotation (Uses MinPitch/MaxPitch)
+
+	// Convert the new rotation back to Euler angles
+	FRotator currentEuler = clientComponent->GetRelativeRotation();
+
+	// Clamp the Roll to the defined angle range (e.g., -75 to 75)
+	float clampedRoll = FMath::Clamp(currentEuler.Roll, MinPitch, MaxPitch);
+
+	// Re-apply the clamped roll while keeping other axes' rotation
+	FRotator finalRot = FRotator(currentEuler.Pitch, currentEuler.Yaw, clampedRoll);
+	clientComponent->SetRelativeRotation(finalRot);
+
+	// The final value is the clamped angle itself, used to control speed.
+	float finalValue = clampedRoll;
+
+	// 6. Broadcast the final angle value directly (This is your speed value)
+	OnLeverMoved.Broadcast(finalValue);
+	UE_LOG(LogTemp, Log, TEXT("Lever Speed Value (Angle): %f"), finalValue);
+
+	// 7. Reset the grabvec for the next tick for continuous, smooth movement
+	grabvec = currVec;
 }
 
 void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

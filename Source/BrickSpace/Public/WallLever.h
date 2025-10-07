@@ -44,8 +44,8 @@ protected:
 
 	virtual void BeginPlay() override;
 	USelector* grabbingSelector = nullptr;
-	float initialGrabZ = 0.0f; 
-	FRotator initialRotation;
+	
+	FVector grabvec;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
 	float MinPitch = -90.0f;
