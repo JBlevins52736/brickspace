@@ -43,7 +43,8 @@ void UBrick::BeginPlay()
 void UBrick::ForePinch(USelector* selector, bool state)
 {
 	// Only allow single handed brick grabbing for now.
-	if (grabbingSelector != nullptr && grabbingSelector != selector)
+	if (clientComponent->Mobility != EComponentMobility::Movable ||
+		(grabbingSelector != nullptr && grabbingSelector != selector))
 		return;
 
 	Super::ForePinch(selector, state);

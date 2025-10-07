@@ -6,6 +6,20 @@
 #include "WorldGrabber.h"
 #include "WorldGrabberReplicated.generated.h"
 
+USTRUCT()
+struct FCalibration {
+	GENERATED_USTRUCT_BODY()
+
+	UPROPERTY()
+	FVector position;
+
+	UPROPERTY()
+	FQuat rotation;
+
+	UPROPERTY()
+	float worldToMeters;
+};
+
 /**
  * 
  */
@@ -16,6 +30,7 @@ class BRICKSPACE_API UWorldGrabberReplicated : public UWorldGrabber
 	
 public:
 	virtual void BeginPlay() override;
+	virtual void ActiveChanged() override;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* leftHandReplicated;
@@ -27,4 +42,6 @@ public:
 
 protected:
 	virtual void SetWorldToMeters(float val) override;
+	void LoadCalibration();
+	void SaveCalibration();
 };
