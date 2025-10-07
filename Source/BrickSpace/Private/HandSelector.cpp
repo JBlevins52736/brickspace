@@ -11,6 +11,7 @@
 #include "OculusXRInputFunctionLibrary.h"
 #include "OculusXRHandComponent.h"
 #include "MotionControllerComponent.h"
+#include "WorldGrabber.h"
 #define GRAB_THRESHOLD 120 // this is the squared length of the threshold to determine if you are grabbing.
 #define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
 #define FINGERTIP_INDICIE_INC 5
@@ -85,7 +86,7 @@ void UHandSelector::CheckHandGestures()
 	// Start performing bone lookups by name because Meta doesnt know what a fixed size array is apparently
 	FVector palmVector = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
 	HandGrabGesture(palmVector);
-
+	
 }
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
@@ -112,6 +113,39 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 
 }
 
+void UHandSelector::WorldGrabGesture(const FVector& palmPos)
+{
+	float squaredLengthOfFingers = 0;
+	FVector thumbTipPos = skRef->GetBoneLocation(boneNames[0], EBoneSpaces::ComponentSpace);
+	FVector dirOfThumb = thumbTipPos - palmPos;
+	float lengthThumbSquared = FVector::DotProduct(dirOfThumb, dirOfThumb);
+	dirOfThumb.Normalize();
+	float dotOfThumbToWorldUp = FVector::DotProduct(dirOfThumb, FVector::UpVector); // I need to get the dir vector in world space and make this comp.
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, FString::Printf(TEXT("up dot: %f"), dotOfThumbToWorldUp));
+	if (dotOfThumbToWorldUp > 0.1f || dotOfThumbToWorldUp < -0.1f) return;
+	for (int i = 1; i < boneNames.Num(); i++)
+	{
+		FVector fingerPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
+		FVector direction = fingerPos - palmPos;
+		float squaredLength = FVector::DotProduct(direction, direction);
+		squaredLengthOfFingers += squaredLength;
+	}
+	float squaredLengthAvg = squaredLengthOfFingers / 4;// number of fingers to average
+	if (!isUsingWorldGrabber && squaredLengthAvg < relativeHandSizeSquared && lengthThumbSquared > relativeHandSizeSquared)
+	{
+		UWorldGrabber* worldGrabber = Cast<UWorldGrabber>(GetOwner()->GetRootComponent());
+		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
+		if (motionCont->GetTrackingSource() == EControllerHand::Right) worldGrabber->RWorldGrab(true);
+		else worldGrabber->LWorldGrab(true);
+	}
+	else if (isUsingWorldGrabber && squaredLengthAvg >= relativeHandSizeSquared) {
+		UWorldGrabber* worldGrabber = Cast<UWorldGrabber>(GetOwner()->GetRootComponent());
+		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
+		if (motionCont->GetTrackingSource() == EControllerHand::Right) worldGrabber->RWorldGrab(false);
+		else worldGrabber->LWorldGrab(false);
+	}
+}
+
 void UHandSelector::CalculateEyeHandPosBoneData(FVector& startVector, FVector& endPos)
 {
 	FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
@@ -136,7 +170,7 @@ inline FVector UHandSelector::GetHandMidpointPos()
 // Called when the game starts
 void UHandSelector::SetCursor()
 {
-	if (handTrackingActive) 
+	if (handTrackingActive) // Not placing it at this location makes the app very difficult to play with hand tracking
 	{
 		FTransform transform = FTransform::Identity;
 		FVector midPoint = GetHandMidpointPos();
@@ -249,7 +283,11 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	}
 	if (handTrackingActive && focusVodget) CheckHandGestures();
-
+	if (handTrackingActive)
+	{
+		FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
+		WorldGrabGesture(palmPos);
+	}
 }
 
 void UHandSelector::SetFilter(uint16 filter)

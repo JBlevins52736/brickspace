@@ -78,6 +78,7 @@ private:
 
 	// Handles grabbing objects
 	void HandGrabGesture(const FVector& palmPos);
+	void WorldGrabGesture(const FVector& palmPos);
 	void CalculateEyeHandPosBoneData(FVector& startVector, FVector& endPos);
 	inline FVector GetHandMidpointPos();
 	float ratioHitEyeOverHandEye = 0.0;
@@ -88,5 +89,5 @@ private:
 	FName palmName = FName("Wrist Root"); // need these to reference my hands
 	FVector rayCastPosition = FVector::Zero();
 	bool handTrackingActive = false;
-	
+	bool isUsingWorldGrabber = false;
 };
