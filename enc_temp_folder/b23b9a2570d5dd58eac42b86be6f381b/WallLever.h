@@ -58,10 +58,10 @@ protected:
 
 private:
 
-	
-	//FRotator TargetLeverRotation = FRotator::ZeroRotator;
-	//FRotator CurrentLeverRotation = FRotator::ZeroRotator;
-	//float initialGrabAngle = 0.0f;
-	//FVector initialGrabVector;
+	// NEW: Variable to store the desired rotation for smoothing
+	FRotator TargetLeverRotation = FRotator::ZeroRotator;
+
+	// NEW: Variable to store the rotation in the previous frame
+	FRotator CurrentLeverRotation = FRotator::ZeroRotator;
 	
 };

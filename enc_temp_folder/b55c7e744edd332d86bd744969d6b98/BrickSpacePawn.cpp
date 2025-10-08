@@ -8,7 +8,6 @@
 #include "WallBrick.h"
 #include "Net/UnrealNetwork.h"
 #include "TimeManager.h"
-#include "WallMover.h"
 
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()
@@ -105,11 +104,4 @@ void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager
 	timeManager->Client_ResetTimer();
 
 	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
-}
-void ABrickSpacePawn::Server_UpdateWallAngle_Implementation(UWallMover* WallMover, float LeverAngle)
-{
-	if (WallMover)
-	{
-		WallMover->SetMovementTarget(LeverAngle);
-	}
 }

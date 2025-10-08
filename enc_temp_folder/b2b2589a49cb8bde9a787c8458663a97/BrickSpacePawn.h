@@ -8,7 +8,6 @@
 #include "HandSelector.h"
 class UWallBrick;
 class UTimeManager;
-class UWallMover;
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -44,8 +43,7 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ResetTimer(UTimeManager* timeManager);
 
-	UFUNCTION(Server, Reliable)
-	void Server_UpdateWallAngle(UWallMover* WallMover, float LeverAngle);
+
 public:
 
 	void VARLog(FString methodName);
