@@ -23,6 +23,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VAR")
 	void UpdateRotAnchor(FVector pos);
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
+	USceneComponent* posAnchorMarker;
+
 protected:
 	virtual void SetLocalCursor() override;
 	
@@ -32,4 +35,9 @@ private:
 	bool rotAnchorSet = false;
 	FVector posAnchor;
 	FVector rotAnchor;
+
+	FVector posAnchorInit;
+	FVector posAnchorLocal;
+
+	float initWorldToMeters;
 };

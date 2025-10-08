@@ -26,8 +26,8 @@ void UWorldGrabberReplicated::ActiveChanged()
 
 void UWorldGrabberReplicated::OnRep_WorldScale(float worldScale)
 {
-	if (currWorldToMeters == worldScale)
-		return;
+	//if (currWorldToMeters == worldScale)
+	//	return;
 
 	// The BrickSpaceGameState currWorldToMeters property was just changed by the listening server client.
 	// Update our local copy of currWorldToMeters and scale the local and replicated hand meshes.
@@ -103,7 +103,8 @@ void UWorldGrabberReplicated::LoadCalibration()
 				{
 					SetWorldLocation(calibration.position);
 					SetWorldRotation(calibration.rotation);
-					GetWorld()->GetWorldSettings()->WorldToMeters = calibration.worldToMeters;
+					SetWorldToMeters(calibration.worldToMeters);
+					//GetWorld()->GetWorldSettings()->WorldToMeters = calibration.worldToMeters;
 
 					UE_LOG(LogTemp, Error, TEXT("Converted Local FJsonObject to FCalibration."));
 				}

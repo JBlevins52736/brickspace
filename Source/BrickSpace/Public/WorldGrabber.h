@@ -41,11 +41,10 @@ protected:
 	bool activeMode = false;
 
 	float currWorldToMeters = 100.0;
-	float initialWorldToMeters = 100.0;
 
 	virtual void GrabChanged();
 	void StartWorldScaling(FVector lhand, FVector rhand);
-	void ChangeWorldScaling(FVector lhand, FVector rhand);
+	void ChangeWorldScaling(FVector &lhand, FVector &rhand);
 private:
 
 	// Bluprint mappable world grabber input functions
@@ -67,7 +66,7 @@ private:
 	bool leftGrabbing = false;
 	bool rightGrabbing = false;
 
-	float initialBimanualHandDist;
+	float prevBimanualHandDist;
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
