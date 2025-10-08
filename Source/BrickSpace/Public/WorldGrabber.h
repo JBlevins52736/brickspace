@@ -43,9 +43,10 @@ protected:
 	float currWorldToMeters = 100.0;
 	float initialWorldToMeters = 100.0;
 
+	virtual void GrabChanged();
 	void StartWorldScaling(FVector lhand, FVector rhand);
 	void ChangeWorldScaling(FVector lhand, FVector rhand);
-private:
+public:
 
 	// Bluprint mappable world grabber input functions
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
@@ -63,6 +64,8 @@ private:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void ActivateToggle(const bool Value);
 
+	void HandTrackActivateToggle(const bool value);
+private:
 	bool leftGrabbing = false;
 	bool rightGrabbing = false;
 
@@ -71,6 +74,5 @@ private:
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	void GrabChanged();
 
 };

@@ -14,9 +14,10 @@ void UGrabber::Focus(USelector* selector, bool state)
 
 void UGrabber::ForePinch(USelector* selector, bool state)
 {
-	if (clientComponent->Mobility != EComponentMobility::Movable &&
-		grabbingSelector != nullptr && grabbingSelector != selector)
-		return;	
+	// Only allow single handed brick grabbing for now.
+	if (clientComponent->Mobility != EComponentMobility::Movable ||
+		(grabbingSelector != nullptr && grabbingSelector != selector))
+		return;
 
 	// We grab the selectors focus when grabbing is true to ensure receiving focusUpdate until grabbing is released.
 	selector->GrabFocus(state);
