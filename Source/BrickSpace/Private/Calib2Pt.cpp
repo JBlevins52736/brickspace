@@ -18,7 +18,7 @@ void UCalib2Pt::SetLocalCursor()
 
 		if (rotAnchorSet && GetOwner()->HasAuthority()) 
 		{
-			ChangeWorldScaling(posAnchor, rotAnchor);
+			//ChangeWorldScaling(posAnchor, rotAnchor);
 		}
 
 		FVector posAnchorScaled = posAnchorInit * (currWorldToMeters / initWorldToMeters);
