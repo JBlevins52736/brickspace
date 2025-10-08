@@ -90,7 +90,6 @@ private:
 	TArray<FName> boneNames; // references my hands
 	FName palmName = FName("Wrist Root"); // need these to reference my hands
 	FVector palmPreviousState = FVector::Zero();
-	FVector rayCastPosition = FVector::Zero();
 	bool handTrackingActive = false;
 	bool isUsingWorldGrabber = false;
 	bool palmInMotion = false;

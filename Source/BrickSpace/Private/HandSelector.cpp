@@ -32,6 +32,7 @@ UVodget* UHandSelector::DoRaycast()
 	FVector EndPos = FVector::Zero();
 	FCollisionQueryParams Params;
 	Params.AddIgnoredActor(GetOwner());
+	
 	if (handTrackingActive)
 	{
 		CalculateEyeHandPosBoneData(StartPos, EndPos); // This is necessary, the default eye hand ray places the location at your wrist, we need the point in your hand. RS
@@ -76,7 +77,7 @@ void UHandSelector::CalculateHandSize()
 	FVector middleIdx = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::ComponentSpace);
 	FVector directionToMiddleIdx = middleIdx - palmPos;
 	relativeHandSizeSquared = FVector::DotProduct(directionToMiddleIdx, directionToMiddleIdx);
-	rayCastPosition = (palmPos + middleIdx) * 0.5f;
+
 
 }
 
@@ -96,7 +97,7 @@ void UHandSelector::UpdatePalmTrackingPoint()
 	if (currentPalmPos.IsNearlyZero()) return;
 	FVector directionPrevPalmCurrPalm = currentPalmPos - palmPreviousState;
 	float sqrMagnitude = FVector::DotProduct(directionPrevPalmCurrPalm, directionPrevPalmCurrPalm);
-	if (sqrMagnitude > 2.0f) palmInMotion = true;
+	if (sqrMagnitude > 0.7f) palmInMotion = true;
 	else palmInMotion = false;
 	palmPreviousState = currentPalmPos;
 	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("difference prev curr: %f"), sqrMagnitude));
