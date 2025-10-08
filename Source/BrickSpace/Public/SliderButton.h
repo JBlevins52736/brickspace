@@ -29,20 +29,20 @@ public:
 	virtual void Focus(USelector* cursor, bool state) override;
 
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button|Type")
-	USceneComponent* StartButton;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button|Type")
-	USceneComponent* LaunchButton;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button|Type")
-	USceneComponent* ResetButton;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	UStaticMeshComponent* StartButton;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-	float MaxDepressionDistance = 5.0f;
+	UStaticMeshComponent* LaunchButton;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-	float PressThreshold = 3.0f;
+	UStaticMeshComponent* ResetButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	float MaxDepressionDistance = -5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	float PressThreshold = -3.0f;
 
 	// Blueprint events
 	UPROPERTY(BlueprintAssignable, Category = "Button")
@@ -58,12 +58,12 @@ public:
 	bool isPressed = false;
 
 private:
-	FVector InitialLocalLocationStart;
-	FVector InitialLocalLocationLaunch;
-	FVector InitialLocalLocationReset;
-	FVector InitialLocalLocation;
-	
 
+	float InitialLocalLocation;
+	float InitialCursorOffsetZ = 0.0f;
+
+
+	USelector* focusSelector = nullptr;
 
 
 	void Press();
