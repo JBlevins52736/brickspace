@@ -41,7 +41,7 @@ public:
 	void Server_StartStopTimer(UTimeManager* timeManager, bool isRunning);
 
 	UFUNCTION(Server, Reliable)
-	void Server_ResetTimer();
+	void Server_ResetTimer(UTimeManager* timeManager);
 
 
 public:

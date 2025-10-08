@@ -6,10 +6,7 @@
 
 class ABrickSpacePawn;
 
-
 #include "TimeManager.generated.h"
-
-
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class BRICKSPACE_API UTimeManager : public UActorComponent
@@ -26,6 +23,7 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	// Server RPCs will be on the Pawn, but these public wrappers remain.
 	UFUNCTION(BlueprintCallable)
 	void StartTimer(ABrickSpacePawn* Pawn);
 
@@ -41,22 +39,39 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetTextRenderer(UTextRenderComponent* InTextRenderer);
 
-	UPROPERTY(ReplicatedUsing = OnRep_Running )
+	// The running state is replicated (server-authoritative)
+	UPROPERTY(ReplicatedUsing = OnRep_Running)
 	bool bIsRunning = false;
 
 	UFUNCTION()
 	virtual void OnRep_Running();
 
-	UPROPERTY(ReplicatedUsing = OnRep_ElapsedTime)
-	float ElapsedTime;
+	// Local copy of elapsed time (maintained by server and clients)
+	// We will *remove* the DOREPLIFETIME for this, making it local
+	float ElapsedTime = 0.0f;
 
-	UFUNCTION()
-	void OnRep_ElapsedTime();
-	
 	void UpdateTextRenderer();
-private:
 
+	// --- CLIENT RPCs (Called by Server to Client) ---
+public: // <--- Place them here
+	// Client RPCs (Called by Server to Client)
+	UFUNCTION(Client, Reliable)
+	void Client_StartTimer();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StopTimer();
+
+	UFUNCTION(Client, Reliable)
+	void Client_ResetTimer();
+
+	// Client-to-Server RPC (Called by Client to Server)
+	UFUNCTION(Server, Reliable)
+	void Server_SyncStoppedTime(float FinalTime);
+
+private:
 	UPROPERTY()
 	UTextRenderComponent* TimerTextRenderer;
 
+	// Server-only variable to store the final time when stopped
+	float ServerStoppedTime = 0.0f;
 };

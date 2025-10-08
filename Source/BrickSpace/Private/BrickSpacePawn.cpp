@@ -74,21 +74,34 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 {
 	if (!timeManager) return;
 
-	// Set the running state
+	// 1. Set the authoritative state (replicated to all)
 	timeManager->bIsRunning = isRunning;
-	timeManager->UpdateTextRenderer();
-	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: bIsRunning=%d, ElapsedTime=%.2f"),
-		timeManager->bIsRunning, timeManager->ElapsedTime);
+
+	// 2. Issue the immediate command to all clients (Multicast)
+	if (isRunning)
+	{
+		timeManager->Client_StartTimer();
+	}
+	else
+	{
+		timeManager->Client_StopTimer();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
 }
 
 
-void ABrickSpacePawn::Server_ResetTimer_Implementation()
+void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager)
 {
-	if (UTimeManager* TimeManager = FindComponentByClass<UTimeManager>())
-	{
-		TimeManager->ElapsedTime = 0.0f;
-		TimeManager->bIsRunning = false;
-		TimeManager->UpdateTextRenderer();
-		UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Timer reset to 0."));
-	}
+	if (!timeManager || timeManager->bIsRunning) return;
+
+	// 1. Server performs reset on its authoritative copy
+	timeManager->ElapsedTime = 0.0f;
+	// bIsRunning should already be false, but ensure it.
+	timeManager->bIsRunning = false;
+
+	// 2. Issue the immediate command to all clients (Multicast)
+	timeManager->Client_ResetTimer();
+
+	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
 }

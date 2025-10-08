@@ -48,10 +48,10 @@ protected:
 	FVector grabvec;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
-	float MinPitch = -90.0f;
+	float MinPitch = -75.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
-	float MaxPitch = 45.0f;
+	float MaxPitch = 75.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
 	float Sensitivity = 1.0f;

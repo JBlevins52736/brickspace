@@ -2,7 +2,7 @@
 #include "BrickSpacePawn.h"
 #include "Net/UnrealNetwork.h"
 #include "GameFramework/Actor.h"
-
+#include "Components/TextRenderComponent.h" 
 
 UTimeManager::UTimeManager()
 {
@@ -23,8 +23,8 @@ void UTimeManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	
-	if (bIsRunning && GetOwner() && GetOwner()->HasAuthority())
+	// Every instance (client and server) runs this if the authoritative bIsRunning is true
+	if (bIsRunning)
 	{
 		ElapsedTime += DeltaTime;
 		UpdateTextRenderer();
@@ -34,31 +34,30 @@ void UTimeManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 void UTimeManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	// Only the running state is replicated; time is calculated locally.
 	DOREPLIFETIME(UTimeManager, bIsRunning);
-	DOREPLIFETIME(UTimeManager, ElapsedTime);
 }
+
+// --- Public Functions (Called by Button) ---
 
 void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 {
-	// Modify this method to take in a pawn ref
-	// Make an rpc call in the server pawn
-	// Decide if this is the host or a remote client
 	if (!pawn) return;
 
 	if (pawn->HasAuthority())
 	{
-	
+		// 1. Server sets authoritative state
 		bIsRunning = true;
-		UE_LOG(LogTemp, Warning, TEXT("Server toggled timer. Running: %d"), bIsRunning);
-		UpdateTextRenderer();
+		UE_LOG(LogTemp, Warning, TEXT("Server initiated StartTimer. Running: %d"), bIsRunning);
+
+		// 2. Server commands all clients (including itself) to ensure local start
+		Client_StartTimer();
 	}
 	else
 	{
-	
+		// 1. Client asks server to start
 		pawn->Server_StartStopTimer(this, true);
 	}
-
-	
 }
 
 void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
@@ -67,19 +66,21 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
+		// 1. Server sets authoritative state
 		bIsRunning = false;
-		UE_LOG(LogTemp, Warning, TEXT("Server stopped timer. ElapsedTime: %.2f"), ElapsedTime);
-		UpdateTextRenderer();
+		UE_LOG(LogTemp, Warning, TEXT("Server initiated StopTimer. Running: %d"), bIsRunning);
+
+		// 2. Server commands all clients (including itself) to stop and report
+		Client_StopTimer();
 	}
 	else
 	{
+		// 1. Client asks server to stop
 		pawn->Server_StartStopTimer(this, false);
 	}
-
 }
 
 
-// Reset = clears time (only allowed when not running)
 void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 {
 	if (!pawn) return;
@@ -88,17 +89,20 @@ void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 	{
 		if (!bIsRunning)
 		{
+			// 1. Server resets its local copy and command
 			ElapsedTime = 0.0f;
-			UE_LOG(LogTemp, Warning, TEXT("Server reset timer to 0."));
-			UpdateTextRenderer();
+			ServerStoppedTime = 0.0f;
+			UE_LOG(LogTemp, Warning, TEXT("Server initiated ResetTimer."));
+
+			// 2. Server commands all clients (including itself) to reset local time
+			Client_ResetTimer();
 		}
 	}
 	else
 	{
-	
-		pawn->Server_ResetTimer();
+		// 1. Client asks server to reset
+		pawn->Server_ResetTimer(this);
 	}
-
 }
 
 float UTimeManager::GetElapsedTime() const
@@ -112,35 +116,71 @@ void UTimeManager::SetTextRenderer(UTextRenderComponent* InTextRenderer)
 	UpdateTextRenderer();
 }
 
+// --- Replication and Client RPC Implementations ---
+
 void UTimeManager::OnRep_Running()
 {
-	UpdateTextRenderer();
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_Running called. bIsRunning: %d, ElapsedTime: %.2f"), bIsRunning, ElapsedTime);
+	// Triggered when the authoritative bIsRunning state changes.
+	UE_LOG(LogTemp, Warning, TEXT("OnRep_Running called. bIsRunning: %d"), bIsRunning);
+
+	// If the timer stops, ensure the display is updated to the final local time.
+	if (!bIsRunning)
+	{
+		UpdateTextRenderer();
+	}
 }
 
-void UTimeManager::OnRep_ElapsedTime()
+void UTimeManager::Client_StartTimer_Implementation()
 {
-
-	UpdateTextRenderer();
+	// Command received to start. TickComponent will handle time accumulation.
+	UE_LOG(LogTemp, Warning, TEXT("Client received Start Timer command."));
 }
 
+void UTimeManager::Client_StopTimer_Implementation()
+{
+	// Command received to stop.
+
+	// 1. Only clients report their final time to the server.
+	if (!GetOwner()->HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);
+		// 2. Client calls the Server RPC to synchronize its final time.
+		Server_SyncStoppedTime(ElapsedTime);
+	}
+
+	// The replicated bIsRunning flag will be set to false, stopping the Tick.
+}
+
+void UTimeManager::Client_ResetTimer_Implementation()
+{
+	// Reset the client's local time immediately
+	ElapsedTime = 0.0f;
+	UpdateTextRenderer();
+	UE_LOG(LogTemp, Warning, TEXT("Client received Reset Timer command. Local Time Reset."));
+}
+
+void UTimeManager::Server_SyncStoppedTime_Implementation(float FinalTime)
+{
+	// This RPC is executed on the server, saving the client's precise time.
+	ServerStoppedTime = FinalTime;
+	UE_LOG(LogTemp, Warning, TEXT("Server received final time from client: %.2f"), ServerStoppedTime);
+}
+
+// --- Text Formatting ---
 
 void UTimeManager::UpdateTextRenderer()
 {
-	
+
 	if (TimerTextRenderer)
 	{
 		int TotalMilliseconds = static_cast<int32>(ElapsedTime * 1000.0f);
 
-		int Minutes = TotalMilliseconds / 60000;                        // 60,000 ms in a minute
-		int Seconds = (TotalMilliseconds % 60000) / 1000;               // remainder / 1000 = seconds
-		int Centiseconds = (TotalMilliseconds % 1000) / 10;             // ms / 10 = 2 digits (00–99)
+		int Minutes = TotalMilliseconds / 60000;
+		int Seconds = (TotalMilliseconds % 60000) / 1000;
+		int Centiseconds = (TotalMilliseconds % 1000) / 10;
 
-		// Format: MM:SS:CC (zero-padded)
 		FString TimeString = FString::Printf(TEXT("%02d:%02d:%02d"), Minutes, Seconds, Centiseconds);
 
 		TimerTextRenderer->SetText(FText::FromString(TimeString));
 	}
 }
-
-
