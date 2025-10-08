@@ -45,6 +45,7 @@ protected:
 	virtual void GrabChanged();
 	void StartWorldScaling(FVector lhand, FVector rhand);
 	void ChangeWorldScaling(FVector &lhand, FVector &rhand);
+	void HandTrackActivateToggle(const bool value);
 private:
 
 	// Bluprint mappable world grabber input functions
