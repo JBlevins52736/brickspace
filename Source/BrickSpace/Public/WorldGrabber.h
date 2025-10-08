@@ -22,6 +22,13 @@ public:
 	void Server_Move(UWorldGrabber* TargetActor, FTransform transform);
 
 	virtual void SetWorldToMeters(float worldScale);
+	void HandTrackActivateToggle(const bool value);
+	// Bluprint mappable world grabber input functions
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void LWorldGrab(const bool Value);
+
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void RWorldGrab(const bool Value);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
@@ -45,15 +52,9 @@ protected:
 	virtual void GrabChanged();
 	void StartWorldScaling(FVector lhand, FVector rhand);
 	void ChangeWorldScaling(FVector &lhand, FVector &rhand);
-	void HandTrackActivateToggle(const bool value);
+
 private:
 
-	// Bluprint mappable world grabber input functions
-	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
-	void LWorldGrab(const bool Value);
-
-	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
-	void RWorldGrab(const bool Value);
 
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void DollyToggle(const bool Value);
