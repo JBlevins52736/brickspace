@@ -55,12 +55,13 @@ void UWorldGrabberReplicated::OnRep_WorldScale(float worldScale)
 
 void UWorldGrabberReplicated::SetWorldToMeters(float worldScale)
 {
-	if (currWorldToMeters == worldScale)
-		return;
-	Super::SetWorldToMeters(worldScale);
-
-	// Notify the GameState so all clients can be updated.
+	// Only the host can change replicated world scale.
 	if (GetOwner()->HasAuthority()) {
+		if (currWorldToMeters == worldScale)
+			return;
+		Super::SetWorldToMeters(worldScale);
+
+		// Notify the GameState so all clients can be updated.
 		ABrickSpaceGameState* GameState = Cast<ABrickSpaceGameState>(UGameplayStatics::GetGameState(GetWorld()));
 		if (GameState)
 		{
@@ -103,7 +104,7 @@ void UWorldGrabberReplicated::LoadCalibration()
 				{
 					SetWorldLocation(calibration.position);
 					SetWorldRotation(calibration.rotation);
-					GetWorld()->GetWorldSettings()->WorldToMeters = calibration.worldToMeters;
+					SetWorldToMeters(calibration.worldToMeters);
 
 					UE_LOG(LogTemp, Error, TEXT("Converted Local FJsonObject to FCalibration."));
 				}
