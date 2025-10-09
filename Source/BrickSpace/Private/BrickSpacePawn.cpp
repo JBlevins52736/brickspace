@@ -7,6 +7,8 @@
 #include "Assembly.h"
 #include "WallBrick.h"
 #include "Net/UnrealNetwork.h"
+#include "TimeManager.h"
+#include "WallMover.h"
 
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()
@@ -68,4 +70,43 @@ void ABrickSpacePawn::Server_MeshScaleUpdate_Implementation(USceneComponent* lef
 	FVector scaleVec = FVector::OneVector * handScale;
 	leftHandMesh->SetWorldScale3D(scaleVec);
 	rightHandMesh->SetWorldScale3D(scaleVec);
+}
+void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeManager, bool isRunning)
+{
+	if (!timeManager) return;
+
+	// 1. Set the authoritative state (replicated to all)
+	timeManager->bIsRunning = isRunning;
+
+	// 2. Issue the immediate command to all clients (Multicast)
+	if (isRunning)
+	{
+		timeManager->Client_StartTimer();
+	}
+	else
+	{
+		timeManager->Client_StopTimer();
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
+}
+
+
+void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager)
+{
+	if (!timeManager || timeManager->bIsRunning) return;
+
+	timeManager->ElapsedTime = 0.0f;
+	
+	timeManager->bIsRunning = false;
+	timeManager->Client_ResetTimer();
+
+	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
+}
+void ABrickSpacePawn::Server_UpdateWallAngle_Implementation(UWallMover* WallMover, float LeverAngle)
+{
+	if (WallMover)
+	{
+		WallMover->SetMovementTarget(LeverAngle);
+	}
 }

@@ -26,4 +26,5 @@ protected:
 
 private:
     FTransform InitialTransform = FTransform::Identity;
+    FTransform InitialRelativeTransform = FTransform::Identity;
 };
