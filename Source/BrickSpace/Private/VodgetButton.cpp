@@ -16,7 +16,7 @@ void UVodgetButton::Focus(USelector* cursor, bool state)
 void UVodgetButton::ForePinch(USelector* selector, bool state)
 {
     if (!selector) return;
-
+ 
     if (state && !bIsPressed)
     {
         // Button pressed
