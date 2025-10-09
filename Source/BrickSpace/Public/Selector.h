@@ -30,6 +30,9 @@ public:
 
 	virtual void SetFilter(uint16 filter);
 
+	UVodget* GetFocusVodget();
+	UVodget* GetFocusGrabbedVodget();
+
 	UPROPERTY(EditAnywhere, meta = (Bitmask), Category = "VAR")
 	uint16 selectionFilter = 0xFF;
 
