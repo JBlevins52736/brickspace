@@ -93,6 +93,7 @@ void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 
 			//Server commands all clients (including itself) to reset local time
 			Client_ResetTimer();
+			UpdateTextRenderer();
 		}
 	}
 	else
