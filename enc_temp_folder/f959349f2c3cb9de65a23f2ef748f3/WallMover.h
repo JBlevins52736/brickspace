@@ -34,11 +34,7 @@ private:
 	float CurrentPercentage = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")
-	float LoweredZOffset = -90.0f; 
-
-	UPROPERTY(EditAnywhere, Category = "Wall Control")
-	float RaisedZOffset = 90.0f;
-
+	float LoweredZOffset = -70.0f; 
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")
 	float MovementInterpSpeed = .5f;
@@ -51,6 +47,4 @@ private:
 
 	bool bIsInitialized = false;
 	FVector LoweredRelativeLocation;
-	
-	FVector RaisedRelativeLocation;
 };

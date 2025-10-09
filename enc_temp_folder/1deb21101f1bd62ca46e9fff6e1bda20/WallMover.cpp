@@ -15,7 +15,6 @@ void UWallMover::BeginPlay()
 
     InitialRelativeLocation = GetRelativeLocation();
     LoweredRelativeLocation = InitialRelativeLocation + FVector(0.0f, 0.0f, LoweredZOffset);
-    RaisedRelativeLocation = InitialRelativeLocation + FVector(0.0f, 0.0f, RaisedZOffset);
 
    
     TargetRelativeLocation = InitialRelativeLocation;
@@ -35,7 +34,7 @@ void UWallMover::SetMovementTarget(float Percentage)
     else if (Percentage > 0.0f)
     {
         
-        TargetRelativeLocation = RaisedRelativeLocation;
+        TargetRelativeLocation = InitialRelativeLocation;
     }
     else
     {
@@ -58,7 +57,7 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
     float PercentageAbs = FMath::Abs(CurrentPercentage);
 
-    const float BaseSpeedFactor = 2.0f; 
+    const float BaseSpeedFactor = 3.0f; 
 
     FVector NewLocation = UKismetMathLibrary::VInterpTo(
         GetRelativeLocation(),

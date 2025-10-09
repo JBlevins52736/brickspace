@@ -47,7 +47,7 @@ void UWallLever::ForePinch(USelector* cursor, bool state)
 			PrimaryComponentTick.SetTickFunctionEnable(false); 
 			FRotator snapBack = FRotator(0.0f, 0.0f, 0.0f);
 			clientComponent->SetRelativeRotation(snapBack);
-			OnLeverMoved.Broadcast(0.0f);
+			
 		}
 	}
 }
