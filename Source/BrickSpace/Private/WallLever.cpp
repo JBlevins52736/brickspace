@@ -45,6 +45,8 @@ void UWallLever::ForePinch(USelector* cursor, bool state)
 			grabbingSelector->GrabFocus(false);
 			grabbingSelector = nullptr;
 			PrimaryComponentTick.SetTickFunctionEnable(false); 
+			FRotator snapBack = FRotator(0.0f, 0.0f, 0.0f);
+			clientComponent->SetRelativeRotation(snapBack);
 		}
 	}
 }
@@ -82,7 +84,8 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	}
 	else
 	{
-	
+		
 		PrimaryComponentTick.SetTickFunctionEnable(false);
+		
 	}
 }
