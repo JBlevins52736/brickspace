@@ -42,7 +42,7 @@ public:
 	float MaxDepressionDistance = -5.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-	float PressThreshold = -3.0f;
+	float PressThreshold = -2.0f;
 
 
 	UPROPERTY(BlueprintAssignable, Category = "Button")

@@ -1,12 +1,12 @@
 #include "WallMover.h"
-#include "WallLever.h"
+#include "WallLever.h" 
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 
-
 UWallMover::UWallMover()
 {
-    PrimaryComponentTick.bCanEverTick = true; 
+    PrimaryComponentTick.bCanEverTick = true;
+    SetIsReplicatedByDefault(true); 
 }
 
 void UWallMover::BeginPlay()
@@ -14,33 +14,39 @@ void UWallMover::BeginPlay()
     Super::BeginPlay();
 
     InitialRelativeLocation = GetRelativeLocation();
+    LoweredRelativeLocation = InitialRelativeLocation + FVector(0.0f, 0.0f, LoweredZOffset);
+
+   
     TargetRelativeLocation = InitialRelativeLocation;
-    bIsInitialized = true;
-
-    TargetRelativeLocation.Z = InitialRelativeLocation.Z + LoweredZOffset;
 }
 
-void UWallMover::SetMovementTarget(float LeverAngle)
+void UWallMover::SetMovementTarget(float Percentage)
 {
-    CurrentLeverAngle = LeverAngle;
-    if (!bIsInitialized) return;
+    // Store the incoming percentage (e.g., -1.0 to 1.0)
+    // The previous logic for alpha based on LoweredThreshold and RaisedThreshold is now
+    // handled by the external component broadcasting Percentage.
+    CurrentPercentage = Percentage;
 
-    const float MinRange = LoweredThreshold; 
-    const float MaxRange = RaisedThreshold;  
+    // In this model, the TargetRelativeLocation will be the fully lowered or fully
+    // raised position, and the VInterpTo speed will vary.
 
-
-    const float ClampedLeverAngle = FMath::Clamp(LeverAngle, MinRange, MaxRange);
-    float Alpha = UKismetMathLibrary::NormalizeToRange(ClampedLeverAngle, MinRange, MaxRange);
-
-    FVector RaisedLocation = InitialRelativeLocation;
-    FVector LoweredLocation = InitialRelativeLocation + FVector(0.0f, 0.0f, LoweredZOffset);
-
-    TargetRelativeLocation.Z = FMath::Lerp(LoweredLocation.Z, RaisedLocation.Z, Alpha);
-
-    TargetRelativeLocation.X = InitialRelativeLocation.X;
-    TargetRelativeLocation.Y = InitialRelativeLocation.Y;
-    UE_LOG(LogTemp, Log, TEXT("SERVER: Lever Angle: %.2f | Alpha: %.2f | Target Z: %.2f"), LeverAngle, Alpha, TargetRelativeLocation.Z); 
+    if (Percentage < 0.0f)
+    {
+        // Negative percentage: moving towards the lowered position
+        TargetRelativeLocation = LoweredRelativeLocation;
+    }
+    else if (Percentage > 0.0f)
+    {
+        // Positive percentage: moving towards the initial (raised) position
+        TargetRelativeLocation = InitialRelativeLocation;
+    }
+    else
+    {
+        // Percentage is 0: target is the current location (wall stops moving)
+        TargetRelativeLocation = GetRelativeLocation();
+    }
 }
+
 
 void UWallMover::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -53,36 +59,27 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (!bIsInitialized) return;
+    // Get the speed multiplier based on the absolute percentage (0.0 to 1.0)
+    float PercentageAbs = FMath::Abs(CurrentPercentage);
 
-    FVector CurrentLocation = GetRelativeLocation();
-
-    if (CurrentLocation.Equals(TargetRelativeLocation, 0.01f))
+    // If the wall is at the target AND the input is 0, we can stop early.
+    // If the input is not 0, we still need to run the VInterpTo to reach the target.
+    // NOTE: Checking equality with floats can be unreliable. Using a small tolerance is better.
+    if (FMath::IsNearlyEqual(PercentageAbs, 0.0f) && GetRelativeLocation().Equals(TargetRelativeLocation, 0.01f))
     {
         return;
     }
 
-    const float AngleFromCenter = FMath::Abs(CurrentLeverAngle);
-    const float MaxAbsAngle = FMath::Max(FMath::Abs(LoweredThreshold), FMath::Abs(RaisedThreshold));
-
-    float AngleFactor = FMath::GetMappedRangeValueClamped(
-        FVector2D(0.0f, MaxAbsAngle),
-        FVector2D(0.0f, 1.0f),
-        AngleFromCenter
-    );
-
-    const float MaxSpeedMultiplier = 5.0f;
-
-    const float DynamicSpeedMultiplier = 1.0f + (AngleFactor * MaxSpeedMultiplier);
-
-    const float FinalInterpSpeed = MovementInterpSpeed * DynamicSpeedMultiplier;
-    UE_LOG(LogTemp, Verbose, TEXT("Angle: %.2f | AngleFactor: %.2f | Final Speed: %.2f"), CurrentLeverAngle, AngleFactor, FinalInterpSpeed);
+    // New InterpSpeed calculation: MovementInterpSpeed * PercentageAbs
+    // The percentage is already normalized (0 to 1), so no need to divide it by anything else.
+    // We can use a reasonable constant factor for overall movement speed.
+    const float BaseSpeedFactor = 100.0f; // A constant for base movement speed (adjust as needed)
 
     FVector NewLocation = UKismetMathLibrary::VInterpTo(
-        CurrentLocation,
+        GetRelativeLocation(),
         TargetRelativeLocation,
         DeltaTime,
-        FinalInterpSpeed
+        (BaseSpeedFactor * PercentageAbs) // Speed increases directly with PercentageAbs
     );
 
     SetRelativeLocation(NewLocation);

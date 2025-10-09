@@ -31,17 +31,13 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 private:
 
-	UPROPERTY(EditAnywhere, Category = "Wall Control")
-	float LoweredZOffset = -70.0f; // 5 units down
+	float CurrentPercentage = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")
-	float LoweredThreshold = -70.0f;
+	float LoweredZOffset = -70.0f; 
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")
-	float RaisedThreshold = 70.0f;
-
-	UPROPERTY(EditAnywhere, Category = "Wall Control")
-	float MovementInterpSpeed = 0.5f;
+	float MovementInterpSpeed = .5f;
 
 	float CurrentLeverAngle = 0.0f;
 	FVector InitialRelativeLocation;
@@ -50,5 +46,5 @@ private:
 	FVector TargetRelativeLocation;
 
 	bool bIsInitialized = false;
-	
+	FVector LoweredRelativeLocation;
 };

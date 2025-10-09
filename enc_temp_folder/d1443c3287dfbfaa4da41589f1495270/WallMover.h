@@ -28,6 +28,7 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 private:
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")
@@ -44,7 +45,10 @@ private:
 
 	float CurrentLeverAngle = 0.0f;
 	FVector InitialRelativeLocation;
+
+	UPROPERTY(Replicated)
 	FVector TargetRelativeLocation;
+
 	bool bIsInitialized = false;
 	
 };

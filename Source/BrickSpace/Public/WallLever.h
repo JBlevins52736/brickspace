@@ -48,10 +48,10 @@ protected:
 	FVector grabvec;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
-	float MinPitch = -75.0f;
+	float MinPitch = -60.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
-	float MaxPitch = 75.0f;
+	float MaxPitch = 60.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Lever Settings")
 	float Sensitivity = 1.0f;
@@ -62,6 +62,7 @@ private:
 	//FRotator TargetLeverRotation = FRotator::ZeroRotator;
 	//FRotator CurrentLeverRotation = FRotator::ZeroRotator;
 	//float initialGrabAngle = 0.0f;
+	//FVector initialGrabVector;
 	//FVector initialGrabVector;
 	
 };

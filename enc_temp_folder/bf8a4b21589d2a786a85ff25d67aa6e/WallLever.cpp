@@ -30,9 +30,8 @@ void UWallLever::ForePinch(USelector* cursor, bool state)
 		{
 			grabbingSelector = cursor;
 
-			FVector worldPos = grabbingSelector->Cursor().GetLocation();
-			grabvec = clientComponent->GetComponentTransform().InverseTransformPosition(worldPos);
-			grabvec.X = 0.0;
+			FVector worldPos = cursor->Cursor().GetLocation();
+			FVector localPos = GetComponentTransform().InverseTransformPosition(worldPos);
 
 			cursor->GrabFocus(true);
 			PrimaryComponentTick.SetTickFunctionEnable(true);
@@ -57,28 +56,27 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	if (grabbingSelector)
 	{
 		FVector worldPos = grabbingSelector->Cursor().GetLocation();
-		FVector localPos = clientComponent->GetComponentTransform().InverseTransformPosition(worldPos);
+		FVector localPos = GetComponentTransform().InverseTransformPosition(worldPos);
 		FVector currVec(0.0f, localPos.Y, localPos.Z);
+		currVec.Normalize();
 
 		FQuat deltaRot = FQuat::FindBetweenVectors(grabvec, currVec);
 
-		//UE_LOG(LogTemp, Warning, TEXT("Error: %.2f"), ds);
-
 		FQuat currentRot = clientComponent->GetRelativeRotation().Quaternion();
-		FQuat rawNewRotQuat =  deltaRot * currentRot;
-		//clientComponent->SetRelativeRotation(rawNewRotQuat);
-
+		FQuat rawNewRotQuat = deltaRot.Inverse() * currentRot;
 
 		FRotator rawNewRot = rawNewRotQuat.Rotator();
 		float currentRoll = rawNewRot.Roll;
+
+		currentRoll *= Sensitivity;
+
 		float clampedRoll = FMath::Clamp(currentRoll, MinPitch, MaxPitch);
+
 		FRotator finalRot = FRotator(0.0f, 0.0f, clampedRoll);
 		clientComponent->SetRelativeRotation(finalRot);
 
-		float pctSpeed = clampedRoll / MaxPitch;
-
-		/*OnLeverMoved.Broadcast(clampedRoll);*/
-		OnLeverMoved.Broadcast(pctSpeed);
+		OnLeverMoved.Broadcast(clampedRoll);
+		grabvec = currVec;
 	}
 	else
 	{

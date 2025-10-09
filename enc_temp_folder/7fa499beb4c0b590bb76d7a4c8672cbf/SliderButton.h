@@ -44,12 +44,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	float PressThreshold = -3.0f;
 
-	// Blueprint events
+
 	UPROPERTY(BlueprintAssignable, Category = "Button")
 	FOnButtonPressed OnPressed;
-
-	//UPROPERTY(BlueprintAssignable, Category = "Button")
-	//FOnButtonReleased OnReleased;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Timer")
 	UTimeManager* timer;

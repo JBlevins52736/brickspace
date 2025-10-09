@@ -63,7 +63,7 @@ void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
     Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-    if (!focusSelector)
+    if (!focusSelector || !clientComponent) // Added clientComponent check
         return;
 
 
@@ -72,15 +72,21 @@ void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
     float DesiredZ = CursorLocalLocationZ - InitialCursorOffsetZ;
 
-   
     DesiredZ = FMath::Clamp(DesiredZ, MaxDepressionDistance, InitialLocalLocation);
 
     
-    FVector NewLocalLocation = clientComponent->GetRelativeLocation();
-    NewLocalLocation.Z = DesiredZ;
-    clientComponent->SetRelativeLocation(NewLocalLocation);
+    FVector CurrentLocalLocation = clientComponent->GetRelativeLocation();
+    float CurrentZ = CurrentLocalLocation.Z;
 
-    float CurrentDepression = DesiredZ - InitialLocalLocation;
+    const float LerpSpeed = 10.0f;
+    float SmoothedZ = FMath::Lerp(CurrentZ, DesiredZ, FMath::Clamp(LerpSpeed * DeltaTime, 0.0f, 1.0f));
+
+    FVector NewLocalLocation = CurrentLocalLocation;
+    NewLocalLocation.Z = SmoothedZ;
+    clientComponent->SetRelativeLocation(NewLocalLocation); 
+
+   
+    float CurrentDepression = SmoothedZ - InitialLocalLocation;
 
     if (CurrentDepression <= PressThreshold && !isPressed)
     {

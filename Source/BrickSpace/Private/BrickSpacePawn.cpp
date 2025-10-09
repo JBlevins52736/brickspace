@@ -96,12 +96,9 @@ void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager
 {
 	if (!timeManager || timeManager->bIsRunning) return;
 
-	// 1. Server performs reset on its authoritative copy
 	timeManager->ElapsedTime = 0.0f;
-	// bIsRunning should already be false, but ensure it.
+	
 	timeManager->bIsRunning = false;
-
-	// 2. Issue the immediate command to all clients (Multicast)
 	timeManager->Client_ResetTimer();
 
 	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
