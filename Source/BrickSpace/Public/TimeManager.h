@@ -23,7 +23,7 @@ protected:
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	// Server RPCs will be on the Pawn, but these public wrappers remain.
+	
 	UFUNCTION(BlueprintCallable)
 	void StartTimer(ABrickSpacePawn* Pawn);
 
@@ -39,22 +39,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetTextRenderer(UTextRenderComponent* InTextRenderer);
 
-	// The running state is replicated (server-authoritative)
+	
 	UPROPERTY(ReplicatedUsing = OnRep_Running)
 	bool bIsRunning = false;
 
 	UFUNCTION()
 	virtual void OnRep_Running();
 
-	// Local copy of elapsed time (maintained by server and clients)
-	// We will *remove* the DOREPLIFETIME for this, making it local
+
 	float ElapsedTime = 0.0f;
 
 	void UpdateTextRenderer();
 
-	// --- CLIENT RPCs (Called by Server to Client) ---
-public: // <--- Place them here
-	// Client RPCs (Called by Server to Client)
+	
+public: 
+
 	UFUNCTION(Client, Reliable)
 	void Client_StartTimer();
 
@@ -64,7 +63,7 @@ public: // <--- Place them here
 	UFUNCTION(Client, Reliable)
 	void Client_ResetTimer();
 
-	// Client-to-Server RPC (Called by Client to Server)
+	// Client-to-Server RPC
 	UFUNCTION(Server, Reliable)
 	void Server_SyncStoppedTime(float FinalTime);
 
@@ -72,6 +71,6 @@ private:
 	UPROPERTY()
 	UTextRenderComponent* TimerTextRenderer;
 
-	// Server-only variable to store the final time when stopped
+	
 	float ServerStoppedTime = 0.0f;
 };
