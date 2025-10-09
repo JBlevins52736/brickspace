@@ -64,6 +64,14 @@ public:
 
 #pragma endregion HAND_MATERIAL_CHANGE_REPLICATION
 
+
+
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	UChildActorComponent* menuSubsystemActor = nullptr;
+
+
+
 protected:
 	// Called when the game starts
 	virtual void SetCursor() override;
@@ -74,24 +82,23 @@ private:
 	UVodget* DoRaycast();
 	void CalculateHandSize();
 	// Handles all gesture commands
-	void CheckHandGestures();
-
+	void CheckHandGestures(float deltaTime);
+	void UpdatePalmTrackingPoint();
 	// Handles grabbing objects
 	void HandGrabGesture(const FVector& palmPos);
 	void WorldGrabGesture(const FVector& palmPos);
 	void CalculateEyeHandPosBoneData(FVector& startVector, FVector& endPos);
-	inline FVector GetHandMidpointPos();
-	void PinchGesture(const FVector& palmPos);
-	void FlickGesture(const FVector& palmPos);
+	inline FVector GetMidPointBetweenThumbIndex();
+	void DetectActivationMenuSystem();
 	float ratioHitEyeOverHandEye = 0.0;
 	float relativeHandSizeSquared = 0;
 	// The hit result gets populated by the line trace
 	FHitResult Hit;
 	TArray<FName> boneNames; // references my hands
 	FName palmName = FName("Wrist Root"); // need these to reference my hands
-	FVector rayCastPosition = FVector::Zero();
+	FVector palmPreviousState = FVector::Zero();
 	bool handTrackingActive = false;
 	bool isUsingWorldGrabber = false;
-
-
+	bool palmInMotion = false;
+	float timeControlMenuButtonPresses = 0.0f;
 };
