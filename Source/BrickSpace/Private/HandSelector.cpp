@@ -104,7 +104,7 @@ void UHandSelector::UpdatePalmTrackingPoint()
 	if (sqrMagnitude > 0.7f) palmInMotion = true;
 	else palmInMotion = false;
 	palmPreviousState = currentPalmPos;
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("difference prev curr: %f"), sqrMagnitude));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("difference prev curr: %f"), sqrMagnitude));
 }
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
@@ -174,7 +174,7 @@ void UHandSelector::WorldGrabGesture(const FVector& palmPos)
 	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("SquaredLengthAvg: %f, Relative comp: %f "), squaredLengthAvg, relativeGrabThreshold));
 	if (!isUsingWorldGrabber && squaredLengthAvg < relativeGrabThreshold && lengthThumbSquared > relativeGrabThreshold) // Activate world grabber
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, TEXT("Entered world grab activate"));
+		//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, TEXT("Entered world grab activate"));
 		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
 		if (motionCont->GetTrackingSource() == EControllerHand::Right)
 		{
@@ -188,7 +188,7 @@ void UHandSelector::WorldGrabGesture(const FVector& palmPos)
 	}
 	else if (isUsingWorldGrabber && squaredLengthAvg >= relativeGrabThreshold) // Deactivate world grabber
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, TEXT("Entered world grab deactivate"));
+		//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Yellow, TEXT("Entered world grab deactivate"));
 
 
 		UMotionControllerComponent* motionCont = Cast<UMotionControllerComponent>(hand->GetAttachParent());
@@ -236,7 +236,7 @@ void UHandSelector::DetectActivationMenuSystem()
 	FVector midPointToEye = (centerEye->GetComponentLocation() - midpoint).GetSafeNormal();
 	float handToEyeNorm = FVector::DotProduct(midPointToEye, wristNormal);
 	float eyeToHandResult = FVector::DotProduct(centerEye->GetForwardVector(), -midPointToEye);
-	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, FString::Printf(TEXT("Result of palm to eye: %f, eye to hand result: %f"), handToEyeNorm, eyeToHandResult));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, FString::Printf(TEXT("Result of palm to eye: %f, eye to hand result: %f"), handToEyeNorm, eyeToHandResult));
 	if (handToEyeNorm <= -0.10f && eyeToHandResult > 0.5f) {
 		menuSubsystemActor->SetVisibility(true);
 		FVector centerToMidpoint = midpoint - centerEye->GetComponentLocation();
