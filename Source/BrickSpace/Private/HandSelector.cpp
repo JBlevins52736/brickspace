@@ -15,6 +15,12 @@
 #define GRAB_THRESHOLD 120 // this is the squared length of the threshold to determine if you are grabbing.
 #define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
 #define FINGERTIP_INDICIE_INC 5
+#define PALM_MOTION_LIMITS 0.7f
+#define CONTROLLER_MENU_ROTATION_LOW_lIMIT -0.2f
+#define EYE_VIEW_VECTOR_MIN 0.8f
+#define PALM_TO_EYE_VEC_MIN -0.1f
+#define DISTANCE_EYE_TO_HAND_SCALAR 0.5f
+#define HAND_SIZE_DISTANCE_SCALAR 0.7f;
 
 UHandSelector::UHandSelector() : handMaterial(nullptr)
 {
@@ -77,7 +83,9 @@ void UHandSelector::CalculateHandSize()
 	FVector middleIdx = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::ComponentSpace);
 	FVector directionToMiddleIdx = middleIdx - palmPos;
 	relativeHandSizeSquared = FVector::DotProduct(directionToMiddleIdx, directionToMiddleIdx);
-
+	FVector eyeToPalm = palmPos - centerEye->GetComponentLocation();
+	
+	squaredHandToEyeDistance = FVector::DotProduct(eyeToPalm, eyeToPalm);
 
 }
 
@@ -98,13 +106,16 @@ void UHandSelector::CheckHandGestures(float deltaTime)
 void UHandSelector::UpdatePalmTrackingPoint()
 {
 	FVector currentPalmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
-	if (currentPalmPos.IsNearlyZero()) return;
+	if (currentPalmPos.IsNearlyZero() || currentPalmPos.IsZero()) {
+
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("x: %f, y: %f, z: %f"), currentPalmPos.X, currentPalmPos.Y, currentPalmPos.Z));
+		return;
+	}
 	FVector directionPrevPalmCurrPalm = currentPalmPos - palmPreviousState;
 	float sqrMagnitude = FVector::DotProduct(directionPrevPalmCurrPalm, directionPrevPalmCurrPalm);
-	if (sqrMagnitude > 0.7f) palmInMotion = true;
+	if (sqrMagnitude > PALM_MOTION_LIMITS) palmInMotion = true;
 	else palmInMotion = false;
 	palmPreviousState = currentPalmPos;
-	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("difference prev curr: %f"), sqrMagnitude));
 }
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
@@ -228,22 +239,40 @@ void UHandSelector::DetectActivationMenuSystem()
 {
 
 	if (!skRef) return;
-	FVector wristPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
-	FVector middleTip = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::WorldSpace); // middle finget tip
-	FQuat wristRot = skRef->GetBoneRotationByName(palmName, EBoneSpaces::WorldSpace).Quaternion();
-	FVector wristNormal = -wristRot.GetUpVector();
-	FVector midpoint = (wristPos + middleTip) * 0.5f;
-	FVector midPointToEye = (centerEye->GetComponentLocation() - midpoint).GetSafeNormal();
-	float handToEyeNorm = FVector::DotProduct(midPointToEye, wristNormal);
-	float eyeToHandResult = FVector::DotProduct(centerEye->GetForwardVector(), -midPointToEye);
-	//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, FString::Printf(TEXT("Result of palm to eye: %f, eye to hand result: %f"), handToEyeNorm, eyeToHandResult));
-	if (handToEyeNorm <= -0.10f && eyeToHandResult > 0.5f) {
-		menuSubsystemActor->SetVisibility(true);
-		FVector centerToMidpoint = midpoint - centerEye->GetComponentLocation();
-		FQuat rotation = midPointToEye.Rotation().Quaternion();
-		menuSubsystemActor->SetWorldRotation(rotation);
+	if (handTrackingActive) {
+
+		FVector wristPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
+		FVector middleTip = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::WorldSpace); // middle finget tip
+		FQuat wristRot = skRef->GetBoneRotationByName(palmName, EBoneSpaces::WorldSpace).Quaternion();
+		FVector wristNormal = -wristRot.GetUpVector();
+		FVector midpoint = (wristPos + middleTip) * 0.5f;
+		FVector midpointToEye = (centerEye->GetComponentLocation() - midpoint);
+		float squaredDistancePalmToEye = FVector::DotProduct(midpointToEye, midpointToEye);
+		float relativeHandToEyeThreshold = squaredHandToEyeDistance * DISTANCE_EYE_TO_HAND_SCALAR;
+		midpointToEye.Normalize();
+		float handToEyeNorm = FVector::DotProduct(midpointToEye, wristNormal);
+		float eyeToHandResult = FVector::DotProduct(centerEye->GetForwardVector(), -midpointToEye);
+		//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, FString::Printf(TEXT("Result of palm to eye: %f, eye to hand result: %f, distance to hand: %f"), handToEyeNorm, eyeToHandResult, squaredDistancePalmToEye));
+		if (handToEyeNorm <= PALM_TO_EYE_VEC_MIN && eyeToHandResult > EYE_VIEW_VECTOR_MIN && squaredDistancePalmToEye <= relativeHandToEyeThreshold) {
+			menuSubsystemActor->SetVisibility(true);
+			FVector centerToMidpoint = midpoint - centerEye->GetComponentLocation();
+			FQuat rotation = midpointToEye.Rotation().Quaternion();
+			menuSubsystemActor->SetWorldRotation(rotation);
+		}
+		else menuSubsystemActor->SetVisibility(false);
 	}
-	else menuSubsystemActor->SetVisibility(false);
+	else {
+		FVector controllerFwdVec = hand->GetForwardVector();
+		FVector eyeFwd = centerEye->GetForwardVector();
+		float opposingView = FVector::DotProduct(eyeFwd, controllerFwdVec);
+		if(opposingView < CONTROLLER_MENU_ROTATION_LOW_lIMIT){
+			menuSubsystemActor->SetVisibility(true);
+			FVector centerToMidpoint = centerEye->GetComponentLocation() - hand->GetComponentLocation();
+			FQuat rotation = centerToMidpoint.Rotation().Quaternion();
+			menuSubsystemActor->SetWorldRotation(rotation);
+		}
+		else menuSubsystemActor->SetVisibility(false);
+	}
 }
 
 // Called when the game starts

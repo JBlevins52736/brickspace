@@ -101,4 +101,5 @@ private:
 	bool isUsingWorldGrabber = false;
 	bool palmInMotion = false;
 	float timeControlMenuButtonPresses = 0.0f;
+	float squaredHandToEyeDistance = 0.0f;
 };
