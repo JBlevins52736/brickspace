@@ -31,7 +31,6 @@ public:
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 private:
 
-	UPROPERTY(Replicated) 
 	float CurrentPercentage = 0.0f;
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")

@@ -50,7 +50,6 @@ void UWallMover::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifeti
     Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
     DOREPLIFETIME(UWallMover, TargetRelativeLocation);
-    DOREPLIFETIME(UWallMover, CurrentPercentage);
 }
 
 void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
