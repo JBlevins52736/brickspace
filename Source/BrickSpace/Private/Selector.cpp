@@ -38,6 +38,18 @@ void USelector::SetFilter(uint16 filter)
 	selectionFilter = filter;
 }
 
+UVodget* USelector::GetFocusVodget()
+{
+    return focusVodget;
+}
+
+UVodget* USelector::GetFocusGrabbedVodget()
+{
+	if (focus_grabbed)
+		return focusVodget;
+	return nullptr;
+}
+
 
 // This method should be pure virtual but is implemented to avoid Unreal compiler issues.
 void USelector::SetCursor() {}

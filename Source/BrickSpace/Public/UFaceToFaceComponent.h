@@ -2,20 +2,29 @@
 
 #pragma once
 #include "Blueprint/UserWidget.h"
+#include "Brick.h"
+#include "Selector.h"
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
 #include "UFaceToFaceComponent.generated.h"
 
 
-
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class BRICKSPACE_API UUFaceToFaceComponent : public USceneComponent
 {
-	GENERATED_BODY()
-
+	GENERATED_BODY()	
 public:	
 	// Sets default values for this component's properties
 	UUFaceToFaceComponent();
+	struct FBrickTransferState
+	{
+		bool    bActive = false;
+		FVector P0 = FVector::ZeroVector;
+		FVector P1 = FVector::ZeroVector;
+		float   Elapsed = 0.f;
+		float   Duration = 0.7f;   // tune
+		float   ArcHeight = 60.f;   // tune
+	};
 
 protected:
 	// Called when the game starts
@@ -23,20 +32,27 @@ protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-
+	FBrickTransferState Transfer;
 
 private:	 
 	 TArray<UUFaceToFaceComponent*> Registry;
 	bool DetectEyeContact(UUFaceToFaceComponent* other);
 	void SomebodyJoinedOrLeft();
-	bool DetectEyeContactHeld(UUFaceToFaceComponent* Other, float DeltaTime);
+	void BrickTransfer(UUFaceToFaceComponent* Other);
+	void LerpBrick(float DeltaTime);
+	bool FindBrick();
+	float DetectEyeContactHeld(UUFaceToFaceComponent* Other, float DeltaTime);
 	void ShowFaceWidget(bool bShow);
 	//void ShowFaceWidget(bool bShow);
 	TMap<UUFaceToFaceComponent*, float> EyeContactTimers;
 	float HoldSeconds = 0.7f;
 	float AngleThreshold = 10.0f;
+	float TransferActive = 3.0f;
 	//UPROPERTY(EditAnywhere, Category = "VAR_UI")
 	TSubclassOf<UUserWidget> FaceWidgetClass;
-	UUserWidget* ActiveWidget = nullptr;
+	UUserWidget* ActiveWidget = nullptr;	
+
+	UVodget* LBrick = nullptr;
+	UVodget* RBrick = nullptr;
 	
 };
