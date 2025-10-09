@@ -22,7 +22,6 @@ public:
 	void Server_Move(UWorldGrabber* TargetActor, FTransform transform);
 
 	virtual void SetWorldToMeters(float worldScale);
-	void HandTrackActivateToggle(const bool value);
 	// Bluprint mappable world grabber input functions
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void LWorldGrab(const bool Value);
