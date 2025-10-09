@@ -46,43 +46,31 @@ void UWallBrick::Server_CloneWallBrick_Implementation(const FTransform& onWallTr
     UWorld* World = TargetActor->GetWorld();
     if (!World) return;
 
-  
+    // We assume the desired spawn location is the current world location of the brick 
+    // before it gets pulled, which is stored in InitialTransform.
     FTransform SpawnWorldTransform = InitialTransform;
 
-   
+    // 1. Spawn the new brick at the saved WORLD location
     AActor* clonedBrick = World->SpawnActor<AActor>(TargetActor->GetClass(), SpawnWorldTransform);
     if (!clonedBrick) return;
 
-   
+    // 2. FIND THE MOVING PARENT (The Wall Scene Component)
     USceneComponent* WallComponent = clientComponent ? clientComponent->GetAttachParent() : nullptr;
 
     if (WallComponent)
     {
-      
+        // 3. ATTACH the cloned brick's root component to the WallComponent
         clonedBrick->GetRootComponent()->AttachToComponent(
             WallComponent,
-            FAttachmentTransformRules::KeepWorldTransform 
+            FAttachmentTransformRules::KeepWorldTransform // Keep its current world position initially
         );
 
+        // 4. SET THE RELATIVE TRANSFORM
+        // Now that it's attached, set its relative transform to the saved value.
+        clonedBrick->GetRootComponent()->SetRelativeTransform(InitialRelativeTransform);
 
-        
-        FTransform WallWorldTransform = WallComponent->GetComponentTransform();
-
-    
-        FTransform BrickWorldTransform = InitialTransform;
-
-        
-        FTransform NewRelativeTransform = BrickWorldTransform.GetRelativeTransform(WallWorldTransform);
-
-      
-        clonedBrick->GetRootComponent()->SetRelativeTransform(NewRelativeTransform);
-
-       
-        UE_LOG(LogTemp, Warning, TEXT("New Relative Pos: %s"), *NewRelativeTransform.GetLocation().ToString());
-       
-
-        //UE_LOG(LogTemp, Log, TEXT("Cloned brick attached to parent: %s, Relative Pos: %s"),
-        //    *WallComponent->GetName(), *InitialRelativeTransform.GetLocation().ToString());
+        UE_LOG(LogTemp, Log, TEXT("Cloned brick attached to parent: %s, Relative Pos: %s"),
+            *WallComponent->GetName(), *InitialRelativeTransform.GetLocation().ToString());
     }
     else
     {
@@ -91,10 +79,6 @@ void UWallBrick::Server_CloneWallBrick_Implementation(const FTransform& onWallTr
 
     // Mark the original brick as removed/cloned
     bThresholdReached = true;
-    if (bThresholdReached) 
-    {
-        clientComponent->DetachFromParent();
-    }
 }
 
 void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

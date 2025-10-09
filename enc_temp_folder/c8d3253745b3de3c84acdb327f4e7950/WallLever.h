@@ -27,6 +27,8 @@ public:
 	virtual void ForePinch(USelector* cursor, bool state) override;
 	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	
+	void UpdateLeverFromSelector(class USelector* cursor);
 
 
 	UPROPERTY(BlueprintAssignable, Category = "Lever Events")

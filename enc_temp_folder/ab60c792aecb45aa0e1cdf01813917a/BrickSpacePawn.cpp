@@ -94,9 +94,12 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 
 void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager)
 {
-	if (!timeManager) return;
+	if (!timeManager || timeManager->bIsRunning) return;
 
-	timeManager->ResetTimer(this);
+	timeManager->ElapsedTime = 0.0f;
+	
+	timeManager->bIsRunning = false;
+	timeManager->Client_ResetTimer();
 
 	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
 }

@@ -23,7 +23,7 @@ void UTimeManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-
+	// Every instance (client and server) runs this if the authoritative bIsRunning is true
 	if (bIsRunning)
 	{
 		ElapsedTime += DeltaTime;
@@ -34,8 +34,11 @@ void UTimeManager::TickComponent(float DeltaTime, ELevelTick TickType, FActorCom
 void UTimeManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	// Only the running state is replicated; time is calculated locally.
 	DOREPLIFETIME(UTimeManager, bIsRunning);
 }
+
+// --- Public Functions (Called by Button) ---
 
 void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 {
@@ -43,16 +46,16 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		//Server sets authoritative state
+		// 1. Server sets authoritative state
 		bIsRunning = true;
 		UE_LOG(LogTemp, Warning, TEXT("Server initiated StartTimer. Running: %d"), bIsRunning);
 
-		//Server commands all clients (including itself) to ensure local start
+		// 2. Server commands all clients (including itself) to ensure local start
 		Client_StartTimer();
 	}
 	else
 	{
-		//Client asks server to start
+		// 1. Client asks server to start
 		pawn->Server_StartStopTimer(this, true);
 	}
 }
@@ -63,16 +66,16 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		//Server sets authoritative state
+		// 1. Server sets authoritative state
 		bIsRunning = false;
 		UE_LOG(LogTemp, Warning, TEXT("Server initiated StopTimer. Running: %d"), bIsRunning);
 
-		//Server commands all clients (including itself) to stop and report
+		// 2. Server commands all clients (including itself) to stop and report
 		Client_StopTimer();
 	}
 	else
 	{
-		//Client asks server to stop
+		// 1. Client asks server to stop
 		pawn->Server_StartStopTimer(this, false);
 	}
 }
@@ -86,18 +89,18 @@ void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 	{
 		if (!bIsRunning)
 		{
-			// Server resets its local copy and command
+			// 1. Server resets its local copy and command
 			ElapsedTime = 0.0f;
 			ServerStoppedTime = 0.0f;
 			UE_LOG(LogTemp, Warning, TEXT("Server initiated ResetTimer."));
 
-			//Server commands all clients (including itself) to reset local time
+			// 2. Server commands all clients (including itself) to reset local time
 			Client_ResetTimer();
 		}
 	}
 	else
 	{
-		//Client asks server to reset
+		// 1. Client asks server to reset
 		pawn->Server_ResetTimer(this);
 	}
 }
@@ -137,11 +140,11 @@ void UTimeManager::Client_StopTimer_Implementation()
 {
 	// Command received to stop.
 
-	//Only clients report their final time to the server.
+	// 1. Only clients report their final time to the server.
 	if (!GetOwner()->HasAuthority())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);
-		//Client calls the Server RPC to synchronize its final time.
+		// 2. Client calls the Server RPC to synchronize its final time.
 		Server_SyncStoppedTime(ElapsedTime);
 	}
 
@@ -153,16 +156,17 @@ void UTimeManager::Client_ResetTimer_Implementation()
 	// Reset the client's local time immediately
 	ElapsedTime = 0.0f;
 	UpdateTextRenderer();
-	Server_SyncStoppedTime(ElapsedTime);
 	UE_LOG(LogTemp, Warning, TEXT("Client received Reset Timer command. Local Time Reset."));
 }
 
 void UTimeManager::Server_SyncStoppedTime_Implementation(float FinalTime)
 {
-	// This RPC is executed on the server, saving the client's time.
+	// This RPC is executed on the server, saving the client's precise time.
 	ServerStoppedTime = FinalTime;
 	UE_LOG(LogTemp, Warning, TEXT("Server received final time from client: %.2f"), ServerStoppedTime);
 }
+
+// --- Text Formatting ---
 
 void UTimeManager::UpdateTextRenderer()
 {
