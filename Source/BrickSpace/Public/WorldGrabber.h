@@ -22,6 +22,13 @@ public:
 	void Server_Move(UWorldGrabber* TargetActor, FTransform transform);
 
 	virtual void SetWorldToMeters(float worldScale);
+	void HandTrackActivateToggle(const bool value);
+	// Bluprint mappable world grabber input functions
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void LWorldGrab(const bool Value);
+
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void RWorldGrab(const bool Value);
 
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
@@ -41,19 +48,13 @@ protected:
 	bool activeMode = false;
 
 	float currWorldToMeters = 100.0;
-	float initialWorldToMeters = 100.0;
 
 	virtual void GrabChanged();
 	void StartWorldScaling(FVector lhand, FVector rhand);
-	void ChangeWorldScaling(FVector lhand, FVector rhand);
-public:
+	void ChangeWorldScaling(FVector &lhand, FVector &rhand);
 
-	// Bluprint mappable world grabber input functions
-	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
-	void LWorldGrab(const bool Value);
+private:
 
-	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
-	void RWorldGrab(const bool Value);
 
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void DollyToggle(const bool Value);
@@ -64,12 +65,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void ActivateToggle(const bool Value);
 
-	void HandTrackActivateToggle(const bool value);
-private:
 	bool leftGrabbing = false;
 	bool rightGrabbing = false;
 
-	float initialBimanualHandDist;
+	float prevBimanualHandDist;
 
 	// Called every frame
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

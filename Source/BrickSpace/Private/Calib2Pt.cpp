@@ -15,23 +15,26 @@ void UCalib2Pt::ActiveChanged()
 void UCalib2Pt::SetLocalCursor()
 {
 	if (posAnchorSet) {
+
+		if (rotAnchorSet && GetOwner()->HasAuthority()) 
+		{
+			//ChangeWorldScaling(posAnchor, rotAnchor);
+		}
+
+		FVector posAnchorScaled = posAnchorInit * (currWorldToMeters / initWorldToMeters);
+
+		//FTransform worldsrt = childsrt * cursorsrt;
+		//FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
+
+		posAnchorMarker->SetWorldLocation(posAnchorScaled);
+
+
 		cursorsrt.SetLocation(posAnchor);
 		if (rotAnchorSet) {
 			FVector xAxis = rotAnchor - posAnchor;
 			xAxis.Z = 0.0;
 			FQuat rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
 			cursorsrt.SetRotation(rot);
-
-			// 
-			//if (GetOwner()->HasAuthority()) {
-			//	ChangeWorldScaling(posAnchor, rotAnchor);
-
-			//	float currBimanualHandDist = (posAnchor - rotAnchor).Length();
-			//	float ds = initialWorldToMeters / currWorldToMeters;
-			//	posAnchor *= ds;
-			//	rotAnchor *= ds;
-
-			//}
 		}
 	}
 	else {
@@ -42,8 +45,6 @@ void UCalib2Pt::SetLocalCursor()
 
 void UCalib2Pt::UpdatePosAnchor(FVector pos)
 {
-	UE_LOG(LogTemp, Warning, TEXT("UpdatePosAnchor receiving"));
-
 	if (rotAnchorSet) {
 		// Reset and start pos anchor grabbing
 		posAnchorSet = false;
@@ -51,6 +52,11 @@ void UCalib2Pt::UpdatePosAnchor(FVector pos)
 	}
 
 	posAnchor = pos;
+
+	posAnchorInit = pos;
+	initWorldToMeters = currWorldToMeters;
+	posAnchorLocal = GetComponentTransform().InverseTransformPosition(pos);
+
 	if (posAnchorSet) {
 		// Update pos anchor grabbing.
 		UpdateCursors();
