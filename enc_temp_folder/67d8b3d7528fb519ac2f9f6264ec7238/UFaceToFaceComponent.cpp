@@ -26,7 +26,7 @@ void UUFaceToFaceComponent::BeginPlay()
 
 	APawn* PawnOwner = Cast<APawn>(GetOwner());
 	if (PawnOwner && PawnOwner->IsLocallyControlled())
-	{
+	{     
 		SomebodyJoinedOrLeft();
 	}
 	Registry.Add(this);
@@ -51,7 +51,7 @@ void UUFaceToFaceComponent::SomebodyJoinedOrLeft()
 	{
 		// Update our local registry of all the other pawns.
 		TArray<AActor*> FoundActors;
-		UGameplayStatics::GetAllActorsOfClass(GetWorld(), APawn::StaticClass(), FoundActors);
+		UGameplayStatics::GetAllActorsOfClass(GetWorld(), AActor::StaticClass(), FoundActors);
 
 		// Now, FoundActors contains all ACharacter instances in the level.
 		// You can iterate through this array and cast to ACharacter if needed.
@@ -78,16 +78,16 @@ void UUFaceToFaceComponent::BrickTransfer(UUFaceToFaceComponent* Other)
 
 		const FVector otherPos = Other->GetComponentLocation();
 		const FVector fwd = Other->GetForwardVector();
-		const float FrontOffset = 70.f;
-		const float HoldHeight = 25.f;
+		const float FrontOffset = 70.f;  
+		const float HoldHeight = 25.f; 
 
 		Transfer.P1 = otherPos + fwd * FrontOffset + FVector::UpVector * HoldHeight;
 		Transfer.Elapsed = 0.f;
-		Transfer.Duration = 0.7f;
+		Transfer.Duration = 0.7f;  
 		Transfer.ArcHeight = 60.f;
 		Transfer.bActive = true;
 	}
-
+	
 }
 
 void UUFaceToFaceComponent::LerpBrick(float DeltaTime)
@@ -95,24 +95,24 @@ void UUFaceToFaceComponent::LerpBrick(float DeltaTime)
 	AActor* R_Brick = RBrick->GetOwner();
 
 	Transfer.Elapsed += DeltaTime;
-	float s = FMath::Clamp(Transfer.Elapsed / Transfer.Duration, 0.f, 1.f);
+	 float s = FMath::Clamp(Transfer.Elapsed / Transfer.Duration, 0.f, 1.f);
 
-	FVector base = FMath::Lerp(Transfer.P0, Transfer.P1, s);
-	const float   bump = 4.f * s * (1.f - s) * Transfer.ArcHeight;
-	const FVector pos = base + FVector::UpVector * bump;
-	R_Brick->SetActorLocation(pos);
+	 FVector base = FMath::Lerp(Transfer.P0, Transfer.P1, s);
+	 const float   bump = 4.f * s * (1.f - s) * Transfer.ArcHeight; 
+	 const FVector pos = base + FVector::UpVector * bump;
+	 R_Brick->SetActorLocation(pos);
 
-	const FVector dir = (Transfer.P1 - Transfer.P0).GetSafeNormal();
-	if (!dir.IsNearlyZero())
-	{
-		R_Brick->SetActorRotation(dir.Rotation());
-	}
+	 const FVector dir = (Transfer.P1 - Transfer.P0).GetSafeNormal();
+	 if (!dir.IsNearlyZero())
+	 {
+		 R_Brick->SetActorRotation(dir.Rotation());
+	 }
 
-	if (s >= 1.f)
-	{
-
-		R_Brick->SetActorLocation(Transfer.P1);
-	}
+	 if (s >= 1.f)
+	 {
+		 
+		 R_Brick->SetActorLocation(Transfer.P1);
+	 }
 
 }
 
@@ -145,12 +145,12 @@ bool UUFaceToFaceComponent::FindBrick()
 				}
 				break;
 			}
-
+			
 		}
 
 	}
 	return FoundBrick;
-
+	
 }
 
 
@@ -168,33 +168,32 @@ void UUFaceToFaceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 	// Draw debug line 
 	FVector End = Start + Forward * 1000.0f;
 	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
-
+	
 
 
 	for (UUFaceToFaceComponent* othercomp : Registry) {
 		//AActor* Other = othercomp->GetOwner();
 		if (othercomp != this) {
 			FString phrase = othercomp->GetOwner()->GetName();
-			float EyeContact = DetectEyeContactHeld(othercomp, DeltaTime);
+			float EyeContact = DetectEyeContactHeld(othercomp,DeltaTime);
 			if (EyeContact >= HoldSeconds) {
 				ShowFaceWidget(true);
 				GEngine->AddOnScreenDebugMessage(-1, 1.5f, FColor::Green, "Bruh its  working (held >= 0.7s)");
 			}
-			if (!Transfer.bActive && EyeContact >= TransferActive) {
+			 if (!Transfer.bActive && EyeContact >= TransferActive) {
 				BrickTransfer(othercomp);
-
+				
 			}
 			else {
 				ShowFaceWidget(false);
-				float* TimerPtr = EyeContactTimers.Find(othercomp);
+				 float* TimerPtr = EyeContactTimers.Find(othercomp);
 				float t = TimerPtr ? *TimerPtr : 0.f;
 				FString Msg = "Maintaining eye contact: %.2fs / %.2fs" + FString::SanitizeFloat(t, HoldSeconds);
 				GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, Msg);
 			}
 		}
 	}
-	if (RBrick != nullptr)
-		LerpBrick(DeltaTime);
+	LerpBrick(DeltaTime);
 }
 
 bool UUFaceToFaceComponent::DetectEyeContact(UUFaceToFaceComponent* other)
@@ -231,7 +230,7 @@ bool UUFaceToFaceComponent::DetectEyeContact(UUFaceToFaceComponent* other)
 	UE_LOG(LogTemp, Warning, TEXT("%s"), *dototot);
 
 	//float Threshold = FMath::Cos(FMath::DegreesToRadians(90.0f));
-
+	
 	float CosThresh = FMath::Cos(FMath::DegreesToRadians(AngleThreshold));
 
 	bool ISFaceToFace = (DotA >= CosThresh) && (DotB >= CosThresh) && (DotOpp <= -CosThresh);
@@ -245,7 +244,7 @@ float UUFaceToFaceComponent::DetectEyeContactHeld(UUFaceToFaceComponent* other, 
 {
 	if (!other) return false;
 
-	bool bRaw = DetectEyeContact(other);
+	 bool bRaw = DetectEyeContact(other); 
 
 	float& Timer = EyeContactTimers.FindOrAdd(other);
 	Timer = bRaw ? (Timer + DeltaTime) : 0.f;

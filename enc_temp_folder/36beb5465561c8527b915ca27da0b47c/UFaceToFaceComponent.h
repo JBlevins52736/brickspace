@@ -22,8 +22,8 @@ public:
 		FVector P0 = FVector::ZeroVector;
 		FVector P1 = FVector::ZeroVector;
 		float   Elapsed = 0.f;
-		float   Duration = 0.7f; 
-		float   ArcHeight = 60.f; 
+		float   Duration = 0.7f;   // tune
+		float   ArcHeight = 60.f;   // tune
 	};
 
 protected:
