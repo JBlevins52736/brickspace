@@ -125,8 +125,8 @@ void UWorldGrabber::ActivateToggle(const bool Value)
 
 void UWorldGrabber::HandTrackActivateToggle(const bool value)
 {
-	/*activeMode = value;
-	ActiveChanged();*/
+	activeMode = value;
+	ActiveChanged();
 }
 
 void UWorldGrabber::ActiveChanged()
