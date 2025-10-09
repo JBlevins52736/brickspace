@@ -97,9 +97,11 @@ private:
 	TArray<FName> boneNames; // references my hands
 	FName palmName = FName("Wrist Root"); // need these to reference my hands
 	FVector palmPreviousState = FVector::Zero();
+	FVector handTravelDirection;
 	bool handTrackingActive = false;
 	bool isUsingWorldGrabber = false;
 	bool palmInMotion = false;
 	float timeControlMenuButtonPresses = 0.0f;
 	float squaredHandToEyeDistance = 0.0f;
+	
 };
