@@ -135,6 +135,7 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
 	if (squaredLengthAvg < relativeGrabThreshold && focusVodget && !focus_grabbed) focusVodget->ForePinch(this, true);
 	else if (focusVodget && focus_grabbed && squaredLengthAvg > relativeGrabThreshold) focusVodget->ForePinch(this, false);
+	
 
 
 
@@ -243,6 +244,7 @@ void UHandSelector::DetectActivationMenuSystem()
 		FVector middleTip = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::WorldSpace); // middle finget tip
 		FQuat wristRot = skRef->GetBoneRotationByName(palmName, EBoneSpaces::WorldSpace).Quaternion();
 		FVector wristNormal = -wristRot.GetUpVector();
+		FVector wristRightVec = wristRot.GetRightVector();
 		FVector midpoint = (wristPos + middleTip) * 0.5f;
 		FVector midpointToEye = (centerEye->GetComponentLocation() - midpoint);
 		float squaredDistancePalmToEye = FVector::DotProduct(midpointToEye, midpointToEye);
@@ -250,8 +252,8 @@ void UHandSelector::DetectActivationMenuSystem()
 		midpointToEye.Normalize();
 		float handToEyeNorm = FVector::DotProduct(midpointToEye, wristNormal);
 		float eyeToHandResult = FVector::DotProduct(centerEye->GetForwardVector(), -midpointToEye);
-		//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Orange, FString::Printf(TEXT("Result of palm to eye: %f, eye to hand result: %f, distance to hand: %f"), handToEyeNorm, eyeToHandResult, squaredDistancePalmToEye));
-		if (handToEyeNorm <= PALM_TO_EYE_VEC_MIN && eyeToHandResult > EYE_VIEW_VECTOR_MIN && squaredDistancePalmToEye <= relativeHandToEyeThreshold) {
+		float secondaryCheckWristRight = FVector::DotProduct(centerEye->GetRightVector(), wristRightVec);
+		if (handToEyeNorm <= PALM_TO_EYE_VEC_MIN && eyeToHandResult > EYE_VIEW_VECTOR_MIN && squaredDistancePalmToEye <= relativeHandToEyeThreshold && FMath::Abs(secondaryCheckWristRight) < 0.2f) {
 			menuSubsystemActor->SetActive(true);
 			menuSubsystemActor->SetVisibility(true);
 			FVector centerToMidpoint = midpoint - centerEye->GetComponentLocation();
