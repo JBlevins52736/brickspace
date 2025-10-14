@@ -17,13 +17,11 @@ void UVodgetButton::ForePinch(USelector* selector, bool state)
 {
 
 	if (!selector) return;
-	selector->GrabFocus(state);
-	UChildActorComponent* childActor = Cast<UChildActorComponent>(GetOwner());
-	if (childActor ) {
-		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, TEXT("pinchChanged"));
-		return;
-	}
-	if (state) {
+	AActor* menuActor = Cast<AActor>(GetOwner());
+	if (menuActor && !menuActor->GetRootComponent()->IsVisible()) return; // Check to see if the button should be interacted with. If its not visible, it should not be interacted with.
+																		  // The assumption is, this type of button is being used on menus
+	if (state) // The below is needed so that we are not, on release of the button sending updates to stop world grabbing
+	{
 
 		isToggle = !isToggle;
 		OnButton.Broadcast(isToggle);

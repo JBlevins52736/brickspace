@@ -17,7 +17,7 @@
 #define FINGERTIP_INDICIE_INC 5
 #define PALM_MOTION_LIMITS 0.7f
 #define CONTROLLER_MENU_ROTATION_LOW_lIMIT -0.2f
-#define EYE_VIEW_VECTOR_MIN 0.8f
+#define EYE_VIEW_VECTOR_MIN 0.6f
 #define PALM_TO_EYE_VEC_MIN -0.1f
 #define DISTANCE_EYE_TO_HAND_SCALAR 0.2f
 #define HAND_SIZE_DISTANCE_SCALAR 0.7f;
@@ -139,7 +139,7 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 	bool pinchChanged = false;
 	if (isPinching)
 	{
-		if (squaredLengthAvg > relativeGrabThreshold) {
+		if (squaredLengthAvg > relativeGrabThreshold + deadZone) {
 			isPinching = false;
 			pinchChanged = true;
 		}
@@ -291,13 +291,13 @@ void UHandSelector::DetectActivationMenuSystem()
 		float secondaryCheckWristRight = FVector::DotProduct(centerEye->GetRightVector(), wristRightVec);
 		if (handToEyeNorm <= PALM_TO_EYE_VEC_MIN && eyeToHandResult > EYE_VIEW_VECTOR_MIN && squaredDistancePalmToEye <= relativeHandToEyeThreshold && FMath::Abs(secondaryCheckWristRight) < 0.2f) {
 			menuSubsystemActor->SetActive(true);
-			menuSubsystemActor->SetVisibility(true);
+			menuSubsystemActor->SetVisibility(true,true);
 			FVector centerToMidpoint = midpoint - centerEye->GetComponentLocation();
 			FQuat rotation = midpointToEye.Rotation().Quaternion();
 			menuSubsystemActor->SetWorldRotation(rotation);
 		}
 		else {
-			menuSubsystemActor->SetVisibility(false);
+			menuSubsystemActor->SetVisibility(false, true);
 			menuSubsystemActor->SetActive(false);
 		}
 	}

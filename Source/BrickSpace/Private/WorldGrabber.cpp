@@ -127,10 +127,11 @@ void UWorldGrabber::DollyToggle(const bool Value) { if (Value) dollyMode = !doll
 void UWorldGrabber::ScaleToggle(const bool Value) { if (Value) scaleMode = !scaleMode; }
 void UWorldGrabber::ActivateToggle(const bool Value)
 {
-	if (Value) {
-		activeMode = !activeMode;
-		ActiveChanged();
-	}
+	
+	activeMode = Value; // Having the if here made it so the world garbber would only change if the value was true
+					    // This then required for two presses of the button in order to enable disable the world grabber.
+	ActiveChanged();
+	
 }
 
 
