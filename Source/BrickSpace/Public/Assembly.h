@@ -30,9 +30,9 @@ struct FMaterialData : public FTableRowBase
 {
 	GENERATED_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawnable")
-	UMaterialInterface* SolidMaterial;
+	UMaterialInterface* SolidMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawnable")
-	UMaterialInterface* RevealMaterial;
+	UMaterialInterface* RevealMaterial = nullptr;
 };
 
 USTRUCT()
