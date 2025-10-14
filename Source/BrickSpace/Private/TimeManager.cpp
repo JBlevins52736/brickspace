@@ -35,6 +35,7 @@ void UTimeManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	DOREPLIFETIME(UTimeManager, bIsRunning);
+	DOREPLIFETIME(UTimeManager, ElapsedTime);
 }
 
 void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
@@ -84,20 +85,13 @@ void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		if (!bIsRunning)
-		{
-			// Server resets its local copy and command
-			ElapsedTime = 0.0f;
-			ServerStoppedTime = 0.0f;
-			UE_LOG(LogTemp, Warning, TEXT("Server initiated ResetTimer."));
-
-			//Server commands all clients (including itself) to reset local time
-			Client_ResetTimer();
-		}
+		// Server commands ALL machines (including itself) to reset
+		Multicast_ResetTimer();
+		UE_LOG(LogTemp, Warning, TEXT("Server initiated ResetTimer."));
 	}
 	else
 	{
-		//Client asks server to reset
+		// Client asks server to reset
 		pawn->Server_ResetTimer(this);
 	}
 }
@@ -148,13 +142,20 @@ void UTimeManager::Client_StopTimer_Implementation()
 	// The replicated bIsRunning flag will be set to false, stopping the Tick.
 }
 
-void UTimeManager::Client_ResetTimer_Implementation()
+void UTimeManager::Multicast_ResetTimer_Implementation()
 {
-	// Reset the client's local time immediately
-	ElapsedTime = 0.0f;
-	UpdateTextRenderer();
-	Server_SyncStoppedTime(ElapsedTime);
-	UE_LOG(LogTemp, Warning, TEXT("Client received Reset Timer command. Local Time Reset."));
+    // This runs on SERVER and ALL CLIENTS
+    ElapsedTime = 0.0f;
+    
+    // Only server resets this
+    if (GetOwner()->HasAuthority())
+    {
+        ServerStoppedTime = 0.0f;
+    }
+    
+    UpdateTextRenderer();
+    
+    UE_LOG(LogTemp, Warning, TEXT("Machine received Reset Timer command. Local Time Reset."));
 }
 
 void UTimeManager::Server_SyncStoppedTime_Implementation(float FinalTime)

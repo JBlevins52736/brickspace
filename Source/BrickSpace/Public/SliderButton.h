@@ -39,6 +39,9 @@ public:
 	UStaticMeshComponent* ResetButton;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	UStaticMeshComponent* PauseButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	float MaxDepressionDistance = -5.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")

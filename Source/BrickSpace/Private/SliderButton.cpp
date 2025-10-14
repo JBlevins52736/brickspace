@@ -91,7 +91,7 @@ void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
     if (CurrentDepression <= PressThreshold && !isPressed)
     {
 
-        Press();
+        
         if (timer)
         {
             ABrickSpacePawn* BrickPawn = Cast<ABrickSpacePawn>(focusSelector->GetOwner());
@@ -107,13 +107,19 @@ void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
             {
                 UE_LOG(LogTemp, Log, TEXT("LaunchButton pressed!"));
                 timer->StopTimer(BrickPawn);
+                Press();
             }
             else if (clientComponent == ResetButton)
             {
                 UE_LOG(LogTemp, Log, TEXT("ResetButton pressed!"));
                 timer->ResetTimer(BrickPawn);
             }
-
+            else if (clientComponent == PauseButton)
+            {
+                UE_LOG(LogTemp, Log, TEXT("PauseButton pressed!"));
+                timer->StopTimer(BrickPawn);
+                
+            }
             UE_LOG(LogTemp, Warning, TEXT("Depression: %f"), CurrentDepression);
         }
     }

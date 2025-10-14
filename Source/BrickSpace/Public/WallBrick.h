@@ -26,5 +26,9 @@ protected:
 
 private:
     FTransform InitialTransform = FTransform::Identity;
+    UPROPERTY(ReplicatedUsing = OnRep_InitialRelativeTransform)
     FTransform InitialRelativeTransform = FTransform::Identity;
+
+    UFUNCTION()
+    void OnRep_InitialRelativeTransform();
 };

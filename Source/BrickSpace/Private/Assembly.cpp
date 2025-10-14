@@ -234,6 +234,15 @@ void UAssembly::LoadAssembly()
 	}
 }
 
+void UAssembly::LaunchRocket()
+{
+	startPos = GetOwner()->GetActorLocation();
+	PrimaryComponentTick.SetTickFunctionEnable(true);
+
+	//niagaraThrusterEffect->Activate();
+	Multi_OnSmoke(true);
+}
+
 bool UAssembly::TryAdvanceLayer()
 {
 	ENetMode CurrentNetMode = GetNetMode();
@@ -250,13 +259,16 @@ bool UAssembly::TryAdvanceLayer()
 			return false;
 	}
 	if (!LoadNextLayer()) {
-		// Take off!
-		startPos = GetOwner()->GetActorLocation();
-		PrimaryComponentTick.SetTickFunctionEnable(true);
+		//if (launch)
+		//{// Take off!
+		//	startPos = GetOwner()->GetActorLocation();
+		//	PrimaryComponentTick.SetTickFunctionEnable(true);
 
-		//niagaraThrusterEffect->Activate();
-		Multi_OnSmoke(true);
+		//	//niagaraThrusterEffect->Activate();
+		//	Multi_OnSmoke(true);
+		//}
 	}
+
 	return true;
 }
 
@@ -445,3 +457,5 @@ void UAssembly::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 
 	GetOwner()->SetActorLocation(pos);
 }
+
+

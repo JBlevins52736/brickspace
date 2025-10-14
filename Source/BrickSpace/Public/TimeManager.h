@@ -47,6 +47,7 @@ public:
 	virtual void OnRep_Running();
 
 
+	UPROPERTY(Replicated)
 	float ElapsedTime = 0.0f;
 
 	void UpdateTextRenderer();
@@ -60,13 +61,15 @@ public:
 	UFUNCTION(Client, Reliable)
 	void Client_StopTimer();
 
-	UFUNCTION(Client, Reliable)
-	void Client_ResetTimer();
+	//UFUNCTION(Client, Reliable)
+	//void Client_ResetTimer();
 
 	// Client-to-Server RPC
 	UFUNCTION(Server, Reliable)
 	void Server_SyncStoppedTime(float FinalTime);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ResetTimer();
 private:
 	UPROPERTY()
 	UTextRenderComponent* TimerTextRenderer;
