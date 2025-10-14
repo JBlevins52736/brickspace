@@ -4,8 +4,8 @@
 #include "VodgetButton.generated.h"
 
 // Define delegates for button events
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FButtonPressedDelegate, int32, ButtonID);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FButtonToggledDelegate, int32, ButtonID, bool, bIsOn);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FButtonDelegate, bool, value);
+
 
 /**
  * VodgetButton - Simple interactive button component for VR
@@ -20,10 +20,8 @@ public:
 	virtual void ForePinch(USelector* selector, bool state) override;
 
 	UPROPERTY(BlueprintAssignable, Category = "Button")
-	FButtonPressedDelegate OnPressed;
+	FButtonDelegate OnButton;
 
-	UPROPERTY(BlueprintAssignable, Category = "Button")
-	FButtonToggledDelegate OnToggled;
 
 protected:
 	virtual void BeginPlay() override;
@@ -31,15 +29,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	int32 ButtonID = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-	bool bIsToggle = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-	bool bIsOn = false;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-	bool bIsPressed = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	FString ShortName;
+
+	bool isToggle = false;
 };

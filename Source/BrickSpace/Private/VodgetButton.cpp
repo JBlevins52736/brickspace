@@ -3,39 +3,28 @@
 
 void UVodgetButton::BeginPlay()
 {
-    Super::BeginPlay();
-    selectionFilter = 0x03; // Only Manufacturer can grab bricks
+	Super::BeginPlay();
+	selectionFilter = 0x03; // Only Manufacturer can grab bricks
 }
 
 void UVodgetButton::Focus(USelector* cursor, bool state)
 {
-    // Call parent class implementation
-    UVodget::Focus(cursor, state);
+	// Call parent class implementation
+	UVodget::Focus(cursor, state);
 }
 
 void UVodgetButton::ForePinch(USelector* selector, bool state)
 {
-    if (!selector) return;
- 
-    if (state && !bIsPressed)
-    {
-        // Button pressed
-        bIsPressed = true;
 
-        if (bIsToggle)
-        {
-            bIsOn = !bIsOn;
-            GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Blue, TEXT("Button pressed"));
-            OnToggled.Broadcast(ButtonID, bIsOn);
-        }
-        else
-        {
-            OnPressed.Broadcast(ButtonID);
-        }
-    }
-    else
-    {
-        // Button released
-        bIsPressed = false;
-    }
+	if (!selector) return;
+	AActor* menuActor = Cast<AActor>(GetOwner());
+	if (menuActor && !menuActor->GetRootComponent()->IsVisible()) return; // Check to see if the button should be interacted with. If its not visible, it should not be interacted with.
+																		  // The assumption is, this type of button is being used on menus
+	if (state) // The below is needed so that we are not, on release of the button sending updates to stop world grabbing
+	{
+
+		isToggle = !isToggle;
+		OnButton.Broadcast(isToggle);
+	}
+	
 }

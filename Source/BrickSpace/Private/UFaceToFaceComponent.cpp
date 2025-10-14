@@ -167,7 +167,7 @@ void UUFaceToFaceComponent::TickComponent(float DeltaTime, ELevelTick TickType, 
 
 	// Draw debug line 
 	FVector End = Start + Forward * 1000.0f;
-	DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
+	//DrawDebugLine(GetWorld(), Start, End, FColor::Red, false, 0, 0, 2.0f);
 
 
 

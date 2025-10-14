@@ -9,6 +9,8 @@ class UOculusXRHandComponent;
 struct FXRMotionControllerData;
 #include "HandSelector.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FButtonDelegate1, bool, value);
+
 /**
  *
  */
@@ -32,6 +34,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	UOculusXRHandComponent* skRef = nullptr; // skRef is the component I need to get bone positions because for some reason this needs to exist
+
+	UPROPERTY(BlueprintAssignable, Category = "Button")
+	FButtonDelegate1 OnPinch;
+
 
 #pragma region HAND_MESH_POSITION_REPLICATION
 	//UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
@@ -103,5 +109,7 @@ private:
 	bool palmInMotion = false;
 	float timeControlMenuButtonPresses = 0.0f;
 	float squaredHandToEyeDistance = 0.0f;
+
+	bool isPinching = false;
 	
 };
