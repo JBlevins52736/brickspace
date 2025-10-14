@@ -3,39 +3,30 @@
 
 void UVodgetButton::BeginPlay()
 {
-    Super::BeginPlay();
-    selectionFilter = 0x03; // Only Manufacturer can grab bricks
+	Super::BeginPlay();
+	selectionFilter = 0x03; // Only Manufacturer can grab bricks
 }
 
 void UVodgetButton::Focus(USelector* cursor, bool state)
 {
-    // Call parent class implementation
-    UVodget::Focus(cursor, state);
+	// Call parent class implementation
+	UVodget::Focus(cursor, state);
 }
 
 void UVodgetButton::ForePinch(USelector* selector, bool state)
 {
 
-    if (!selector) return;
-    selector->GrabFocus(state);
-    if (state && !bIsPressed)
-    {
-        // Button pressed
-        bIsPressed = true;
+	if (!selector) return;
+	selector->GrabFocus(state);
+	UChildActorComponent* childActor = Cast<UChildActorComponent>(GetOwner());
+	if (childActor ) {
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, TEXT("pinchChanged"));
+		return;
+	}
+	if (state) {
 
-        if (bIsToggle)
-        {
-            bIsOn = !bIsOn;
-            OnToggled.Broadcast(ButtonID, bIsOn);
-        }
-        else
-        {
-            OnPressed.Broadcast(ButtonID);
-        }
-    }
-    else
-    {
-        // Button released
-        bIsPressed = false;
-    }
+		isToggle = !isToggle;
+		OnButton.Broadcast(isToggle);
+	}
+	
 }

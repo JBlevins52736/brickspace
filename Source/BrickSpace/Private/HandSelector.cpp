@@ -113,7 +113,7 @@ void UHandSelector::UpdatePalmTrackingPoint()
 	}
 	handTravelDirection = currentPalmPos - palmPreviousState;
 	palmPreviousState = currentPalmPos;
-	
+
 }
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
@@ -133,9 +133,45 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 
 	}
 	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
-	if (squaredLengthAvg < relativeGrabThreshold && focusVodget && !focus_grabbed) focusVodget->ForePinch(this, true);
-	else if (focusVodget && focus_grabbed && squaredLengthAvg > relativeGrabThreshold) focusVodget->ForePinch(this, false);
-	
+
+
+	float deadZone = relativeHandSizeSquared * 0.05f;
+	bool pinchChanged = false;
+	if (isPinching)
+	{
+		if (squaredLengthAvg > relativeGrabThreshold) {
+			isPinching = false;
+			pinchChanged = true;
+		}
+	}
+	else {
+		if (squaredLengthAvg < (relativeGrabThreshold + deadZone))
+		{
+			isPinching = true;
+			pinchChanged = true;
+		}
+	}
+
+	if (pinchChanged)
+	{
+		OnPinch.Broadcast(isPinching);
+		
+		if (focusVodget) {
+			focusVodget->ForePinch(this, isPinching);
+		
+		}
+	}
+
+	//if (squaredLengthAvg < relativeGrabThreshold && focusVodget && !focus_grabbed)
+	//{
+	//	focusVodget->ForePinch(this, true);
+	//	OnPinch.Broadcast(true);
+	//}
+	//else if (squaredLengthAvg > relativeGrabThreshold && focusVodget && focus_grabbed) {
+	//	focusVodget->ForePinch(this, false);
+	//	OnPinch.Broadcast(false);
+	//}
+	//
 
 
 
@@ -296,7 +332,7 @@ void UHandSelector::SetCursor()
 		transform.SetScale3D(FVector::OneVector);
 		cursor = transform;
 	}
-	else if (!handTrackingActive && !status) 
+	else if (!handTrackingActive && !status)
 	{
 		FTransform transform = FTransform::Identity;
 		float magnitude = FVector::DotProduct(handTravelDirection, handTravelDirection);
@@ -366,38 +402,22 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
 	if (bspawn && handMesh) {
 
-		if (handTrackingActive)
+		FVector markerPos = (handTrackingActive) ? GetMidPointBetweenThumbIndex() : hand->GetComponentLocation();
+
+		if (pawn->GetLocalRole() == ROLE_Authority)
 		{
-			if (pawn->GetLocalRole() == ROLE_Authority)
-			{
-				handMesh->SetWorldLocation(GetMidPointBetweenThumbIndex());
+			handMesh->SetWorldLocation(markerPos);
 
-
-			}
-			else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
-			{
-				Server_MeshPosUpdate(this, GetMidPointBetweenThumbIndex());
-			}
 		}
-		else {
-
-			if (pawn->GetLocalRole() == ROLE_Authority)
-			{
-				handMesh->SetWorldLocation(hand->GetComponentLocation());
-
-			}
-			else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
-			{
-				Server_MeshPosUpdate(this, hand->GetComponentLocation());
-			}
+		else if (pawn->GetLocalRole() == ROLE_AutonomousProxy)
+		{
+			Server_MeshPosUpdate(this, markerPos);
 		}
 	}
 	if (bspawn && menuSubsystemActor) DetectActivationMenuSystem();
 
 	if (!focus_grabbed)
 	{
-
-
 		// Use a physics raycast to find vodgets in the scene.
 		UVodget* hitVodget = DoRaycast();
 
@@ -406,7 +426,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		{
 			// Let the previous focusVodgetCurr know that it has lost focus here.
 			if (focusVodget != nullptr) {
-				//UE_LOG(LogTemp, Warning, TEXT("Focus FALSE:%s"), *FString(focusVodget->GetOwner()->GetActorLabel()));
+				
 				focusVodget->Focus(this, false);
 			}
 
@@ -414,7 +434,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 			// Let the focusVodgetCurr know that it now has selector focus here.
 			if (focusVodget != nullptr) {
-				//UE_LOG(LogTemp, Warning, TEXT("Focus TRUE:%s"), *FString(focusVodget->GetOwner()->GetActorLabel()));
+				
 				focusVodget->Focus(this, true);
 
 			}
@@ -423,20 +443,20 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		}
 
 	}
-	
-	if (handTrackingActive && focusVodget) // Hand tracking, when sight is lost hand tracking is disabled.
+
+	if (handTrackingActive) // Hand tracking, when sight is lost hand tracking is disabled.
 	{
-		
+
 		UpdatePalmTrackingPoint();
 		CheckHandGestures(DeltaTime); // checking for palm in motion or low motion
 
 	}
-	
-	if (handTrackingActive && bspawn && !focus_grabbed)
-	{
-		FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
-		WorldGrabGesture(palmPos);
-	}
+
+	//if (handTrackingActive && bspawn && !focus_grabbed)
+	//{
+	//	FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
+	//	WorldGrabGesture(palmPos);
+	//}
 }
 
 void UHandSelector::SetFilter(uint16 filter)

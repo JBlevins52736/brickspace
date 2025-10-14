@@ -29,6 +29,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void RWorldGrab(const bool Value);
 
+	bool IsWorldGrabActive() { return activeMode; }
 protected:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR", meta = (AllowPrivateAccess = true))
 	USceneComponent* leftHand;

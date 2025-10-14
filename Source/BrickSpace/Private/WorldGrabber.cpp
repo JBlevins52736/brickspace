@@ -110,7 +110,7 @@ void UWorldGrabber::GrabChanged()
 		UE_LOG(LogTemp, Error, TEXT("WorldGrabber::GrabChanged: leftHand or rightHand not assigned."));
 		return;
 	}
-	
+
 	// This is the very moment that bimanual grabbing begins.
 	if (leftGrabbing && rightGrabbing)
 	{
@@ -123,12 +123,14 @@ void UWorldGrabber::GrabChanged()
 	childsrt = cursorsrt.Inverse();
 }
 
-void UWorldGrabber::DollyToggle(const bool Value) { dollyMode = !dollyMode; }
-void UWorldGrabber::ScaleToggle(const bool Value) { scaleMode = !scaleMode; }
+void UWorldGrabber::DollyToggle(const bool Value) { if (Value) dollyMode = !dollyMode; }
+void UWorldGrabber::ScaleToggle(const bool Value) { if (Value) scaleMode = !scaleMode; }
 void UWorldGrabber::ActivateToggle(const bool Value)
-{ 
-	activeMode = !activeMode;
-	ActiveChanged();
+{
+	if (Value) {
+		activeMode = !activeMode;
+		ActiveChanged();
+	}
 }
 
 
@@ -174,7 +176,7 @@ void UWorldGrabber::StartWorldScaling(FVector lhand, FVector rhand)
 	currWorldToMeters = GetWorld()->GetWorldSettings()->WorldToMeters;
 }
 
-void UWorldGrabber::ChangeWorldScaling(FVector &lhand, FVector &rhand)
+void UWorldGrabber::ChangeWorldScaling(FVector& lhand, FVector& rhand)
 {
 	// The VR Pawn is made larger/smaller in Unreal by changing the WorldToMeters setting.
 	// Pawn geometry like the markers attached to controllers is the responsibility of the application.
@@ -182,7 +184,7 @@ void UWorldGrabber::ChangeWorldScaling(FVector &lhand, FVector &rhand)
 
 	float currBimanualHandDist = (lhand - rhand).Length();
 	float ds = prevBimanualHandDist / currBimanualHandDist;
-UE_LOG(LogTemp, Warning, TEXT("WorldGrabber ds:%f"), ds);
+	UE_LOG(LogTemp, Warning, TEXT("WorldGrabber ds:%f"), ds);
 
 	float worldScale = currWorldToMeters * ds;
 
