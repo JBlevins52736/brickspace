@@ -113,6 +113,8 @@ protected:
 public:
 	TArray<UBrick*> groundPlateBricks;
 
+	UFUNCTION(BlueprintCallable, Category = "Rocket")
+	void LaunchRocket();
 private:
 	
 	//ABrickSpacePlayerState* playerState = nullptr;
