@@ -236,11 +236,8 @@ void UAssembly::LoadAssembly()
 
 void UAssembly::LaunchRocket()
 {
-	startPos = GetOwner()->GetActorLocation();
-	PrimaryComponentTick.SetTickFunctionEnable(true);
+	launch = true;
 
-	//niagaraThrusterEffect->Activate();
-	Multi_OnSmoke(true);
 }
 
 bool UAssembly::TryAdvanceLayer()
@@ -258,17 +255,15 @@ bool UAssembly::TryAdvanceLayer()
 		if (!brick->IsSolved())
 			return false;
 	}
-	if (!LoadNextLayer()) {
-		//if (launch)
-		//{// Take off!
-		//	startPos = GetOwner()->GetActorLocation();
-		//	PrimaryComponentTick.SetTickFunctionEnable(true);
+	if (!LoadNextLayer() && launch) {
+		// Take off!
+		startPos = GetOwner()->GetActorLocation();
+		PrimaryComponentTick.SetTickFunctionEnable(true);
 
-		//	//niagaraThrusterEffect->Activate();
-		//	Multi_OnSmoke(true);
-		//}
+		//niagaraThrusterEffect->Activate();
+		Multi_OnSmoke(true);
 	}
-
+	launch = false;
 	return true;
 }
 

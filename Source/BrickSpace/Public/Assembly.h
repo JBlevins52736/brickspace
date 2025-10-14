@@ -6,6 +6,7 @@
 #include "Components/SceneComponent.h"
 #include "Brick.h"
 #include "Engine/DataTable.h"
+#include "SliderButton.h"
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
 class AAssemblyActor;
@@ -116,7 +117,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rocket")
 	void LaunchRocket();
 private:
-	
+	bool launch= false;
 	//ABrickSpacePlayerState* playerState = nullptr;
 
 	AAssemblyActor* assemblyActor;
