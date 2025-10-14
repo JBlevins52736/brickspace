@@ -16,7 +16,7 @@ void UCalib2Pt::SetLocalCursor()
 {
 	if (posAnchorSet) {
 
-		if (rotAnchorSet && GetOwner()->HasAuthority()) 
+		if (rotAnchorSet && GetOwner()->HasAuthority())
 		{
 			//ChangeWorldScaling(posAnchor, rotAnchor);
 		}
@@ -39,6 +39,7 @@ void UCalib2Pt::SetLocalCursor()
 	}
 	else {
 		// Revert to normal world grabbing until posAnchor is set.
+
 		Super::SetLocalCursor();
 	}
 }
@@ -67,6 +68,7 @@ void UCalib2Pt::UpdatePosAnchor(FVector pos)
 		SetLocalCursor();
 		childsrt = cursorsrt.Inverse();
 	}
+	
 }
 
 void UCalib2Pt::UpdateRotAnchor(FVector pos)

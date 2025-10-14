@@ -18,6 +18,7 @@ void UAlignWorld::ForePinch(USelector* selector, bool state)
 		grabbingSelector = nullptr;
 	}
 	PrimaryComponentTick.SetTickFunctionEnable(state);	
+	
 }
 
 void UAlignWorld::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -25,5 +26,6 @@ void UAlignWorld::TickComponent(float DeltaTime, ELevelTick TickType, FActorComp
 	if (grabbingSelector) {
 		FTransform worldsrt = childsrt * grabbingSelector->Cursor();
 		AlignDelegate.Broadcast(worldsrt.GetLocation());
+	
 	}
 }

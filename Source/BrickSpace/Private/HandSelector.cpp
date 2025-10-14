@@ -547,11 +547,11 @@ void UHandSelector::SetMaterial(UMaterialInterface* color)
 	}
 
 	if (pawn->HasAuthority()) {
-		UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from server client"));
+		//UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from server client"));
 		Server_SetMaterial_Implementation(color);
 	}
 	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy) {
-		UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from remote client"));
+		//UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from remote client"));
 		Server_SetMaterial(color);
 	}
 }
