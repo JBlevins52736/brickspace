@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "{DA57B92C-4744-DB20-314D-2D9346D606A1}",
+	"EngineAssociation": "{4CA01FB3-4C4F-95CF-11AF-779547FA34EF}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -43,6 +43,10 @@
 				"Linux",
 				"Android"
 			]
+		},
+		{
+			"Name": "PlasticSourceControl",
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [
