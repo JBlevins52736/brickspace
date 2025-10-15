@@ -20,7 +20,7 @@ public:
 	void SetMovementTarget(float LeverAngle);
 
 	/** Reference to the Static Mesh Component (the plane) to scale for the ground opening effect. */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
+	UPROPERTY(EditAnywhere, Category = "Ground Effect")
 	UStaticMeshComponent* FloorPlate;
 protected:
 

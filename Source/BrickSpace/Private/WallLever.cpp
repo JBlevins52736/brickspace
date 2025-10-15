@@ -44,10 +44,14 @@ void UWallLever::ForePinch(USelector* cursor, bool state)
 		{
 			grabbingSelector->GrabFocus(false);
 			grabbingSelector = nullptr;
-			PrimaryComponentTick.SetTickFunctionEnable(false); 
-			FRotator snapBack = FRotator(0.0f, 0.0f, 0.0f);
-			clientComponent->SetRelativeRotation(snapBack);
-			OnLeverMoved.Broadcast(0.0f);
+			PrimaryComponentTick.SetTickFunctionEnable(false);
+			if (!box) 
+			{
+				FRotator snapBack = FRotator(0.0f, 0.0f, 0.0f);	
+				clientComponent->SetRelativeRotation(snapBack);
+				OnLeverMoved.Broadcast(0.0f);
+			}
+		
 		}
 	}
 }
@@ -74,14 +78,23 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 		FRotator rawNewRot = rawNewRotQuat.Rotator();
 		float currentRoll = rawNewRot.Roll;
-		float clampedRoll = FMath::Clamp(currentRoll, MinPitch, MaxPitch);
-		FRotator finalRot = FRotator(0.0f, 0.0f, clampedRoll);
-		clientComponent->SetRelativeRotation(finalRot);
+		if (box) 
+		{
+			float clampedRoll = FMath::Clamp(currentRoll, -94, 0);
+			FRotator finalRot = FRotator(0.0f, 0.0f, clampedRoll);
+			clientComponent->SetRelativeRotation(finalRot);
+		}
+		else 
+		{
+			float clampedRoll = FMath::Clamp(currentRoll, MinPitch, MaxPitch);
+			FRotator finalRot = FRotator(0.0f, 0.0f, clampedRoll);
+			clientComponent->SetRelativeRotation(finalRot);
 
-		float pctSpeed = clampedRoll / MaxPitch;
+			float pctSpeed = clampedRoll / MaxPitch;
 
-		/*OnLeverMoved.Broadcast(clampedRoll);*/
-		OnLeverMoved.Broadcast(pctSpeed);
+			/*OnLeverMoved.Broadcast(clampedRoll);*/
+			OnLeverMoved.Broadcast(pctSpeed);
+		}
 	}
 	else
 	{

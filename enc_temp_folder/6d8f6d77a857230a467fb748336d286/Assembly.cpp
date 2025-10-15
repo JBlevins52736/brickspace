@@ -236,14 +236,11 @@ void UAssembly::LoadAssembly()
 
 void UAssembly::LaunchRocket()
 {
-	if (!LoadNextLayer()) {
 	startPos = GetOwner()->GetActorLocation();
 	PrimaryComponentTick.SetTickFunctionEnable(true);
 
 	//niagaraThrusterEffect->Activate();
 	Multi_OnSmoke(true);
-	}
-
 }
 
 bool UAssembly::TryAdvanceLayer()

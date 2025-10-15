@@ -38,6 +38,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
 	USceneComponent* LeverArm;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
+	USceneComponent* box;
+
 protected:
 
 	virtual void BeginPlay() override;
