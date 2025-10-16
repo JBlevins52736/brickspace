@@ -507,7 +507,12 @@ void UHandSelector::BeginPlay()
 	CalculateHandSize();
 	currentHand = Cast<UMotionControllerComponent>(hand->GetAttachParent());
 	leftOrRight = currentHand->GetTrackingSource();
-
+	if (fireAffect) {
+		fireAffect->AttachToComponent(hand, FAttachmentTransformRules::KeepRelativeTransform);
+		fireAffect->SetWorldScale3D(FVector(0.2f));
+		fireAffect->SetVariableLinearColor(FName("User.Color"), FLinearColor::Blue);
+		fireAffect->ActivateSystem();
+	}
 }
 
 #pragma region HAND_MESH_POSITION_REPLICATION

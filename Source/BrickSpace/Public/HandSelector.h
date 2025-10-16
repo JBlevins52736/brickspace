@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Selector.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 class ABrickSpacePawn;
 class UOculusXRHandComponent;
 struct FXRMotionControllerData;
@@ -39,6 +41,9 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Button")
 	FButtonDelegate1 OnPinch;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	UNiagaraComponent* fireAffect = nullptr;
 
 
 #pragma region HAND_MESH_POSITION_REPLICATION
