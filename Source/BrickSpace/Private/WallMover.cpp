@@ -65,50 +65,46 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
     );
 
     SetRelativeLocation(NewLocation);
+    GEngine->AddOnScreenDebugMessage(
+        -1,                      // Key to identify/replace the message (use -1 for new)
+        5.0f,                    // Duration to display (in seconds)
+        FColor::Green,          // Color of the text
+        FString::Printf(TEXT("Wall Z Location: %f"), NewLocation.Z));
 
     if (FloorPlate)
     {
-        float TargetGroundScaleY = 0.0f;
+        float WallZ = GetRelativeLocation().Z;
+        if (WallZ <= 10) {
+    // Scale FloorPlate up (to 1.2f)
+    FVector CurrentScale = FloorPlate->GetRelativeScale3D();
+    float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 1.2f, DeltaTime, GroundScaleInterpSpeed);
+    FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+}
+else if (WallZ > 10) // Changed to 10 to cover the remaining range clearly
+{
+    // Scale FloorPlate down (to 0.0f)
+    FVector CurrentScale = FloorPlate->GetRelativeScale3D();
+    float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 0.0f, DeltaTime, GroundScaleInterpSpeed);
+    FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+}
+// Note: WallZ = 10 is covered by the first 'if'
 
-        if (CurrentPercentage == 0.0f)
-        {
-            bWallIsClear = false;
-        }
-        else
-        {
-            const float LocationTolerance = 0.1f;
-            if (FVector::DistSquared(GetRelativeLocation(), TargetRelativeLocation) < LocationTolerance * LocationTolerance)
-            {
-                bWallIsClear = true;
-            }
-        }
+// Logic for SkyPlate (Starts here, NOT an 'else if' of the above)
+if (WallZ > 60)
+{
+    // Scale SkyPlate up (to 1.2f)
+    FVector CurrentScale = SkyPlate->GetRelativeScale3D();
+    float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 1.2f, DeltaTime, GroundScaleInterpSpeed);
+    SkyPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+}
+else if (WallZ < 50) // The condition WallZ < 50 should be the opposite of WallZ > 60's active range
+{
+    // Scale SkyPlate down (to 0.0f)
+    FVector CurrentScale = SkyPlate->GetRelativeScale3D();
+    float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 0.0f, DeltaTime, GroundScaleInterpSpeed);
+    SkyPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+}
 
-        if (CurrentPercentage < 0.0f)
-        {
-           
-            if (bWallIsClear)
-            {
-                TargetGroundScaleY = GroundMaxScaleY;
-            }
-
-            TargetGroundScaleY = GroundMaxScaleY;
-        }
-
-        FVector CurrentScale = FloorPlate->GetRelativeScale3D();
-        float NewScaleY = FMath::FInterpTo(
-            CurrentScale.Y,
-            TargetGroundScaleY,
-            DeltaTime,
-            GroundScaleInterpSpeed
-        );
-        if (CurrentScale.Y >= GroundMaxScaleY && !bWallIsClear && CurrentPercentage < 0.0f)
-        {
-            NewScaleY = GroundMaxScaleY;
-        }
-
-        
-        NewScaleY = FMath::Clamp(NewScaleY, 0.0f, GroundMaxScaleY);
-
-        FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+       
     }
 }

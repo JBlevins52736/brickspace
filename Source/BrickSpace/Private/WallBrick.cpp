@@ -91,7 +91,7 @@ void UWallBrick::Server_CloneWallBrick_Implementation(const FTransform& onWallTr
     bThresholdReached = true;
     if (bThresholdReached)
     {
-        clientComponent->DetachFromParent();
+        clientComponent->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
     }
 }
 void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

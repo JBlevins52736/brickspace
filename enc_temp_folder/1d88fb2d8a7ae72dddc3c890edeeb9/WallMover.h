@@ -22,10 +22,6 @@ public:
 	/** Reference to the Static Mesh Component (the plane) to scale for the ground opening effect. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	UStaticMeshComponent* FloorPlate;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
-	UStaticMeshComponent* SkyPlate;
-
 protected:
 
 	virtual void BeginPlay() override;
@@ -51,7 +47,7 @@ private:
 
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")
-	float MovementInterpSpeed = .3f;
+	float MovementInterpSpeed = .5f;
 
 	float CurrentLeverAngle = 0.0f;
 	FVector InitialRelativeLocation;
@@ -67,7 +63,7 @@ private:
 
 	/** The speed at which the plane's Y-scale interpolates to the target. */
 	UPROPERTY(EditAnywhere, Category = "Ground Effect")
-	float GroundScaleInterpSpeed = 10.0f;
+	float GroundScaleInterpSpeed = 5.0f;
 
 	bool bIsInitialized = false;
 	FVector LoweredRelativeLocation;
