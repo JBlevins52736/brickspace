@@ -16,10 +16,10 @@ void UCalib2Pt::SetLocalCursor()
 {
 	if (posAnchorSet) {
 
-		if (rotAnchorSet && GetOwner()->HasAuthority())
-		{
+		//if (rotAnchorSet && GetOwner()->HasAuthority())
+		//{
 			//ChangeWorldScaling(posAnchor, rotAnchor);
-		}
+		//}
 
 		//FVector posAnchorScaled = posAnchorInit * (currWorldToMeters / initWorldToMeters);
 
