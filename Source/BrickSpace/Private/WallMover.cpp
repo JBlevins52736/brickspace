@@ -23,23 +23,19 @@ void UWallMover::BeginPlay()
 
 void UWallMover::SetMovementTarget(float Percentage)
 {
-
     CurrentPercentage = Percentage;
 
-
+    // ... rest of the logic (now only running on the server) ...
     if (Percentage < 0.0f)
     {
-        
         TargetRelativeLocation = LoweredRelativeLocation;
     }
     else if (Percentage > 0.0f)
     {
-        
         TargetRelativeLocation = RaisedRelativeLocation;
     }
     else
     {
-        
         TargetRelativeLocation = GetRelativeLocation();
     }
 }
@@ -72,27 +68,47 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
     if (FloorPlate)
     {
-        // Determine the target Y scale based on the wall's movement state
         float TargetGroundScaleY = 0.0f;
 
-        // The user wants the plane to scale up when the wall is moving down/lowered (CurrentPercentage < 0)
+        if (CurrentPercentage == 0.0f)
+        {
+            bWallIsClear = false;
+        }
+        else
+        {
+            const float LocationTolerance = 0.1f;
+            if (FVector::DistSquared(GetRelativeLocation(), TargetRelativeLocation) < LocationTolerance * LocationTolerance)
+            {
+                bWallIsClear = true;
+            }
+        }
+
         if (CurrentPercentage < 0.0f)
         {
+           
+            if (bWallIsClear)
+            {
+                TargetGroundScaleY = GroundMaxScaleY;
+            }
+
             TargetGroundScaleY = GroundMaxScaleY;
         }
-        // Otherwise, it targets 0.0 (when moving up or stopped at center/raised)
 
         FVector CurrentScale = FloorPlate->GetRelativeScale3D();
-
-        // Smoothly interpolate the current Y scale to the target Y scale
         float NewScaleY = FMath::FInterpTo(
             CurrentScale.Y,
             TargetGroundScaleY,
             DeltaTime,
             GroundScaleInterpSpeed
         );
+        if (CurrentScale.Y >= GroundMaxScaleY && !bWallIsClear && CurrentPercentage < 0.0f)
+        {
+            NewScaleY = GroundMaxScaleY;
+        }
 
-        // Apply the new scale, preserving X and Z scales
+        
+        NewScaleY = FMath::Clamp(NewScaleY, 0.0f, GroundMaxScaleY);
+
         FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
     }
 }

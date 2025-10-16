@@ -56,7 +56,8 @@ public:
 
 	UPROPERTY()
 	bool isPressed = false;
-
+	
+	void Press();
 private:
 
 	float InitialLocalLocation;
@@ -66,7 +67,7 @@ private:
 	USelector* focusSelector = nullptr;
 
 
-	void Press();
+	
 
 
 

@@ -67,7 +67,7 @@ private:
 
 	bool bIsInitialized = false;
 	FVector LoweredRelativeLocation;
-	
+	bool bWallIsClear = false;
 	FVector RaisedRelativeLocation;
 
 

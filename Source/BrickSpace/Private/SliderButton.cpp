@@ -103,11 +103,20 @@ void USliderButton::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
                 timer->StartTimer(BrickPawn);
 
             }
-            else if (clientComponent == LaunchButton)
+            if (clientComponent == LaunchButton)
             {
-                UE_LOG(LogTemp, Log, TEXT("LaunchButton pressed!"));
-                timer->StopTimer(BrickPawn);
-                Press();
+                if (BrickPawn->GetLocalRole() < ROLE_Authority) // Check if this is a Client
+                {
+                    // CLIENT: Send the request to the server through the Pawn
+                    BrickPawn->Server_HandleLaunchButtonPress(this);
+                }
+                else
+                {
+                    // SERVER or LISTEN SERVER: Execute the logic directly
+                    UE_LOG(LogTemp, Log, TEXT("LaunchButton pressed on Server!"));
+                    timer->StopTimer(BrickPawn);
+                    Press();
+                }
             }
             else if (clientComponent == ResetButton)
             {

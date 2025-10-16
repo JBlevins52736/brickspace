@@ -9,6 +9,7 @@
 class UWallBrick;
 class UTimeManager;
 class UWallMover;
+class USliderButton;
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -46,6 +47,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_UpdateWallAngle(UWallMover* WallMover, float LeverAngle);
+
+	UFUNCTION(Server, Reliable)
+	void Server_HandleLaunchButtonPress(USliderButton* ButtonComponent);
 public:
 
 	void VARLog(FString methodName);
