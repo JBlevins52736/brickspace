@@ -13,7 +13,7 @@
 #include "MotionControllerComponent.h"
 #include "WorldGrabber.h"
 #define GRAB_THRESHOLD 120 // this is the squared length of the threshold to determine if you are grabbing.
-#define GRAB_FINGER_COUNT 5 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
+#define GRAB_FINGER_COUNT 4 // this is the amount of fingers that must meet the threshold parameter to be considered a grab.
 #define FINGERTIP_INDICIE_INC 5
 #define PALM_MOTION_LIMITS 0.7f
 #define CONTROLLER_MENU_ROTATION_LOW_lIMIT -0.2f
@@ -87,6 +87,11 @@ void UHandSelector::CalculateHandSize()
 
 	squaredHandToEyeDistance = FVector::DotProduct(eyeToPalm, eyeToPalm);
 
+	FVector indexFinger = skRef->GetBoneLocation(boneNames[1], EBoneSpaces::ComponentSpace);
+	FVector thumbPos = skRef->GetBoneLocation(boneNames[0], EBoneSpaces::ComponentSpace);
+	FVector directionThumbToIndexFinger = indexFinger - thumbPos;
+	relativeDistanceBetweenThumbAndIdx = FVector::DotProduct(directionThumbToIndexFinger, directionThumbToIndexFinger);
+
 }
 
 void UHandSelector::CheckHandGestures(float deltaTime)
@@ -103,49 +108,51 @@ void UHandSelector::CheckHandGestures(float deltaTime)
 
 }
 
-void UHandSelector::UpdatePalmTrackingPoint()
+void UHandSelector::UpdatePalmTrackingPoint(float deltaTime)
 {
-	FVector currentPalmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
-	if (currentPalmPos.Equals(palmPreviousState)) {
+	if (handTrackingActive) {
+		FVector currentPalmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::WorldSpace);
+		handTravelDirection = currentPalmPos - palmPreviousState;
+		handTravelDirection.Normalize();
+		float fwdDirectionCheck = FVector::DotProduct(handTravelDirection, GetOwner()->GetActorForwardVector());
+		handTravelDirection = fwdDirectionCheck < -0.5f ? -handTravelDirection: handTravelDirection;
+		FVector pawnPos = GetOwner()->GetActorLocation();
+		FVector distanceFromPalmPrevStateToPawn = (pawnPos - currentPalmPos) + (GetOwner()->GetActorForwardVector() * 10); // move an extra 10cm in front of the desired location
+		magnitudeForPredictiveHandTravel = FVector::DotProduct(distanceFromPalmPrevStateToPawn, distanceFromPalmPrevStateToPawn);
+		palmPreviousState = currentPalmPos;
 
-		//GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("x: %f, y: %f, z: %f"), currentPalmPos.X, currentPalmPos.Y, currentPalmPos.Z));
-		return;
 	}
-	handTravelDirection = currentPalmPos - palmPreviousState;
-	palmPreviousState = currentPalmPos;
 
+	else {
+		FVector pawnPos = GetOwner()->GetActorLocation();
+		FVector distanceFromPalmPrevStateToPawn = (pawnPos - palmPreviousState) + (GetOwner()->GetActorForwardVector() * 10); // move an extra 10cm in front of the desired location
+		magnitudeForPredictiveHandTravel = FVector::DotProduct(distanceFromPalmPrevStateToPawn, distanceFromPalmPrevStateToPawn);
+	}
 }
 
 void UHandSelector::HandGrabGesture(const FVector& palmPos)
 {
 
-	int correctOrientation = 0; // this indicates correct position for hand grab
-	FVector currentPos = FVector::Zero();
-	FVector directionPalmToFinger = FVector::Zero();
-	float squaredLengthAvg = 0;
-	float squaredLengthTotalFingers = 0;
-	float relativeGrabThreshold = relativeHandSizeSquared * 0.65f;
-	for (int i = 0; i < boneNames.Num(); i++) {
 
-		currentPos = skRef->GetBoneLocation(boneNames[i], EBoneSpaces::ComponentSpace);
-		directionPalmToFinger = currentPos - palmPos;
-		squaredLengthTotalFingers += FVector::DotProduct(directionPalmToFinger, directionPalmToFinger);
-
-	}
-	squaredLengthAvg = squaredLengthTotalFingers / GRAB_FINGER_COUNT;
+	float relativeGrabThreshold = relativeDistanceBetweenThumbAndIdx * 0.5f;
+	float squaredLength = 0.0f;
+	FVector thumbPos = skRef->GetBoneLocation(boneNames[0], EBoneSpaces::ComponentSpace);
+	FVector indexFinger = skRef->GetBoneLocation(boneNames[1], EBoneSpaces::ComponentSpace);
+	FVector direction = indexFinger - thumbPos;
+	squaredLength = FVector::DotProduct(direction, direction);
 
 
-	float deadZone = relativeHandSizeSquared * 0.05f;
+	float deadZone = relativeDistanceBetweenThumbAndIdx * 0.05f;
 	bool pinchChanged = false;
 	if (isPinching)
 	{
-		if (squaredLengthAvg > relativeGrabThreshold + deadZone) {
+		if (squaredLength > relativeGrabThreshold + deadZone) {
 			isPinching = false;
 			pinchChanged = true;
 		}
 	}
 	else {
-		if (squaredLengthAvg < (relativeGrabThreshold + deadZone))
+		if (squaredLength < (relativeGrabThreshold + deadZone))
 		{
 			isPinching = true;
 			pinchChanged = true;
@@ -155,10 +162,10 @@ void UHandSelector::HandGrabGesture(const FVector& palmPos)
 	if (pinchChanged)
 	{
 		OnPinch.Broadcast(isPinching);
-		
+
 		if (focusVodget) {
 			focusVodget->ForePinch(this, isPinching);
-		
+
 		}
 	}
 
@@ -257,7 +264,7 @@ void UHandSelector::CalculateEyeHandPosBoneData(FVector& startVector, FVector& e
 	FVector eyePos = centerEye->GetComponentLocation();
 	FVector ray = midPointVec - eyePos;
 	ray.Normalize();
-	ray *= 20.0;
+	ray *= 50.0;
 
 	startVector = midPointVec - ray;
 	endPos = midPointVec + ray;
@@ -289,9 +296,9 @@ void UHandSelector::DetectActivationMenuSystem()
 		float handToEyeNorm = FVector::DotProduct(midpointToEye, wristNormal);
 		float eyeToHandResult = FVector::DotProduct(centerEye->GetForwardVector(), -midpointToEye);
 		float secondaryCheckWristRight = FVector::DotProduct(centerEye->GetRightVector(), wristRightVec);
-		if (handToEyeNorm <= PALM_TO_EYE_VEC_MIN && eyeToHandResult > EYE_VIEW_VECTOR_MIN && squaredDistancePalmToEye <= relativeHandToEyeThreshold && FMath::Abs(secondaryCheckWristRight) < 0.2f) {
+		if (handToEyeNorm <= PALM_TO_EYE_VEC_MIN && eyeToHandResult > EYE_VIEW_VECTOR_MIN && FMath::Abs(secondaryCheckWristRight) < 0.2f) {
 			menuSubsystemActor->SetActive(true);
-			menuSubsystemActor->SetVisibility(true,true);
+			menuSubsystemActor->SetVisibility(true, true);
 			FVector centerToMidpoint = midpoint - centerEye->GetComponentLocation();
 			FQuat rotation = midpointToEye.Rotation().Quaternion();
 			menuSubsystemActor->SetWorldRotation(rotation);
@@ -332,17 +339,23 @@ void UHandSelector::SetCursor()
 		transform.SetScale3D(FVector::OneVector);
 		cursor = transform;
 	}
-	else if (!handTrackingActive && !status)
+	else if (!handTrackingActive && focus_grabbed) // Update this section, use the component space of the hand, then use the pawn.Inverse() which should give me a rough placement
 	{
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, TEXT("Entered into inactive status of hand and controll"));
 		FTransform transform = FTransform::Identity;
-		float magnitude = FVector::DotProduct(handTravelDirection, handTravelDirection);
-		FVector travelDir = hand->GetForwardVector() * magnitude + palmPreviousState;
-		transform.SetLocation(travelDir);
+		float length = FMath::Sqrt(magnitudeForPredictiveHandTravel); // magnitudeForPredictiveHandTravel is squared length calculated in the hot path, this makes it so sqrt only happens if required.
+		FVector handTravelPosition = (palmPreviousState + handTravelDirection * length); 
+		
+		transform.SetLocation(handTravelPosition);
 		transform.SetRotation(skRef->GetBoneQuaternion(palmName, EBoneSpaces::WorldSpace));
 		transform.SetScale3D(FVector::OneVector);
+		
 	}
 	else
+	{
+
 		cursor = hand->GetComponentTransform();
+	}
 
 	// Search for Vodget components when focus is not grabbed.
 	//if (focusVodget != nullptr) {
@@ -397,9 +410,12 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 			return;
 		}
 	}
-	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandTrackingEnabled();
+
+	handTrackingActive = UOculusXRInputFunctionLibrary::IsHandPositionValid(skRef->SkeletonType);
+
 	if (relativeHandSizeSquared <= 0 && handTrackingActive) CalculateHandSize();
 	ABrickSpacePawn* bspawn = Cast<ABrickSpacePawn>(GetOwner());
+
 	if (bspawn && handMesh) {
 
 		FVector markerPos = (handTrackingActive) ? GetMidPointBetweenThumbIndex() : hand->GetComponentLocation();
@@ -426,7 +442,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 		{
 			// Let the previous focusVodgetCurr know that it has lost focus here.
 			if (focusVodget != nullptr) {
-				
+
 				focusVodget->Focus(this, false);
 			}
 
@@ -434,7 +450,7 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 			// Let the focusVodgetCurr know that it now has selector focus here.
 			if (focusVodget != nullptr) {
-				
+
 				focusVodget->Focus(this, true);
 
 			}
@@ -444,19 +460,13 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	}
 
+	UpdatePalmTrackingPoint(DeltaTime); // This needs to always run to keep the current state of the hand updated or change magnitude for predictive movement
 	if (handTrackingActive) // Hand tracking, when sight is lost hand tracking is disabled.
 	{
 
-		UpdatePalmTrackingPoint();
 		CheckHandGestures(DeltaTime); // checking for palm in motion or low motion
 
 	}
-
-	//if (handTrackingActive && bspawn && !focus_grabbed)
-	//{
-	//	FVector palmPos = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
-	//	WorldGrabGesture(palmPos);
-	//}
 }
 
 void UHandSelector::SetFilter(uint16 filter)
@@ -495,6 +505,9 @@ void UHandSelector::BeginPlay()
 
 #endif
 	CalculateHandSize();
+	currentHand = Cast<UMotionControllerComponent>(hand->GetAttachParent());
+	leftOrRight = currentHand->GetTrackingSource();
+
 }
 
 #pragma region HAND_MESH_POSITION_REPLICATION

@@ -7,6 +7,8 @@
 class ABrickSpacePawn;
 class UOculusXRHandComponent;
 struct FXRMotionControllerData;
+class UMotionControllerComponent;
+
 #include "HandSelector.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FButtonDelegate1, bool, value);
@@ -89,7 +91,7 @@ private:
 	void CalculateHandSize();
 	// Handles all gesture commands
 	void CheckHandGestures(float deltaTime);
-	void UpdatePalmTrackingPoint();
+	void UpdatePalmTrackingPoint(float deltaTime);
 	// Handles grabbing objects
 	void HandGrabGesture(const FVector& palmPos);
 	void WorldGrabGesture(const FVector& palmPos);
@@ -103,13 +105,17 @@ private:
 	TArray<FName> boneNames; // references my hands
 	FName palmName = FName("Wrist Root"); // need these to reference my hands
 	FVector palmPreviousState = FVector::Zero();
-	FVector handTravelDirection;
+	FVector handTravelDirection = FVector::Zero();
+	FVector targetPosition = FVector::Zero();
 	bool handTrackingActive = false;
 	bool isUsingWorldGrabber = false;
 	bool palmInMotion = false;
 	float timeControlMenuButtonPresses = 0.0f;
 	float squaredHandToEyeDistance = 0.0f;
-
+	float relativeDistanceBetweenThumbAndIdx = 0.0f;
 	bool isPinching = false;
+	UMotionControllerComponent* currentHand = nullptr;
+	EControllerHand leftOrRight;
+	float magnitudeForPredictiveHandTravel = 0;
 	
 };
