@@ -40,19 +40,19 @@ struct FAssemblyBrick {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	int layerInd;
+	int layerInd = 0;
 
 	UPROPERTY()
 	FString shortName;
 
 	UPROPERTY()
-	FVector position;
+	FVector position = FVector::ZeroVector;
 
 	UPROPERTY()
-	FQuat rotation;
+	FQuat rotation = FQuat::Identity;
 
 	UPROPERTY()
-	UMaterialInterface* material;
+	UMaterialInterface* material = nullptr;
 };
 
 USTRUCT(BlueprintType)

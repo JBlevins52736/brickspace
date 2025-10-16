@@ -11,13 +11,13 @@ struct FCalibration {
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY()
-	FVector position;
+	FVector position = FVector::ZeroVector;
 
 	UPROPERTY()
-	FQuat rotation;
+	FQuat rotation = FQuat::Identity;
 
 	UPROPERTY()
-	float worldToMeters;
+	float worldToMeters = 100.0;
 };
 
 /**
