@@ -4,8 +4,6 @@
 #include "AlignWorld.h"
 #include "Selector.h"
 
-#include "WorldAlignmentActor.h"
-
 void UAlignWorld::ForePinch(USelector* selector, bool state)
 {
 	selector->GrabFocus(state);
