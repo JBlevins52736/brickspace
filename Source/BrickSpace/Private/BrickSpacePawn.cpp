@@ -63,6 +63,21 @@ void ABrickSpacePawn::Server_Move_Implementation(AActor* TargetActor, const FTra
 	TargetActor->SetActorTransform(InitialTransform);
 }
 
+void ABrickSpacePawn::Server_MoveRelative_Implementation(USceneComponent* TargetActor, const FTransform& InitialTransform)
+{
+	TargetActor->SetRelativeTransform(InitialTransform);
+}
+
+void ABrickSpacePawn::Server_Translate_Implementation(USceneComponent* TargetActor, const FVector& worldPos)
+{
+	TargetActor->SetRelativeLocation(worldPos);
+}
+
+void ABrickSpacePawn::Server_Rotate_Implementation(USceneComponent* TargetActor, const FRotator& Rot)
+{
+	TargetActor->SetRelativeRotation(Rot);
+}
+
 void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 {
 	TargetActor->Destroy(true, true);
@@ -121,5 +136,16 @@ void ABrickSpacePawn::Server_UpdateWallAngle_Implementation(UWallMover* WallMove
 	if (WallMover)
 	{
 		WallMover->SetMovementTarget(LeverAngle);
+	}
+}
+
+void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButton* ButtonComponent)
+{
+
+	if (ButtonComponent && ButtonComponent->timer)
+	{
+
+		ButtonComponent->timer->StopTimer(this);
+		ButtonComponent->Press();
 	}
 }

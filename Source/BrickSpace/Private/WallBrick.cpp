@@ -56,7 +56,7 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 	{
 		ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
 		if (pawn->HasAuthority())
-			clientComponent->SetRelativeTransform(InitialRelativeTransform);9
+			clientComponent->SetRelativeTransform(InitialRelativeTransform);
 		else
 			pawn->Server_MoveRelative(clientComponent, InitialRelativeTransform); 
 	}
