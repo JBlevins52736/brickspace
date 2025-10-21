@@ -65,7 +65,6 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 		DeltaTime,
 		(BaseSpeedFactor * PercentageAbs)
 	);
-	//SetRelativeLocation(NewLocation);
 
 	APlayerController* LocalPlayerController = GetWorld()->GetFirstPlayerController(); 
 		if (LocalPlayerController)
@@ -78,11 +77,11 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 				
 				if (LocalPawn->HasAuthority())
 				{
-					SetRelativeLocation(NewLocation);
+					GetOwner()->SetActorLocation(NewLocation);
 				}
 				else 
 				{
-					brickspacePawn->Server_Translate(this, NewLocation);
+					brickspacePawn->Server_Translate(GetOwner(), NewLocation);
 				}
 
 			}
@@ -126,5 +125,5 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 
 	}
-
+	PrimaryComponentTick.SetTickFunctionEnable(false);
 }

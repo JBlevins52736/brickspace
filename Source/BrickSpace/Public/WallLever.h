@@ -9,6 +9,7 @@
 
 class UStaticMeshComponent;
 class USelector;
+class ABrickSpacePawn;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnLeverMoved, float, NormalizedRotation);
 
@@ -41,8 +42,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
 	USceneComponent* box;
 
-	UFUNCTION(Server, Unreliable)
-	void Server_SetLeverPosition(float NormalizedRotation);
+	//UFUNCTION(Server, Unreliable)
+	//void Server_SetLeverPosition(float NormalizedRotation);
 protected:
 
 	virtual void BeginPlay() override;

@@ -28,7 +28,7 @@ public:
 	void Server_Move(AActor* TargetActor, const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
-	void Server_Translate(USceneComponent* TargetActor, const FVector& worldPos);
+	void Server_Translate(AActor* TargetActor, const FVector& worldPos);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Rotate(USceneComponent* TargetActor, const FRotator& Rot);

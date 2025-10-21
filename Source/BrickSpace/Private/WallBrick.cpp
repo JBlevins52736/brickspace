@@ -63,9 +63,9 @@ void UWallBrick::Server_CloneWallBrick_Implementation(const FTransform& onWallTr
     AActor* clonedBrick = World->SpawnActor<AActor>(TargetActor->GetClass(), FTransform::Identity);
     if (!clonedBrick) return;
 
-    // Ensure the new brick has movement replication enabled.
-    clonedBrick->SetReplicates(true);
-    clonedBrick->SetReplicateMovement(true);
+    //// Ensure the new brick has movement replication enabled.
+    //clonedBrick->SetReplicates(true);
+    //clonedBrick->SetReplicateMovement(true);
 
     //Attach the cloned brick to the WallComponent.
     clonedBrick->GetRootComponent()->AttachToComponent(

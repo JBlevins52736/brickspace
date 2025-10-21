@@ -64,9 +64,9 @@ void ABrickSpacePawn::Server_Move_Implementation(AActor* TargetActor, const FTra
 	TargetActor->SetActorTransform(InitialTransform);
 }
 
-void ABrickSpacePawn::Server_Translate_Implementation(USceneComponent* TargetActor, const FVector& worldPos)
+void ABrickSpacePawn::Server_Translate_Implementation(AActor* TargetActor, const FVector& worldPos)
 {
-	TargetActor->SetRelativeLocation(worldPos);
+	TargetActor->SetActorLocation(worldPos);
 }
 
 void ABrickSpacePawn::Server_Rotate_Implementation(USceneComponent* TargetActor, const FRotator& Rot)
