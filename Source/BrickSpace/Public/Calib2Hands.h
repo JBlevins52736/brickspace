@@ -15,12 +15,23 @@ class BRICKSPACE_API UCalib2Hands : public UWorldGrabberReplicated
 	GENERATED_BODY()
 	
 public:
-	virtual void ActiveChanged() override;
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void LCalibGesture(const bool Value);
 
-protected:
-	virtual void SetLocalCursor() override;
-	
+	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
+	void RCalibGesture(const bool Value);
+
+	// Server RPC Function
+	UFUNCTION(Server, Reliable)
+	void ServerCalibRequest();
+
+	UFUNCTION(Client, Reliable)
+	void ClientCalibrate( FVector leftPos, FVector rightPos );
+
 private:
-	FVector leftPos;
-	FVector rightPos;
+	void SetCursorSrt( FVector leftPos, FVector rightPos );
+	FTransform csr;
+
+	bool leftGestureState = false;
+	bool rightGestureState = false;
 };

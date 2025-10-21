@@ -46,6 +46,8 @@ protected:
 	bool dollyMode = true;
 	bool scaleMode = false;
 	bool activeMode = false;
+	bool leftGrabbing = false;
+	bool rightGrabbing = false;
 
 	float currWorldToMeters = 100.0;
 
@@ -64,9 +66,6 @@ private:
 
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void ActivateToggle(const bool Value);
-
-	bool leftGrabbing = false;
-	bool rightGrabbing = false;
 
 	float prevBimanualHandDist;
 
