@@ -4,7 +4,7 @@
 #include "Calib2Hands.h"
 #include <Kismet/GameplayStatics.h>
 
-void UCalib2Hands::SetCursorSrt()
+void UCalib2Hands::SetCursorSrt(FVector leftPos, FVector rightPos)
 {
 	// Set the cursor to the local hands.
 	csr.SetLocation((leftPos + rightPos) * 0.5);
@@ -18,18 +18,64 @@ void UCalib2Hands::SetCursorSrt()
 void UCalib2Hands::LCalibGesture(const bool Value)
 {
 	leftGestureState = Value;
-	if (leftGestureState && rightGestureState && !GetOwner()->HasAuthority() )
-		DoCalibration();
+	if (leftGestureState && rightGestureState && !GetOwner()->HasAuthority())
+		ServerCalibRequest();
 }
 
 void UCalib2Hands::RCalibGesture(const bool Value)
 {
 	rightGestureState = Value;
 	if (leftGestureState && rightGestureState && !GetOwner()->HasAuthority())
-		DoCalibration();
+		ServerCalibRequest();
 }
 
-void UCalib2Hands::DoCalibration()
+void UCalib2Hands::ServerCalibRequest_Implementation()
+{
+	APlayerController* ListenServerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	APawn* ListenServerPawn = ListenServerController->GetPawn();
+
+	FVector leftPos;
+	{
+		UActorComponent* actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("LeftHand"));
+		if (!actorComponent)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Calib2Hands: No component with LeftHand tag found on ListenServerPawn."));
+			return;
+		}
+		USceneComponent* handComponent = Cast<USceneComponent>(actorComponent);
+		if (!handComponent)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Calib2Hands: ActorComponent not a SceneComponent."));
+			return;
+		}
+		leftPos = handComponent->GetComponentLocation();
+	}
+
+	FVector rightPos;
+	{
+		UActorComponent* actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("RightHand"));
+		if (!actorComponent)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Calib2Hands: No component with RightHand tag found on ListenServerPawn."));
+			return;
+		}
+		USceneComponent* handComponent = Cast<USceneComponent>(actorComponent);
+		if (!handComponent)
+		{
+			UE_LOG(LogTemp, Error, TEXT("Calib2Hands: ActorComponent not a SceneComponent."));
+			return;
+		}
+		handComponent = Cast<USceneComponent>(actorComponent);
+		rightPos = handComponent->GetComponentLocation();
+	}
+
+	UCalib2Hands* calib = Cast<UCalib2Hands>(GetOwner()->GetRootComponent());
+	if (calib) {
+		calib->ClientCalibrate(leftPos, rightPos);
+	}
+}
+
+void UCalib2Hands::ClientCalibrate_Implementation(FVector leftPos, FVector rightPos)
 {
 	// If either hand is not assigned then do nothing.
 	if (leftHand == nullptr || rightHand == nullptr)
@@ -39,72 +85,18 @@ void UCalib2Hands::DoCalibration()
 	}
 
 	// Set the childsrt to the inverse of the listen server clients cursor.
-	FTransform child;
+	SetCursorSrt(leftPos, rightPos);
 
-	{
-		// Get the servers simulated hand locations from its pawn
-		APlayerController* ListenServerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-		if (!ListenServerController)
-			return;
+	// Calculate the identity worldsrt as a child of the cursor.
+	FTransform child = csr.Inverse();
 
-		APawn* ListenServerPawn = ListenServerController->GetPawn();
-		// Get all SceneComponents with the tag "MyTag" on this actor
-		{
-			UActorComponent* actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("LeftHand"));
-			if (!actorComponent)
-			{
-				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: No component with LeftHand tag found on ListenServerPawn."));
-				return;
-			}
-			USceneComponent* handComponent = Cast<USceneComponent>(actorComponent);
-			if (!handComponent)
-			{
-				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: ActorComponent not a SceneComponent."));
-				return;
-			}
-			leftPos = handComponent->GetComponentLocation();
-
-			if (dummyL) {
-				dummyL->SetWorldLocation(leftPos);
-			}
-		}
-
-		{
-			UActorComponent* actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("RightHand"));
-			if (!actorComponent)
-			{
-				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: No component with RightHand tag found on ListenServerPawn."));
-				return;
-			}
-			USceneComponent* handComponent = Cast<USceneComponent>(actorComponent);
-			if (!handComponent)
-			{
-				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: ActorComponent not a SceneComponent."));
-				return;
-			}
-			handComponent = Cast<USceneComponent>(actorComponent);
-			rightPos = handComponent->GetComponentLocation();
-			if (dummyR) {
-				dummyR->SetWorldLocation(rightPos);
-			}
-		}
-
-		SetCursorSrt();
-
-		// Calculate the identity worldsrt as a child of the cursor.
-		child = csr.Inverse();
-	}
 
 	// My left hand is where the hosts right hand is and vis-versa
-	rightPos = leftHand->GetComponentLocation();
-	leftPos = rightHand->GetComponentLocation();
-	SetCursorSrt();
+	SetCursorSrt(rightHand->GetComponentLocation(), leftHand->GetComponentLocation());
 
 	// Move the cursor to the servers hands.
 	FTransform worldsrt = child * csr;
 	FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
 
-#ifdef BLAH
-	//Server_Move(this, pawnChildOfWorld);
-#endif
+	Server_Move(this, pawnChildOfWorld);
 }

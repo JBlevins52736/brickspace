@@ -21,17 +21,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "VAR", meta = (AllowPrivateAccess = true))
 	void RCalibGesture(const bool Value);
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
-	USceneComponent* dummyL = nullptr;
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
-	USceneComponent* dummyR = nullptr;
+	// Server RPC Function
+	UFUNCTION(Server, Reliable)
+	void ServerCalibRequest();
+
+	UFUNCTION(Client, Reliable)
+	void ClientCalibrate( FVector leftPos, FVector rightPos );
 
 private:
-	void DoCalibration();
-
-	void SetCursorSrt();
-	FVector leftPos;
-	FVector rightPos;
+	void SetCursorSrt( FVector leftPos, FVector rightPos );
 	FTransform csr;
 
 	bool leftGestureState = false;
