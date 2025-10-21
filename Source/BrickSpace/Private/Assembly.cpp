@@ -230,20 +230,36 @@ void UAssembly::LoadAssembly()
 
 	currLayer = -1;
 	if (!LoadNextLayer()) {
-		UE_LOG(LogTemp, Warning, TEXT("bricklist initialzed but empty"));
+		/*UE_LOG(LogTemp, Warning, TEXT("bricklist initialzed but empty"));*/
 	}
 }
 
 void UAssembly::LaunchRocket()
 {
-	if (!LoadNextLayer()) {
+	
+	for (UBrick* brick : layerBricks)
+	{
+		if (!brick->IsSolved())
+		{
+			/*UE_LOG(LogTemp, Warning, TEXT("LAUNCH: Cannot launch, current layer not complete."));*/
+			return; 
+		}
+	}
+
+	
+	if (LoadNextLayer()) {
+		
+		/*UE_LOG(LogTemp, Warning, TEXT("LAUNCH: Loaded next layer. Rocket not launched."));*/
+		return; 
+	}
+
+	
 	startPos = GetOwner()->GetActorLocation();
 	PrimaryComponentTick.SetTickFunctionEnable(true);
 
 	//niagaraThrusterEffect->Activate();
 	Multi_OnSmoke(true);
-	}
-
+	/*UE_LOG(LogTemp, Warning, TEXT("LAUNCH: All layers complete. Launching Rocket!"));*/
 }
 
 bool UAssembly::TryAdvanceLayer()
