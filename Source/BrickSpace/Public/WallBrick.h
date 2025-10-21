@@ -16,7 +16,7 @@ public:
     UPROPERTY(EditAnywhere, Replicated)
     bool bThresholdReached = false;  
 
-	void Server_CloneWallBrick_Implementation(FTransform initialTransform);
+	void CloneWallBrick(FTransform initialTransform);
 
 protected:
     virtual void BeginPlay() override;

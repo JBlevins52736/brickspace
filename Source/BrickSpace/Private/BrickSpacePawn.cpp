@@ -85,7 +85,7 @@ void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 
 void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& onWallTransform)
 {
-	wallBrick->Server_CloneWallBrick_Implementation(onWallTransform);
+	wallBrick->CloneWallBrick(onWallTransform);
 }
 
 void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(UBrick* assemblyBrick)

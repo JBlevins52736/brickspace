@@ -50,19 +50,20 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 		return;
 
 	if (state) {
-		InitialRelativeTransform = clientComponent->GetRelativeTransform();
+		InitialRelativeTransform = GetRelativeTransform();
 	}
-	else if (!bThresholdReached )
+	else if (!bThresholdReached)
 	{
 		ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
 		if (pawn->HasAuthority())
-			clientComponent->SetRelativeTransform(InitialRelativeTransform);
+			SetRelativeTransform(InitialRelativeTransform);
 		else
-			pawn->Server_MoveRelative(clientComponent, InitialRelativeTransform); 
+			pawn->Server_MoveRelative(this, InitialRelativeTransform);
+
 	}
 }
 
-void UWallBrick::Server_CloneWallBrick_Implementation( FTransform initialTransform )
+void UWallBrick::CloneWallBrick( FTransform initialTransform )
 {
 	AActor* TargetActor = GetOwner();
 	UWorld* World = TargetActor->GetWorld();
@@ -141,9 +142,9 @@ void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
 	if (pawn->HasAuthority())
-		Server_CloneWallBrick_Implementation(InitialRelativeTransform);                // If already on server, just spawn.
+		CloneWallBrick(InitialRelativeTransform);              
 	else
-		pawn->Server_CloneWallBrick(this, InitialRelativeTransform);    // Ask server to spawn.
+		pawn->Server_CloneWallBrick(this, InitialRelativeTransform); 
 
 }
 
