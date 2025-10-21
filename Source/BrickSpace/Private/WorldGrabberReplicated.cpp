@@ -102,10 +102,14 @@ void UWorldGrabberReplicated::LoadCalibration()
 				FCalibration calibration;
 				if (FJsonObjectConverter::JsonObjectToUStruct(JsonObject.ToSharedRef(), &calibration, 0, 0))
 				{
-					SetWorldLocation(calibration.position);
-					SetWorldRotation(calibration.rotation);
-					SetWorldToMeters(calibration.worldToMeters);
-
+					FTransform calibPose(calibration.rotation, calibration.position);
+					if (GetOwner()->HasAuthority()) {
+						SetRelativeTransform(calibPose);
+						SetWorldToMeters(calibration.worldToMeters);
+					}
+					else {
+						Server_Move(this, calibPose);
+					}
 					UE_LOG(LogTemp, Error, TEXT("Converted Local FJsonObject to FCalibration."));
 				}
 				else
