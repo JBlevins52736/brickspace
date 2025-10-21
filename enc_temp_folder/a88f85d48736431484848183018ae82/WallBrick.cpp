@@ -52,7 +52,9 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 		return;
 
 	if (state) {
-		InitialRelativeTransform = clientComponent->GetRelativeTransform();
+		if ( !bThresholdReached ) {
+			InitialRelativeTransform = clientComponent->GetRelativeTransform();
+		}
 	}
 	else if (!bThresholdReached )
 	{

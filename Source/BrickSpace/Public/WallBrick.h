@@ -16,7 +16,7 @@ public:
     UPROPERTY(EditAnywhere, Replicated)
     bool bThresholdReached = false;  // only bool we need
 
-	void Server_CloneWallBrick_Implementation(const FTransform& onWallTransform);
+	void Server_CloneWallBrick_Implementation(FTransform initialTransform);
 
 protected:
     virtual void BeginPlay() override;
@@ -26,9 +26,10 @@ protected:
 
 private:
     FTransform InitialTransform = FTransform::Identity;
-    UPROPERTY(ReplicatedUsing = OnRep_InitialRelativeTransform)
+
+    //UPROPERTY(ReplicatedUsing = OnRep_InitialRelativeTransform)
     FTransform InitialRelativeTransform = FTransform::Identity;
 
-    UFUNCTION()
-    void OnRep_InitialRelativeTransform();
+    //UFUNCTION()
+    //void OnRep_InitialRelativeTransform();
 };

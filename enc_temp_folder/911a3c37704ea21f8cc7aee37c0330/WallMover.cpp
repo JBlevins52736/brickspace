@@ -99,11 +99,11 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 			
 			UE_LOG(LogTemp, Warning, TEXT("Local Pawn Name: %s"), *PawnName);
 
-	/*
+	
 			if (GEngine)
 			{
 				GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Pawn Name: %s"), *PawnName));
-			}*/
+			}
 
 			PrimaryComponentTick.SetTickFunctionEnable(true);
 			ABrickSpacePawn* brickspacePawn = Cast<ABrickSpacePawn>(LocalPawn);

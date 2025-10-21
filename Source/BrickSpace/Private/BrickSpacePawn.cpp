@@ -64,6 +64,11 @@ void ABrickSpacePawn::Server_Move_Implementation(AActor* TargetActor, const FTra
 	TargetActor->SetActorTransform(InitialTransform);
 }
 
+void ABrickSpacePawn::Server_MoveRelative_Implementation(USceneComponent* TargetActor, const FTransform& InitialTransform)
+{
+	TargetActor->SetRelativeTransform(InitialTransform);
+}
+
 void ABrickSpacePawn::Server_Translate_Implementation(USceneComponent* TargetActor, const FVector& worldPos)
 {
 	TargetActor->SetRelativeLocation(worldPos);
@@ -79,9 +84,9 @@ void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 	TargetActor->Destroy(true, true);
 }
 
-void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& onWallTransform)
+void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, FTransform InitialTransform )
 {
-	wallBrick->Server_CloneWallBrick_Implementation(onWallTransform);
+	wallBrick->Server_CloneWallBrick_Implementation( InitialTransform );
 }
 
 void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(UBrick* assemblyBrick)

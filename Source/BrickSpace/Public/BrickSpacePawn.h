@@ -28,6 +28,9 @@ public:
 	void Server_Move(AActor* TargetActor, const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
+	void Server_MoveRelative(USceneComponent* TargetActor, const FTransform& InitialTransform);
+
+	UFUNCTION(Server, Reliable)
 	void Server_Translate(USceneComponent* TargetActor, const FVector& worldPos);
 
 	UFUNCTION(Server, Reliable)
@@ -37,7 +40,7 @@ public:
 	void Server_Delete(AActor* TargetActor);
 
 	UFUNCTION(Server, Reliable)
-	void Server_CloneWallBrick(UWallBrick* wallBrick, const FTransform& onWallTransform);
+	void Server_CloneWallBrick(UWallBrick* wallBrick, FTransform InitialTransform );
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryAdvanceLayer(UBrick* assemblyBrick);
