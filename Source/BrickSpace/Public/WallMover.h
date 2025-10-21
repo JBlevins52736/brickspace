@@ -19,7 +19,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Wall Movement")
 	void SetMovementTarget(float LeverAngle);
 
-	/** Reference to the Static Mesh Component (the plane) to scale for the ground opening effect. */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	UStaticMeshComponent* FloorPlate;
 
@@ -59,13 +58,10 @@ private:
 	UPROPERTY(Replicated)
 	FVector TargetRelativeLocation;
 
-	
-
-	/** The maximum Y-scale the plane should reach when the wall is lowered (e.g., 1.2). */
 	UPROPERTY(EditAnywhere, Category = "Ground Effect")
 	float GroundMaxScaleY = 1.2f;
 
-	/** The speed at which the plane's Y-scale interpolates to the target. */
+
 	UPROPERTY(EditAnywhere, Category = "Ground Effect")
 	float GroundScaleInterpSpeed = 10.0f;
 

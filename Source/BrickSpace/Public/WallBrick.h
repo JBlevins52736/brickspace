@@ -14,7 +14,7 @@ public:
     float DistanceThreshold = 100.0f;
 
     UPROPERTY(EditAnywhere, Replicated)
-    bool bThresholdReached = false;  // only bool we need
+    bool bThresholdReached = false;  
 
 	void Server_CloneWallBrick_Implementation(FTransform initialTransform);
 

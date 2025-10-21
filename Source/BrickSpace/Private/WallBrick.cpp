@@ -19,8 +19,6 @@ void UWallBrick::BeginPlay()
 	//if (GetOwner()->HasAuthority())
 
 	if (clientComponent == nullptr) {
-		// WTF: Why wasn't this initialized in Vodget base class? 
-		// This only occurs when spawned on a remote client from the listen server client.
 
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent clientComponent null"));
 		clientComponent = GetAttachParent();
@@ -58,9 +56,9 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 	{
 		ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
 		if (pawn->HasAuthority())
-			clientComponent->SetRelativeTransform(InitialRelativeTransform);    // If already on server, just reset transform.
+			clientComponent->SetRelativeTransform(InitialRelativeTransform);9
 		else
-			pawn->Server_MoveRelative(clientComponent, InitialRelativeTransform);    // Ask server to reset transform.
+			pawn->Server_MoveRelative(clientComponent, InitialRelativeTransform); 
 	}
 }
 

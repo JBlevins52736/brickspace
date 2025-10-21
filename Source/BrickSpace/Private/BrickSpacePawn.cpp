@@ -23,16 +23,11 @@ ABrickSpacePawn::ABrickSpacePawn()
 
 void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButton* ButtonComponent)
 {
-	// 1. The server receives the request.
 
 	if (ButtonComponent && ButtonComponent->timer)
 	{
-		// 2. The server executes the authoritative game logic.
+	
 		ButtonComponent->timer->StopTimer(this);
-
-		// 3. The server calls the Press function, which triggers the OnPressed delegate.
-		// If OnPressed is used for visual effects, consider making it a Multicast RPC 
-		// or using a RepNotify variable on the ButtonComponent's owner.
 		ButtonComponent->Press();
 	}
 }

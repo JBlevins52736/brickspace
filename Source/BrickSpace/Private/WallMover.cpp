@@ -26,7 +26,6 @@ void UWallMover::SetMovementTarget(float Percentage)
 {
 	CurrentPercentage = Percentage;
 
-	// ... rest of the logic (now only running on the server) ...
 	if (Percentage < 0.0f)
 	{
 		TargetRelativeLocation = LoweredRelativeLocation;
