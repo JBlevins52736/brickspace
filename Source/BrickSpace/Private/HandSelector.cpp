@@ -418,7 +418,8 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	if (bspawn && handMesh) {
 
-		FVector markerPos = (handTrackingActive) ? GetMidPointBetweenThumbIndex() : hand->GetComponentLocation();
+		//FVector markerPos = (handTrackingActive) ? GetMidPointBetweenThumbIndex() : hand->GetComponentLocation();
+		FVector markerPos = hand->GetComponentLocation();
 
 		if (pawn->GetLocalRole() == ROLE_Authority)
 		{

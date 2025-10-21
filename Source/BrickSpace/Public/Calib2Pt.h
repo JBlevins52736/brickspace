@@ -3,14 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WorldGrabberReplicated.h"
+#include "Calib2Hands.h"
 #include "Calib2Pt.generated.h"
 
 /**
  * 
  */
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class BRICKSPACE_API UCalib2Pt : public UWorldGrabberReplicated
+class BRICKSPACE_API UCalib2Pt : public UCalib2Hands
 {
 	GENERATED_BODY()
 	

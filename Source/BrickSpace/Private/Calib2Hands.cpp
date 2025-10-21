@@ -4,74 +4,107 @@
 #include "Calib2Hands.h"
 #include <Kismet/GameplayStatics.h>
 
-void UCalib2Hands::SetLocalCursor()
+void UCalib2Hands::SetCursorSrt()
 {
-	if (GetOwner()->HasAuthority()) {
-		Super::SetLocalCursor();
-		return;
-	}
 	// Set the cursor to the local hands.
-	cursorsrt.SetLocation((leftPos + rightPos) * 0.5);
+	csr.SetLocation((leftPos + rightPos) * 0.5);
 	FVector xAxis = leftPos - rightPos;
 	xAxis.Z = 0.0;
 	FQuat rot = FRotationMatrix::MakeFromXZ(xAxis, FVector::UpVector).ToQuat();
-	cursorsrt.SetRotation(rot);
-	cursorsrt.SetScale3D(FVector::OneVector);
+	csr.SetRotation(rot);
+	csr.SetScale3D(FVector::OneVector);
 }
 
-void UCalib2Hands::ActiveChanged()
+void UCalib2Hands::LCalibGesture(const bool Value)
 {
-	if (GetOwner()->HasAuthority()) {
-		// The server is always calibrated operating in standard world grabber replicated mode.
-		Super::ActiveChanged();
+	leftGestureState = Value;
+	if (leftGestureState && rightGestureState && !GetOwner()->HasAuthority() )
+		DoCalibration();
+}
+
+void UCalib2Hands::RCalibGesture(const bool Value)
+{
+	rightGestureState = Value;
+	if (leftGestureState && rightGestureState && !GetOwner()->HasAuthority())
+		DoCalibration();
+}
+
+void UCalib2Hands::DoCalibration()
+{
+	// If either hand is not assigned then do nothing.
+	if (leftHand == nullptr || rightHand == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Calib2Hands: leftHand or rightHand not assigned."));
 		return;
 	}
 
-	// Clients calibrate to the servers hands immediately and don't need tick update.
-	if (activeMode) {
+	// Set the childsrt to the inverse of the listen server clients cursor.
+	FTransform child;
 
+	{
 		// Get the servers simulated hand locations from its pawn
 		APlayerController* ListenServerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (!ListenServerController)
+			return;
+
 		APawn* ListenServerPawn = ListenServerController->GetPawn();
 		// Get all SceneComponents with the tag "MyTag" on this actor
-		UActorComponent* actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("LeftHand"));
-		if (!actorComponent)
 		{
-			UE_LOG(LogTemp, Error, TEXT("No component with LeftHand tag found."));
-			return;
-		}
-		USceneComponent* handComponent = Cast<USceneComponent>(actorComponent);
-		leftPos = handComponent->GetComponentLocation();
+			UActorComponent* actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("LeftHand"));
+			if (!actorComponent)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: No component with LeftHand tag found on ListenServerPawn."));
+				return;
+			}
+			USceneComponent* handComponent = Cast<USceneComponent>(actorComponent);
+			if (!handComponent)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: ActorComponent not a SceneComponent."));
+				return;
+			}
+			leftPos = handComponent->GetComponentLocation();
 
-		actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("RightHand"));
-		if (!handComponent)
-		{
-			UE_LOG(LogTemp, Error, TEXT("No component with RightHand tag found."));
-			return;
+			if (dummyL) {
+				dummyL->SetWorldLocation(leftPos);
+			}
 		}
-		handComponent = Cast<USceneComponent>(actorComponent);
-		rightPos = handComponent->GetComponentLocation();		
-		
-		SetLocalCursor();
+
+		{
+			UActorComponent* actorComponent = ListenServerPawn->FindComponentByTag(USceneComponent::StaticClass(), FName("RightHand"));
+			if (!actorComponent)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: No component with RightHand tag found on ListenServerPawn."));
+				return;
+			}
+			USceneComponent* handComponent = Cast<USceneComponent>(actorComponent);
+			if (!handComponent)
+			{
+				UE_LOG(LogTemp, Error, TEXT("Calib2Hands: ActorComponent not a SceneComponent."));
+				return;
+			}
+			handComponent = Cast<USceneComponent>(actorComponent);
+			rightPos = handComponent->GetComponentLocation();
+			if (dummyR) {
+				dummyR->SetWorldLocation(rightPos);
+			}
+		}
+
+		SetCursorSrt();
 
 		// Calculate the identity worldsrt as a child of the cursor.
-		childsrt = cursorsrt.Inverse();
-
-		// If either hand is not assigned then do nothing.
-		if (leftHand == nullptr || rightHand == nullptr)
-		{
-			UE_LOG(LogTemp, Error, TEXT("Calib2Hands::HandsTouchingServers: leftHand or rightHand not assigned."));
-			return;
-		}
-
-		// My left hand is where the hosts right hand is and vis-versa
-		rightPos = leftHand->GetComponentLocation();
-		leftPos = rightHand->GetComponentLocation();
-
-		// Move the cursor to the servers hands.
-		UpdateCursors();
-
-		// World grabbing is always disabled for clients.
-		activeMode = false;
+		child = csr.Inverse();
 	}
+
+	// My left hand is where the hosts right hand is and vis-versa
+	rightPos = leftHand->GetComponentLocation();
+	leftPos = rightHand->GetComponentLocation();
+	SetCursorSrt();
+
+	// Move the cursor to the servers hands.
+	FTransform worldsrt = child * csr;
+	FTransform pawnChildOfWorld = GetRelativeTransform() * worldsrt.Inverse();
+
+#ifdef BLAH
+	//Server_Move(this, pawnChildOfWorld);
+#endif
 }
