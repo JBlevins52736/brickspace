@@ -9,7 +9,6 @@
 class UWallBrick;
 class UTimeManager;
 class UWallMover;
-class USliderButton;
 #include "BrickSpacePawn.generated.h"
 
 UCLASS()
@@ -28,19 +27,10 @@ public:
 	void Server_Move(AActor* TargetActor, const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
-	void Server_MoveRelative(USceneComponent* TargetActor, const FTransform& InitialTransform);
-
-	UFUNCTION(Server, Reliable)
-	void Server_Translate(USceneComponent* TargetActor, const FVector& worldPos);
-
-	UFUNCTION(Server, Reliable)
-	void Server_Rotate(USceneComponent* TargetActor, const FRotator& Rot);
-
-	UFUNCTION(Server, Reliable)
 	void Server_Delete(AActor* TargetActor);
 
 	UFUNCTION(Server, Reliable)
-	void Server_CloneWallBrick(UWallBrick* wallBrick, FTransform InitialTransform );
+	void Server_CloneWallBrick(UWallBrick* wallBrick, const FTransform& onWallTransform);
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryAdvanceLayer(UBrick* assemblyBrick);
@@ -57,8 +47,8 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_UpdateWallAngle(UWallMover* WallMover, float LeverAngle);
 
-	UFUNCTION(Server, Reliable)
-	void Server_HandleLaunchButtonPress(USliderButton* ButtonComponent);
+	UFUNCTION(NetMulticast, Reliable)
+	void ActivateParticleSystem(bool isActive);
 public:
 
 	void VARLog(FString methodName);

@@ -55,7 +55,9 @@ void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
 	{
 		//Client asks server to start
 		pawn->Server_StartStopTimer(this, true);
+
 	}
+	pawn->ActivateParticleSystem(true);
 }
 
 void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
@@ -75,7 +77,9 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 	{
 		//Client asks server to stop
 		pawn->Server_StartStopTimer(this, false);
+
 	}
+	pawn->ActivateParticleSystem(false);
 }
 
 
@@ -144,18 +148,18 @@ void UTimeManager::Client_StopTimer_Implementation()
 
 void UTimeManager::Multicast_ResetTimer_Implementation()
 {
-    // This runs on SERVER and ALL CLIENTS
-    ElapsedTime = 0.0f;
-    
-    // Only server resets this
-    if (GetOwner()->HasAuthority())
-    {
-        ServerStoppedTime = 0.0f;
-    }
-    
-    UpdateTextRenderer();
-    
-    UE_LOG(LogTemp, Warning, TEXT("Machine received Reset Timer command. Local Time Reset."));
+	// This runs on SERVER and ALL CLIENTS
+	ElapsedTime = 0.0f;
+
+	// Only server resets this
+	if (GetOwner()->HasAuthority())
+	{
+		ServerStoppedTime = 0.0f;
+	}
+
+	UpdateTextRenderer();
+
+	UE_LOG(LogTemp, Warning, TEXT("Machine received Reset Timer command. Local Time Reset."));
 }
 
 void UTimeManager::Server_SyncStoppedTime_Implementation(float FinalTime)

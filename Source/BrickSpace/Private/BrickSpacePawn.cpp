@@ -9,7 +9,6 @@
 #include "Net/UnrealNetwork.h"
 #include "TimeManager.h"
 #include "WallMover.h"
-#include "SliderButton.h"
 
 // Sets default values
 ABrickSpacePawn::ABrickSpacePawn()
@@ -21,15 +20,20 @@ ABrickSpacePawn::ABrickSpacePawn()
 	SetReplicates(true);
 }
 
-void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButton* ButtonComponent)
+void ABrickSpacePawn::ActivateParticleSystem_Implementation(bool isActive)
 {
-
-	if (ButtonComponent && ButtonComponent->timer)
-	{
 	
-		ButtonComponent->timer->StopTimer(this);
-		ButtonComponent->Press();
+	TArray<UActorComponent*> components = K2_GetComponentsByClass(UHandSelector::StaticClass());
+	
+	
+	
+	for (UActorComponent* child : components)
+	{
+		if (UHandSelector* selector = Cast<UHandSelector>(child)) {
+			selector->StartStopParticleSystem(isActive);
+		}
 	}
+
 }
 
 void ABrickSpacePawn::VARLog(FString methodName)
@@ -59,29 +63,14 @@ void ABrickSpacePawn::Server_Move_Implementation(AActor* TargetActor, const FTra
 	TargetActor->SetActorTransform(InitialTransform);
 }
 
-void ABrickSpacePawn::Server_MoveRelative_Implementation(USceneComponent* TargetActor, const FTransform& InitialTransform)
-{
-	TargetActor->SetRelativeTransform(InitialTransform);
-}
-
-void ABrickSpacePawn::Server_Translate_Implementation(USceneComponent* TargetActor, const FVector& worldPos)
-{
-	TargetActor->SetRelativeLocation(worldPos);
-}
-
-void ABrickSpacePawn::Server_Rotate_Implementation(USceneComponent* TargetActor, const FRotator& Rot)
-{
-	TargetActor->SetRelativeRotation(Rot);
-}
-
 void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 {
 	TargetActor->Destroy(true, true);
 }
 
-void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, FTransform InitialTransform )
+void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& onWallTransform)
 {
-	wallBrick->Server_CloneWallBrick_Implementation( InitialTransform );
+	wallBrick->Server_CloneWallBrick_Implementation(onWallTransform);
 }
 
 void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(UBrick* assemblyBrick)
@@ -102,10 +91,10 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 {
 	if (!timeManager) return;
 
-	
+	// 1. Set the authoritative state (replicated to all)
 	timeManager->bIsRunning = isRunning;
 
-	
+	// 2. Issue the immediate command to all clients (Multicast)
 	if (isRunning)
 	{
 		timeManager->Client_StartTimer();
@@ -114,8 +103,8 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 	{
 		timeManager->Client_StopTimer();
 	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
+	
+	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
 }
 
 
@@ -125,7 +114,7 @@ void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager
 
 	timeManager->ResetTimer(this);
 
-	/*UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));*/
+	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
 }
 void ABrickSpacePawn::Server_UpdateWallAngle_Implementation(UWallMover* WallMover, float LeverAngle)
 {

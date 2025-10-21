@@ -4,9 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Selector.h"
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
 class ABrickSpacePawn;
 class UOculusXRHandComponent;
 struct FXRMotionControllerData;
+class UMotionControllerComponent;
+
 #include "HandSelector.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FButtonDelegate1, bool, value);
@@ -32,12 +36,19 @@ public:
 	virtual void SetFilter(uint16 filter) override;
 	virtual void BeginPlay() override;
 
+	void StartStopParticleSystem(bool isActive);
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	UOculusXRHandComponent* skRef = nullptr; // skRef is the component I need to get bone positions because for some reason this needs to exist
 
 	UPROPERTY(BlueprintAssignable, Category = "Button")
 	FButtonDelegate1 OnPinch;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	UNiagaraComponent* fireAffect = nullptr;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	USceneComponent* anchorForParticleEffect = nullptr;
 
 #pragma region HAND_MESH_POSITION_REPLICATION
 	//UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)
@@ -89,7 +100,7 @@ private:
 	void CalculateHandSize();
 	// Handles all gesture commands
 	void CheckHandGestures(float deltaTime);
-	void UpdatePalmTrackingPoint();
+	void UpdatePalmTrackingPoint(float deltaTime);
 	// Handles grabbing objects
 	void HandGrabGesture(const FVector& palmPos);
 	void WorldGrabGesture(const FVector& palmPos);
@@ -103,13 +114,17 @@ private:
 	TArray<FName> boneNames; // references my hands
 	FName palmName = FName("Wrist Root"); // need these to reference my hands
 	FVector palmPreviousState = FVector::Zero();
-	FVector handTravelDirection;
+	FVector handTravelDirection = FVector::Zero();
+	FVector targetPosition = FVector::Zero();
 	bool handTrackingActive = false;
 	bool isUsingWorldGrabber = false;
 	bool palmInMotion = false;
 	float timeControlMenuButtonPresses = 0.0f;
 	float squaredHandToEyeDistance = 0.0f;
-
+	float relativeDistanceBetweenThumbAndIdx = 0.0f;
 	bool isPinching = false;
+	UMotionControllerComponent* currentHand = nullptr;
+	EControllerHand leftOrRight;
+	float magnitudeForPredictiveHandTravel = 0;
 	
 };

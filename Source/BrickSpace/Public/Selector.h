@@ -22,6 +22,7 @@ public:
 	// on another vodget client until GrabFocus(false) is called by focusVodget releasing the grab.
 	virtual void GrabFocus(bool val)
 	{
+		
 		focus_grabbed = val;
 	}
 
