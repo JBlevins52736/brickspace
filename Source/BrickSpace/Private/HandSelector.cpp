@@ -98,12 +98,12 @@ void UHandSelector::CheckHandGestures(float deltaTime)
 {
 
 	// Start performing bone lookups by name because Meta doesnt know what a fixed size array is apparently
-	timeControlMenuButtonPresses += deltaTime;
-	if (timeControlMenuButtonPresses > 0.050) {
+
+	{
 
 		FVector palmVector = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
 		HandGrabGesture(palmVector);
-		timeControlMenuButtonPresses = 0;
+		
 	}
 
 }
@@ -115,7 +115,7 @@ void UHandSelector::UpdatePalmTrackingPoint(float deltaTime)
 		handTravelDirection = currentPalmPos - palmPreviousState;
 		handTravelDirection.Normalize();
 		float fwdDirectionCheck = FVector::DotProduct(handTravelDirection, GetOwner()->GetActorForwardVector());
-		handTravelDirection = fwdDirectionCheck < -0.5f ? -handTravelDirection: handTravelDirection;
+		handTravelDirection = fwdDirectionCheck < -0.5f ? -handTravelDirection : handTravelDirection;
 		FVector pawnPos = GetOwner()->GetActorLocation();
 		FVector distanceFromPalmPrevStateToPawn = (pawnPos - currentPalmPos) + (GetOwner()->GetActorForwardVector() * 10); // move an extra 10cm in front of the desired location
 		magnitudeForPredictiveHandTravel = FVector::DotProduct(distanceFromPalmPrevStateToPawn, distanceFromPalmPrevStateToPawn);
@@ -344,12 +344,12 @@ void UHandSelector::SetCursor()
 		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, TEXT("Entered into inactive status of hand and controll"));
 		FTransform transform = FTransform::Identity;
 		float length = FMath::Sqrt(magnitudeForPredictiveHandTravel); // magnitudeForPredictiveHandTravel is squared length calculated in the hot path, this makes it so sqrt only happens if required.
-		FVector handTravelPosition = (palmPreviousState + handTravelDirection * length); 
-		
+		FVector handTravelPosition = (palmPreviousState + handTravelDirection * length);
+
 		transform.SetLocation(handTravelPosition);
 		transform.SetRotation(skRef->GetBoneQuaternion(palmName, EBoneSpaces::WorldSpace));
 		transform.SetScale3D(FVector::OneVector);
-		
+
 	}
 	else
 	{
@@ -418,8 +418,8 @@ void UHandSelector::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 	if (bspawn && handMesh) {
 
-		//FVector markerPos = (handTrackingActive) ? GetMidPointBetweenThumbIndex() : hand->GetComponentLocation();
-		FVector markerPos = hand->GetComponentLocation();
+		FVector markerPos = (handTrackingActive) ? GetMidPointBetweenThumbIndex() : hand->GetComponentLocation();
+		//FVector markerPos = hand->GetComponentLocation();
 
 		if (pawn->GetLocalRole() == ROLE_Authority)
 		{
@@ -493,6 +493,8 @@ void UHandSelector::BeginPlay()
 		boneNames.Add(FName("Ring Tip"));
 		boneNames.Add(FName("Pinky Tip"));
 		palmName = FName("Wrist Root");
+		handTrackingActive = UOculusXRInputFunctionLibrary::IsHandPositionValid(skRef->SkeletonType);
+
 	}
 #else 
 	if (skRef) {
@@ -502,6 +504,7 @@ void UHandSelector::BeginPlay()
 		boneNames.Add(FName("Ring_Tip"));
 		boneNames.Add(FName("Pinky_Tip"));
 		palmName = FName("Wrist_Root");
+		handTrackingActive = UOculusXRInputFunctionLibrary::IsHandPositionValid(skRef->SkeletonType);
 	}
 
 #endif
@@ -509,10 +512,23 @@ void UHandSelector::BeginPlay()
 	currentHand = Cast<UMotionControllerComponent>(hand->GetAttachParent());
 	leftOrRight = currentHand->GetTrackingSource();
 	if (fireAffect) {
-		fireAffect->AttachToComponent(hand, FAttachmentTransformRules::KeepRelativeTransform);
-		fireAffect->SetWorldScale3D(FVector(0.2f));
-		fireAffect->SetVariableLinearColor(FName("User.Color"), FLinearColor::Blue);
-		fireAffect->ActivateSystem();
+		FVector middleFingerTip = skRef->GetBoneLocation(boneNames[2], EBoneSpaces::ComponentSpace);
+		FVector palmLocation = skRef->GetBoneLocation(palmName, EBoneSpaces::ComponentSpace);
+		FVector midPoint = (middleFingerTip + palmLocation) * 0.5f;
+		
+		fireAffect->AttachToComponent(handMesh, FAttachmentTransformRules::KeepRelativeTransform);
+		fireAffect->SetWorldScale3D(FVector(0.05f));
+		fireAffect->SetVariableLinearColor(FName("User.Color"), FLinearColor::White);
+		fireAffect->DeactivateImmediate();
+	}
+}
+
+void UHandSelector::StartStopParticleSystem(bool isActive)
+{
+	
+	if (fireAffect)
+	{
+		isActive ? fireAffect->ActivateSystem() : fireAffect->DeactivateImmediate();
 	}
 }
 
@@ -565,11 +581,11 @@ void UHandSelector::SetMaterial(UMaterialInterface* color)
 		return;
 	}
 
-	if (pawn->HasAuthority()) {
+	if (pawn->HasAuthority() && pawn->IsLocallyControlled()) {
 		//UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from server client"));
 		Server_SetMaterial_Implementation(color);
 	}
-	else if (pawn->GetLocalRole() == ROLE_AutonomousProxy) {
+	else if (pawn->IsLocallyControlled()) {
 		//UE_LOG(LogTemp, Warning, TEXT("SetMaterial called from remote client"));
 		Server_SetMaterial(color);
 	}
@@ -588,7 +604,15 @@ void UHandSelector::OnRep_Material()
 	VARLog(TEXT("USelector::OnRep_Material"));
 
 	if (handMaterial)
+	{
+		FLinearColor color;
+		bool success = handMaterial->GetVectorParameterValue(FName("ParticleColor"), color);
+		if (success && fireAffect)
+		{
+			fireAffect->SetVariableLinearColor(FName("User.Color"), color);
+		}
 		handMesh->SetMaterial(0, handMaterial);
+	}
 
 }
 

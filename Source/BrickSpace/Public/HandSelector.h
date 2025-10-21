@@ -36,6 +36,8 @@ public:
 	virtual void SetFilter(uint16 filter) override;
 	virtual void BeginPlay() override;
 
+	void StartStopParticleSystem(bool isActive);
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	UOculusXRHandComponent* skRef = nullptr; // skRef is the component I need to get bone positions because for some reason this needs to exist
 
@@ -45,6 +47,8 @@ public:
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
 	UNiagaraComponent* fireAffect = nullptr;
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "VAR")
+	USceneComponent* anchorForParticleEffect = nullptr;
 
 #pragma region HAND_MESH_POSITION_REPLICATION
 	//UPROPERTY(ReplicatedUsing = OnRep_MeshPosUpdate)

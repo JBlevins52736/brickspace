@@ -20,6 +20,22 @@ ABrickSpacePawn::ABrickSpacePawn()
 	SetReplicates(true);
 }
 
+void ABrickSpacePawn::ActivateParticleSystem_Implementation(bool isActive)
+{
+	
+	TArray<UActorComponent*> components = K2_GetComponentsByClass(UHandSelector::StaticClass());
+	
+	
+	
+	for (UActorComponent* child : components)
+	{
+		if (UHandSelector* selector = Cast<UHandSelector>(child)) {
+			selector->StartStopParticleSystem(isActive);
+		}
+	}
+
+}
+
 void ABrickSpacePawn::VARLog(FString methodName)
 {
 	FString locstr = (IsLocallyControlled()) ? TEXT("LocallyControlled") : TEXT("NotLocallyControlled");
@@ -87,7 +103,7 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 	{
 		timeManager->Client_StopTimer();
 	}
-
+	
 	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
 }
 

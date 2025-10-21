@@ -46,6 +46,9 @@ public:
 
 	UFUNCTION(Server, Reliable)
 	void Server_UpdateWallAngle(UWallMover* WallMover, float LeverAngle);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void ActivateParticleSystem(bool isActive);
 public:
 
 	void VARLog(FString methodName);
