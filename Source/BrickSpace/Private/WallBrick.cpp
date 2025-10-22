@@ -45,21 +45,27 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 {
 	Super::ForePinch(selector, state);
 
-
-	if (!selector || !grabbingSelector || !clientComponent)
+	if (!selector || !clientComponent)
 		return;
 
-	if (state) {
-		InitialRelativeTransform = GetRelativeTransform();
+	if (state)
+	{
+		InitialRelativeTransform = clientComponent->GetRelativeTransform();
 	}
 	else if (!bThresholdReached)
 	{
-		ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
-		if (pawn->HasAuthority())
-			SetRelativeTransform(InitialRelativeTransform);
-		else
-			pawn->Server_MoveRelative(this, InitialRelativeTransform);
 
+		clientComponent->SetRelativeTransform(InitialRelativeTransform);
+
+		ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
+		if (pawn->HasAuthority())
+		{
+			return;
+		}
+		else
+		{
+			pawn->Server_MoveRelative(clientComponent, InitialRelativeTransform);
+		}
 	}
 }
 
