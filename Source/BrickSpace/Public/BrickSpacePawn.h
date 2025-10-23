@@ -31,7 +31,7 @@ public:
 	void Server_MoveRelative(USceneComponent* TargetActor, const FTransform& InitialTransform);
 
 	UFUNCTION(Server, Reliable)
-	void Server_Translate(USceneComponent* TargetActor, const FVector& worldPos);
+	void Server_Translate(UWallMover* TargetActor, float pct);
 
 	UFUNCTION(Server, Reliable)
 	void Server_Rotate(USceneComponent* TargetActor, const FRotator& Rot);
@@ -54,14 +54,12 @@ public:
 	UFUNCTION(Server, Reliable)
 	void Server_ResetTimer(UTimeManager* timeManager);
 
-	UFUNCTION(Server, Reliable)
-	void Server_UpdateWallAngle(UWallMover* WallMover, float LeverAngle);
-
 	UFUNCTION(NetMulticast, Reliable)
 	void ActivateParticleSystem(bool isActive);
 
 	UFUNCTION(Server, Reliable)
 	void Server_HandleLaunchButtonPress(USliderButton* ButtonComponent);
+
 
 public:
 

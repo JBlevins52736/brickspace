@@ -36,6 +36,7 @@ void ABrickSpacePawn::ActivateParticleSystem_Implementation(bool isActive)
 
 }
 
+
 void ABrickSpacePawn::VARLog(FString methodName)
 {
 	FString locstr = (IsLocallyControlled()) ? TEXT("LocallyControlled") : TEXT("NotLocallyControlled");
@@ -68,9 +69,10 @@ void ABrickSpacePawn::Server_MoveRelative_Implementation(USceneComponent* Target
 	TargetActor->SetRelativeTransform(InitialTransform);
 }
 
-void ABrickSpacePawn::Server_Translate_Implementation(USceneComponent* TargetActor, const FVector& worldPos)
+void ABrickSpacePawn::Server_Translate_Implementation(UWallMover* TargetActor, float pct)
 {
-	TargetActor->SetRelativeLocation(worldPos);
+	TargetActor->SetMovementTarget(pct);
+
 }
 
 void ABrickSpacePawn::Server_Rotate_Implementation(USceneComponent* TargetActor, const FRotator& Rot)
@@ -131,13 +133,6 @@ void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager
 
 	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
 }
-void ABrickSpacePawn::Server_UpdateWallAngle_Implementation(UWallMover* WallMover, float LeverAngle)
-{
-	if (WallMover)
-	{
-		WallMover->SetMovementTarget(LeverAngle);
-	}
-}
 
 void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButton* ButtonComponent)
 {
@@ -149,3 +144,4 @@ void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButto
 		ButtonComponent->Press();
 	}
 }
+

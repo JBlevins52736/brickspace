@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/SceneComponent.h"
+#include "BrickSpacePawn.h"
 #include "WallMover.generated.h"
 
 
@@ -25,6 +26,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Button")
 	UStaticMeshComponent* SkyPlate;
 
+
 protected:
 
 	virtual void BeginPlay() override;
@@ -35,12 +37,11 @@ public:
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
-
-
-private:
-
 	UPROPERTY(Replicated) 
 	float CurrentPercentage = 0.0f;
+private:
+
+
 
 	UPROPERTY(EditAnywhere, Category = "Wall Control")
 	float LoweredZOffset = -90.0f; 

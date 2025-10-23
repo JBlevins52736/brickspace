@@ -26,6 +26,18 @@ void UWallLever::Focus(USelector* cursor, bool state)
 
 }
 
+void UWallLever::Server_LeverMoved_Implementation(float pctSpeed)
+{
+	// Update lever position or any server-side logic
+	OnLeverMoved.Broadcast(pctSpeed);
+	//GEngine->AddOnScreenDebugMessage(
+	//	-1,                      // Key to identify/replace the message (use -1 for new)
+	//	5.0f,                    // Duration to display (in seconds)
+	//	FColor::Red,          // Color of the text
+	//	FString::Printf(TEXT("BroadCast SENT : %f"), pctSpeed));
+	
+}
+
 void UWallLever::ForePinch(USelector* cursor, bool state)
 {
 	if (state) 
@@ -124,17 +136,24 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 				ABrickSpacePawn* brick = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
 				brick->Server_Rotate(clientComponent, finalRot);
-
+				
 			}
 
 			float pctSpeed = clampedRoll / MaxPitch;
 
 			/*OnLeverMoved.Broadcast(clampedRoll);*/
 			OnLeverMoved.Broadcast(pctSpeed);
-	/*		if (GetOwner()->GetLocalRole() < ROLE_Authority)
-			{
-				Server_SetLeverPosition(pctSpeed);
-			}*/
+			ABrickSpacePawn* brick = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
+		
+			//if (!GetOwner()->HasAuthority())
+			//{
+			//	Server_LeverMoved(pctSpeed);
+			//	GEngine->AddOnScreenDebugMessage(
+   // -1,                      // Key to identify/replace the message (use -1 for new)
+   // 5.0f,                    // Duration to display (in seconds)
+   // FColor::Green,          // Color of the text
+   // FString::Printf(TEXT("BroadCast SENT : %f"), pctSpeed));
+			//}
 		}
 	}
 	else

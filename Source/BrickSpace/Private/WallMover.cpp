@@ -7,7 +7,7 @@
 UWallMover::UWallMover()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-	SetIsReplicatedByDefault(true);
+
 }
 
 void UWallMover::BeginPlay()
@@ -22,24 +22,49 @@ void UWallMover::BeginPlay()
 	TargetRelativeLocation = InitialRelativeLocation;
 }
 
+
 void UWallMover::SetMovementTarget(float Percentage)
 {
 	CurrentPercentage = Percentage;
 
-	if (Percentage < 0.0f)
+	APlayerController* LocalPlayerController = GetWorld()->GetFirstPlayerController();
+	if (LocalPlayerController)
 	{
-		TargetRelativeLocation = LoweredRelativeLocation;
+		APawn* LocalPawn = LocalPlayerController->GetPawn();
+		if (LocalPawn)
+		{
+
+			ABrickSpacePawn* brickspacePawn = Cast<ABrickSpacePawn>(LocalPawn);
+
+			if (LocalPawn->HasAuthority())
+			{
+				
+
+				if (Percentage < 0.0f)
+				{
+					TargetRelativeLocation = LoweredRelativeLocation;
+				}
+				else if (Percentage > 0.0f)
+				{
+					TargetRelativeLocation = RaisedRelativeLocation;
+				}
+				else
+				{
+					TargetRelativeLocation = GetRelativeLocation();
+				}
+				PrimaryComponentTick.SetTickFunctionEnable(true);
+			}
+			else
+			{
+				brickspacePawn->Server_Translate(this, Percentage);
+			
+			}
+
+		}
 	}
-	else if (Percentage > 0.0f)
-	{
-		TargetRelativeLocation = RaisedRelativeLocation;
-	}
-	else
-	{
-		TargetRelativeLocation = GetRelativeLocation();
-	}
-	PrimaryComponentTick.SetTickFunctionEnable(true);
+
 }
+
 
 
 void UWallMover::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -55,7 +80,6 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	float PercentageAbs = FMath::Abs(CurrentPercentage);
-
 	const float BaseSpeedFactor = 2.0f;
 
 	FVector NewLocation = UKismetMathLibrary::VInterpTo(
@@ -64,58 +88,10 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 		DeltaTime,
 		(BaseSpeedFactor * PercentageAbs)
 	);
-	//SetRelativeLocation(NewLocation);
 
-	/*APlayerController* LocalPlayerController = GetWorld()->GetFirstPlayerController(); 
-		if (LocalPlayerController)
-		{
-			APawn* LocalPawn = LocalPlayerController->GetPawn();
-			if (LocalPawn)
-			{
-				PrimaryComponentTick.SetTickFunctionEnable(true);
-				ABrickSpacePawn* brickspacePawn = Cast<ABrickSpacePawn>(LocalPawn);
-				
-				if (LocalPawn->HasAuthority())
-				{
-					SetRelativeLocation(NewLocation);
-				}
-				else 
-				{
-					brickspacePawn->Server_Translate(this, NewLocation);
-				}
+	SetRelativeLocation(NewLocation);
 
-			}
-		}*/
-	APlayerController* LocalPlayerController = GetWorld()->GetFirstPlayerController();
-	if (LocalPlayerController)
-	{
-		APawn* LocalPawn = LocalPlayerController->GetPawn();
-		if (LocalPawn)
-		{
-		
-			FString PawnName = LocalPawn->GetName();
-
-			
-			UE_LOG(LogTemp, Warning, TEXT("Local Pawn Name: %s"), *PawnName);
-
-
-				/*GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, FString::Printf(TEXT("Pawn Name: %s"), *PawnName));*/
-		
-
-			PrimaryComponentTick.SetTickFunctionEnable(true);
-			ABrickSpacePawn* brickspacePawn = Cast<ABrickSpacePawn>(LocalPawn);
-
-			if (LocalPawn->HasAuthority())
-			{
-				SetRelativeLocation(NewLocation);
-			}
-			else
-			{
-				brickspacePawn->Server_Translate(this, NewLocation);
-			}
-
-		}
-	}
+}
 
 	//GEngine->AddOnScreenDebugMessage(
 	//    -1,                      // Key to identify/replace the message (use -1 for new)
@@ -123,37 +99,37 @@ void UWallMover::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 	//    FColor::Green,          // Color of the text
 	//    FString::Printf(TEXT("Wall Z Location: %f"), NewLocation.Z));
 
-	if (FloorPlate)
-	{
-		float WallZ = GetRelativeLocation().Z;
-		if (WallZ <= 10) {
+	//if (FloorPlate)
+	//{
+	//	float WallZ = GetRelativeLocation().Z;
+	//	if (WallZ <= 10) {
 
-			FVector CurrentScale = FloorPlate->GetRelativeScale3D();
-			float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 1.2f, DeltaTime, GroundScaleInterpSpeed);
-			FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
-		}
-		else if (WallZ > 10)
-		{
+	//		FVector CurrentScale = FloorPlate->GetRelativeScale3D();
+	//		float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 1.2f, DeltaTime, GroundScaleInterpSpeed);
+	//		FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+	//	}
+	//	else if (WallZ > 10)
+	//	{
 
-			FVector CurrentScale = FloorPlate->GetRelativeScale3D();
-			float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 0.0f, DeltaTime, GroundScaleInterpSpeed);
-			FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
-		}
+	//		FVector CurrentScale = FloorPlate->GetRelativeScale3D();
+	//		float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 0.0f, DeltaTime, GroundScaleInterpSpeed);
+	//		FloorPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+	//	}
 
-		if (WallZ > 60)
-		{
-			FVector CurrentScale = SkyPlate->GetRelativeScale3D();
-			float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 1.2f, DeltaTime, GroundScaleInterpSpeed);
-			SkyPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
-		}
-		else if (WallZ < 50)
-		{
-			FVector CurrentScale = SkyPlate->GetRelativeScale3D();
-			float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 0.0f, DeltaTime, GroundScaleInterpSpeed);
-			SkyPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
-		}
+	//	if (WallZ > 60)
+	//	{
+	//		FVector CurrentScale = SkyPlate->GetRelativeScale3D();
+	//		float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 1.2f, DeltaTime, GroundScaleInterpSpeed);
+	//		SkyPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+	//	}
+	//	else if (WallZ < 50)
+	//	{
+	//		FVector CurrentScale = SkyPlate->GetRelativeScale3D();
+	//		float NewScaleY = FMath::FInterpTo(CurrentScale.Y, 0.0f, DeltaTime, GroundScaleInterpSpeed);
+	//		SkyPlate->SetRelativeScale3D(FVector(CurrentScale.X, NewScaleY, CurrentScale.Z));
+	//	}
 
 
-	}
+	//}
 
-}
+

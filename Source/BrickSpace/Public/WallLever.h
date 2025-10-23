@@ -42,8 +42,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
 	USceneComponent* box;
 
-	//UFUNCTION(Server, Unreliable)
-	//void Server_SetLeverPosition(float NormalizedRotation);
+	UFUNCTION(Server, Reliable)
+	void Server_LeverMoved(float pctSpeed);
 protected:
 
 	virtual void BeginPlay() override;
