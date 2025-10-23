@@ -16,9 +16,14 @@ void UBrick::BeginPlay()
 {
 	Super::BeginPlay();
 
-	UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
-	if (mesh != nullptr)
-		brickMaterial = mesh->GetMaterial(0);
+	if (clientComponent == nullptr) {
+		clientComponent = GetAttachParent();
+	}
+	if (clientComponent) {
+		UStaticMeshComponent* mesh = Cast<UStaticMeshComponent>(clientComponent);
+		if (mesh != nullptr)
+			brickMaterial = mesh->GetMaterial(0);
+	}
 
 	selectionFilter = 0x01; // Only Assembler can grab bricks
 
@@ -380,7 +385,7 @@ bool UBrick::TryMatch(USelector* selector, UBrick* assemblerBrick)
 		return false;
 	}
 
-	if ( !assemblerBrick->assemblyActor)
+	if (!assemblerBrick->assemblyActor)
 		return false;
 
 	if (!brickActor->brick) {
@@ -397,7 +402,7 @@ bool UBrick::TryMatch(USelector* selector, UBrick* assemblerBrick)
 		pawn->Server_ChangeMaterial(assemblerBrick, mesh->GetMaterial(0), true);
 
 		// Notify server to check if layer is solved and either add the next layer or launch the rocket.
-		pawn->Server_TryAdvanceLayer(assemblerBrick);	
+		pawn->Server_TryAdvanceLayer(assemblerBrick);
 	}
 
 
