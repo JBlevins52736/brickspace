@@ -28,7 +28,7 @@ enum class EColorState : uint8 // E prefix is a common Unreal naming convention 
 USTRUCT()
 struct FMaterialData : public FTableRowBase
 {
-	GENERATED_BODY()
+	GENERATED_USTRUCT_BODY()
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawnable")
 	UMaterialInterface* SolidMaterial = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawnable")
@@ -117,7 +117,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Rocket")
 	void LaunchRocket();
 private:
-	bool launch= false;
+	bool launch = false;
 	//ABrickSpacePlayerState* playerState = nullptr;
 
 	AAssemblyActor* assemblyActor;
@@ -131,7 +131,7 @@ private:
 
 	void ClearAssembly();
 
-	UBrick* SpawnBrick(const FAssemblyBrick &brick);
+	UBrick* SpawnBrick(const FAssemblyBrick& brick);
 	int currLayer = -1;
 	std::vector<UBrick*> layerBricks;
 	bool LoadNextLayer();
