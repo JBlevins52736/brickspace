@@ -214,7 +214,7 @@ UBrick* UAssembly::SpawnBrick(const FAssemblyBrick& brick)
 	SpawnedBrick->brickMaterial = RevealMaterial;
 	SpawnedBrick->OnRep_Material();
 	SpawnedBrick->OnRep_Grabbable();
-	SpawnedBrick->OnRep_Parent();
+	SpawnedBrick->OnRep_AssemblyActorParent();
 
 	return SpawnedBrick;
 }

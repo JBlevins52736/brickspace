@@ -25,8 +25,6 @@ void ABrickSpacePawn::ActivateParticleSystem_Implementation(bool isActive)
 	
 	TArray<UActorComponent*> components = K2_GetComponentsByClass(UHandSelector::StaticClass());
 	
-	
-	
 	for (UActorComponent* child : components)
 	{
 		if (UHandSelector* selector = Cast<UHandSelector>(child)) {
@@ -83,9 +81,9 @@ void ABrickSpacePawn::Server_Delete_Implementation(AActor* TargetActor)
 	TargetActor->Destroy(true, true);
 }
 
-void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& onWallTransform)
+void ABrickSpacePawn::Server_CloneWallBrick_Implementation(UWallBrick* wallBrick, const FTransform& InitialWorldTransform)
 {
-	wallBrick->CloneWallBrick(onWallTransform);
+	wallBrick->CloneWallBrick(InitialWorldTransform);
 }
 
 void ABrickSpacePawn::Server_TryAdvanceLayer_Implementation(UBrick* assemblyBrick)

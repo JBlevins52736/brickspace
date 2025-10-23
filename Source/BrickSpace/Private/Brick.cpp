@@ -259,7 +259,7 @@ bool UBrick::TryReparent(USceneComponent* pnt, std::vector<UBrick*>& layerBricks
 	return true;
 }
 
-void UBrick::OnRep_Parent()
+void UBrick::OnRep_AssemblyActorParent()
 {
 	if (clientComponent == nullptr) {
 		// WTF: Why wasn't this initialized in Vodget base class? 

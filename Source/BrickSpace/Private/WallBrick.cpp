@@ -23,22 +23,6 @@ void UWallBrick::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent clientComponent null"));
 		clientComponent = GetAttachParent();
 	}
-
-	//if (clientComponent) {
-
-	//	InitialTransform = clientComponent->GetComponentTransform();
-
-	//	if (clientComponent->GetAttachParent())
-	//	{
-
-	//		InitialRelativeTransform = clientComponent->GetRelativeTransform();
-
-	//	}
-	//}
-
-
-
-
 }
 
 void UWallBrick::ForePinch(USelector* selector, bool state)
@@ -48,34 +32,28 @@ void UWallBrick::ForePinch(USelector* selector, bool state)
 	if (!selector || !clientComponent)
 		return;
 
+	clientComponentCloned = nullptr;
+
 	if (state)
 	{
 		InitialRelativeTransform = clientComponent->GetRelativeTransform();
+		InitialWorldTransform = GetOwner()->GetActorTransform();
 	}
 	else if (!bThresholdReached)
 	{
-
 		clientComponent->SetRelativeTransform(InitialRelativeTransform);
 
 		ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(selector->GetOwner());
-		if (pawn->HasAuthority())
-		{
-			return;
-		}
-		else
-		{
+		if (!pawn->HasAuthority())
 			pawn->Server_MoveRelative(clientComponent, InitialRelativeTransform);
-		}
 	}
 }
 
-void UWallBrick::CloneWallBrick( FTransform initialTransform )
+void UWallBrick::CloneWallBrick(const FTransform &worldTransform)
 {
 	AActor* TargetActor = GetOwner();
 	UWorld* World = TargetActor->GetWorld();
 	if (!World) return;
-
-	InitialRelativeTransform = initialTransform;
 
 	// Get the wall parent component
 	if (clientComponent == nullptr) {
@@ -85,51 +63,26 @@ void UWallBrick::CloneWallBrick( FTransform initialTransform )
 		UE_LOG(LogTemp, Warning, TEXT("OnRep_Parent clientComponent null"));
 		clientComponent = GetAttachParent();
 	}
-	USceneComponent* WallComponent = clientComponent ? clientComponent->GetAttachParent() : nullptr;
-	if (!WallComponent)
-	{
-		UE_LOG(LogTemp, Error, TEXT("UWallBrick failed to find parent component for attachment!"));
-		return;
-	}
+	USceneComponent *WallComponent = clientComponent->GetAttachParent();
 
 	//Spawn the new brick at a neutral, irrelevant location.
-	AActor* clonedBrick = World->SpawnActor<AActor>(TargetActor->GetClass(), FTransform::Identity);
-	if (!clonedBrick) return;
+	FActorSpawnParameters params;
+	params.Owner = WallComponent->GetOwner();
+	AActor* ClonedBrick = World->SpawnActor<AActor>(TargetActor->GetClass(), worldTransform, params);
+	if (!ClonedBrick) return;
 
-	//// Ensure the new brick has movement replication enabled.
-	//clonedBrick->SetReplicates(true);
-	//clonedBrick->SetReplicateMovement(true);
-
-	//Attach the cloned brick to the WallComponent.
-	clonedBrick->GetRootComponent()->AttachToComponent(
-		WallComponent,
-		FAttachmentTransformRules::KeepRelativeTransform
-	);
-
-	clonedBrick->GetRootComponent()->SetRelativeTransform(InitialRelativeTransform);
-
-	//UWallBrick* clonedWallBrick = clonedBrick->FindComponentByClass<UWallBrick>();
-	//if (clonedWallBrick)
-	//{
-	//	clonedWallBrick->InitialRelativeTransform = InitialRelativeTransform;
-
-	//	UE_LOG(LogTemp, Log, TEXT("Set cloned brick's InitialRelativeTransform for replication: %s"),
-	//		*InitialRelativeTransform.GetLocation().ToString());
-	//}
-
-	UE_LOG(LogTemp, Log, TEXT("Cloned brick attached to parent: %s, Final Relative Pos: %s"),
-		*WallComponent->GetName(), *InitialRelativeTransform.GetLocation().ToString());
+	ClonedBrick->AttachToActor(WallComponent->GetOwner(), FAttachmentTransformRules::KeepWorldTransform);
 
 	// Mark the original brick as removed/cloned
 	bThresholdReached = true;
-	if (bThresholdReached)
-	{
-		clientComponent->DetachFromComponent(FDetachmentTransformRules::KeepRelativeTransform);
-	}
+	clientComponent->DetachFromComponent(FDetachmentTransformRules::KeepWorldTransform);
 }
+
 void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	//MoveCloned();
 
 	if (bThresholdReached || !grabbingSelector) return;
 
@@ -148,24 +101,11 @@ void UWallBrick::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 	ABrickSpacePawn* pawn = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
 	if (pawn->HasAuthority())
-		CloneWallBrick(InitialRelativeTransform);              
+		CloneWallBrick(InitialWorldTransform);
 	else
-		pawn->Server_CloneWallBrick(this, InitialRelativeTransform); 
+		pawn->Server_CloneWallBrick(this, InitialWorldTransform);
 
 }
-
-//void UWallBrick::OnRep_InitialRelativeTransform()
-//{
-//	// This runs on clients when InitialRelativeTransform is replicated
-//	if (clientComponent && !GetOwner()->HasAuthority())
-//	{
-//		// Apply the replicated relative transform
-//		clientComponent->SetRelativeTransform(InitialRelativeTransform);
-//
-//		UE_LOG(LogTemp, Log, TEXT("Client applied replicated relative transform: %s"),
-//			*InitialRelativeTransform.GetLocation().ToString());
-//	}
-//}
 
 void UWallBrick::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {

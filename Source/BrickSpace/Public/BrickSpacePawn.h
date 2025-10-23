@@ -40,7 +40,7 @@ public:
 	void Server_Delete(AActor* TargetActor);
 
 	UFUNCTION(Server, Reliable)
-	void Server_CloneWallBrick(UWallBrick* wallBrick, const FTransform& onWallTransform);
+	void Server_CloneWallBrick(UWallBrick* wallBrick, const FTransform& InitialWorldTransform);
 
 	UFUNCTION(Server, Reliable)
 	void Server_TryAdvanceLayer(UBrick* assemblyBrick);

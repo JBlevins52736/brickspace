@@ -16,7 +16,7 @@ public:
     UPROPERTY(EditAnywhere, Replicated)
     bool bThresholdReached = false;  
 
-	void CloneWallBrick(FTransform initialTransform);
+	void CloneWallBrick(const FTransform & worldTransform);
 
 protected:
     virtual void BeginPlay() override;
@@ -25,11 +25,11 @@ protected:
     virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-    FTransform InitialTransform = FTransform::Identity;
-
-    //UPROPERTY(ReplicatedUsing = OnRep_InitialRelativeTransform)
     FTransform InitialRelativeTransform = FTransform::Identity;
+    FTransform InitialWorldTransform = FTransform::Identity;
 
-    //UFUNCTION()
-    //void OnRep_InitialRelativeTransform();
+    //void MoveCloned();
+    USceneComponent* clientComponentCloned = nullptr;
+
+    
 };

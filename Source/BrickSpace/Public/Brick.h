@@ -53,11 +53,11 @@ public:
 	UPROPERTY(Replicated)
 	UMaterialInterface* solidMatchMaterial = nullptr;	// Set by Reveal() method and only used to test material in TryMatch() 
 
-	UPROPERTY(ReplicatedUsing = OnRep_Parent)
+	UPROPERTY(ReplicatedUsing = OnRep_AssemblyActorParent)
 	AAssemblyActor* assemblyActor = nullptr;
 
 	UFUNCTION()
-	virtual void OnRep_Parent();
+	virtual void OnRep_AssemblyActorParent();
 
 	FVector GetLocation();
 	FQuat GetQuat();
