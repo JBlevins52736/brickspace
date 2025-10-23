@@ -127,8 +127,8 @@ void UTimeManager::OnRep_Running()
 
 void UTimeManager::Client_StartTimer_Implementation()
 {
-	//// Command received to start. TickComponent will handle time accumulation.
-	//UE_LOG(LogTemp, Warning, TEXT("Client received Start Timer command."));
+	// Command received to start. TickComponent will handle time accumulation.
+	UE_LOG(LogTemp, Warning, TEXT("Client received Start Timer command."));
 }
 
 void UTimeManager::Client_StopTimer_Implementation()
@@ -138,7 +138,7 @@ void UTimeManager::Client_StopTimer_Implementation()
 	//Only clients report their final time to the server.
 	if (!GetOwner()->HasAuthority())
 	{
-		/*UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);*/
+		UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);
 		//Client calls the Server RPC to synchronize its final time.
 		Server_SyncStoppedTime(ElapsedTime);
 	}
@@ -159,14 +159,14 @@ void UTimeManager::Multicast_ResetTimer_Implementation()
 
 	UpdateTextRenderer();
 
-	//UE_LOG(LogTemp, Warning, TEXT("Machine received Reset Timer command. Local Time Reset."));
+	UE_LOG(LogTemp, Warning, TEXT("Machine received Reset Timer command. Local Time Reset."));
 }
 
 void UTimeManager::Server_SyncStoppedTime_Implementation(float FinalTime)
 {
 	// This RPC is executed on the server, saving the client's time.
 	ServerStoppedTime = FinalTime;
-	/*UE_LOG(LogTemp, Warning, TEXT("Server received final time from client: %.2f"), ServerStoppedTime);*/
+	UE_LOG(LogTemp, Warning, TEXT("Server received final time from client: %.2f"), ServerStoppedTime);
 }
 
 void UTimeManager::UpdateTextRenderer()

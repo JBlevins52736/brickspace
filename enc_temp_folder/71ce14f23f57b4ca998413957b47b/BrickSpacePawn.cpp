@@ -108,10 +108,10 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 {
 	if (!timeManager) return;
 
-	
+	// 1. Set the authoritative state (replicated to all)
 	timeManager->bIsRunning = isRunning;
 
-	//command to all clients (Multicast)
+	// 2. Issue the immediate command to all clients (Multicast)
 	if (isRunning)
 	{
 		timeManager->Client_StartTimer();

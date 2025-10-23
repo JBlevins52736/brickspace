@@ -46,32 +46,15 @@ void UWallLever::ForePinch(USelector* cursor, bool state)
 	{
 		if (grabbingSelector)
 		{
-			grabbingSelector->GrabFocus(false);		
+			grabbingSelector->GrabFocus(false);
+			grabbingSelector = nullptr;
+			
 			if (!box)
 			{
 				FRotator snapBack = FRotator(0.0f, 0.0f, 0.0f);
-				ABrickSpacePawn* brick = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
-				if (brick) {
-					if (brick->HasAuthority())
-					{
-
-						clientComponent->SetRelativeRotation(snapBack);
-						OnLeverMoved.Broadcast(0.0f);
-					}
-					else
-					{
-
-
-						brick->Server_Rotate(clientComponent, snapBack);
-						OnLeverMoved.Broadcast(0.0f);
-
-					}
-				}
-			
+				clientComponent->SetRelativeRotation(snapBack);
+				OnLeverMoved.Broadcast(0.0f);
 			}
-			grabbingSelector = nullptr;
-			
-
 			PrimaryComponentTick.SetTickFunctionEnable(false);
 
 		}
@@ -122,11 +105,11 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 			if (GetOwner()->HasAuthority())
 			{
 				clientComponent->SetRelativeRotation(finalRot);
-				//GEngine->AddOnScreenDebugMessage(
-				//	-1,                      // Key to identify/replace the message (use -1 for new)
-				//	5.0f,                    // Duration to display (in seconds)
-				//	FColor::Green,          // Color of the text
-				//	FString::Printf(TEXT("Hey")));
+				GEngine->AddOnScreenDebugMessage(
+					-1,                      // Key to identify/replace the message (use -1 for new)
+					5.0f,                    // Duration to display (in seconds)
+					FColor::Green,          // Color of the text
+					FString::Printf(TEXT("Hey")));
 
 			}
 			else

@@ -42,8 +42,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
 	USceneComponent* box;
 
-	UFUNCTION(Server, Reliable)
-	void Server_LeverMoved(float pctSpeed);
 protected:
 
 	virtual void BeginPlay() override;
