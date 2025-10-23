@@ -39,25 +39,22 @@ void UTimeManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 }
 
 void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
+{if (!pawn) return;
+
+if (pawn->HasAuthority())
 {
-	if (!pawn) return;
+	// Server sets authoritative state (Replication will notify clients via OnRep_Running)
+	bIsRunning = true;
+	UE_LOG(LogTemp, Warning, TEXT("Server initiated StartTimer. Running: %d"), bIsRunning);
 
-	if (pawn->HasAuthority())
-	{
-		//Server sets authoritative state
-		bIsRunning = true;
-		UE_LOG(LogTemp, Warning, TEXT("Server initiated StartTimer. Running: %d"), bIsRunning);
-
-		//Server commands all clients (including itself) to ensure local start
-		Client_StartTimer();
-	}
-	else
-	{
-		//Client asks server to start
-		pawn->Server_StartStopTimer(this, true);
-
-	}
-	pawn->ActivateParticleSystem(true);
+	// DELETED: Server no longer needs to call Client_StartTimer();
+}
+else
+{
+	// Client asks server to start
+	pawn->Server_StartStopTimer(this, true);
+}
+pawn->ActivateParticleSystem(true); pawn->ActivateParticleSystem(true);
 }
 
 void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
@@ -66,18 +63,16 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		//Server sets authoritative state
+		// Server sets authoritative state (Replication will notify clients via OnRep_Running)
 		bIsRunning = false;
 		UE_LOG(LogTemp, Warning, TEXT("Server initiated StopTimer. Running: %d"), bIsRunning);
 
-		//Server commands all clients (including itself) to stop and report
-		Client_StopTimer();
+		// DELETED: Server no longer needs to call Client_StopTimer();
 	}
 	else
 	{
-		//Client asks server to stop
+		// Client asks server to stop
 		pawn->Server_StartStopTimer(this, false);
-
 	}
 	pawn->ActivateParticleSystem(false);
 }
@@ -115,36 +110,26 @@ void UTimeManager::SetTextRenderer(UTextRenderComponent* InTextRenderer)
 
 void UTimeManager::OnRep_Running()
 {
-	// Triggered when the authoritative bIsRunning state changes.
+	// Triggered when the authoritative bIsRunning state changes on a client.
 	UE_LOG(LogTemp, Warning, TEXT("OnRep_Running called. bIsRunning: %d"), bIsRunning);
 
-	// If the timer stops, ensure the display is updated to the final local time.
+	// If the timer stops (state changed to false), react.
 	if (!bIsRunning)
 	{
+		// 1. Ensure the display is updated to the final local time.
 		UpdateTextRenderer();
+
+		// 2. MOVED LOGIC: Only clients report their final time to the server.
+		// This ensures the report only happens *after* the authoritative state is received.
+		if (!GetOwner()->HasAuthority())
+		{
+			/*UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);*/
+			// Client calls the Server RPC to synchronize its final time.
+			Server_SyncStoppedTime(ElapsedTime);
+		}
 	}
 }
 
-void UTimeManager::Client_StartTimer_Implementation()
-{
-	// Command received to start. TickComponent will handle time accumulation.
-	UE_LOG(LogTemp, Warning, TEXT("Client received Start Timer command."));
-}
-
-void UTimeManager::Client_StopTimer_Implementation()
-{
-	// Command received to stop.
-
-	//Only clients report their final time to the server.
-	if (!GetOwner()->HasAuthority())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);
-		//Client calls the Server RPC to synchronize its final time.
-		Server_SyncStoppedTime(ElapsedTime);
-	}
-
-	// The replicated bIsRunning flag will be set to false, stopping the Tick.
-}
 
 void UTimeManager::Multicast_ResetTimer_Implementation()
 {
@@ -159,14 +144,14 @@ void UTimeManager::Multicast_ResetTimer_Implementation()
 
 	UpdateTextRenderer();
 
-	UE_LOG(LogTemp, Warning, TEXT("Machine received Reset Timer command. Local Time Reset."));
+	//UE_LOG(LogTemp, Warning, TEXT("Machine received Reset Timer command. Local Time Reset."));
 }
 
 void UTimeManager::Server_SyncStoppedTime_Implementation(float FinalTime)
 {
 	// This RPC is executed on the server, saving the client's time.
 	ServerStoppedTime = FinalTime;
-	UE_LOG(LogTemp, Warning, TEXT("Server received final time from client: %.2f"), ServerStoppedTime);
+	/*UE_LOG(LogTemp, Warning, TEXT("Server received final time from client: %.2f"), ServerStoppedTime);*/
 }
 
 void UTimeManager::UpdateTextRenderer()

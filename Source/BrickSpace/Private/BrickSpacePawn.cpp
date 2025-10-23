@@ -108,20 +108,9 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 {
 	if (!timeManager) return;
 
-	
 	timeManager->bIsRunning = isRunning;
 
-	//command to all clients (Multicast)
-	if (isRunning)
-	{
-		timeManager->Client_StartTimer();
-	}
-	else
-	{
-		timeManager->Client_StopTimer();
-	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
+	//UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: State set. bIsRunning=%d"), timeManager->bIsRunning);
 }
 
 
@@ -131,7 +120,7 @@ void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager
 
 	timeManager->ResetTimer(this);
 
-	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
+	/*UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));*/
 }
 
 void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButton* ButtonComponent)

@@ -108,20 +108,13 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 {
 	if (!timeManager) return;
 
-	// 1. Set the authoritative state (replicated to all)
+	// The server only needs to set the authoritative, replicated state.
+	// The UTimeManager::OnRep_Running function will now execute on the client.
 	timeManager->bIsRunning = isRunning;
 
-	// 2. Issue the immediate command to all clients (Multicast)
-	if (isRunning)
-	{
-		timeManager->Client_StartTimer();
-	}
-	else
-	{
-		timeManager->Client_StopTimer();
-	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
+	// DELETED: Removed redundant timeManager->Client_StartTimer() and timeManager->Client_StopTimer() calls.
+
+	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: State set. bIsRunning=%d"), timeManager->bIsRunning);
 }
 
 

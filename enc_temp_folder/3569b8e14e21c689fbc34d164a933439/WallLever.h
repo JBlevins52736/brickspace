@@ -61,4 +61,10 @@ protected:
 private:
 
 	
+	//FRotator TargetLeverRotation = FRotator::ZeroRotator;
+	//FRotator CurrentLeverRotation = FRotator::ZeroRotator;
+	//float initialGrabAngle = 0.0f;
+	//FVector initialGrabVector;
+	//FVector initialGrabVector;
+	
 };

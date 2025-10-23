@@ -39,25 +39,18 @@ void UTimeManager::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 }
 
 void UTimeManager::StartTimer(ABrickSpacePawn* pawn)
+{if (!pawn) return;
+
+if (pawn->HasAuthority())
 {
-	if (!pawn) return;
-
-	if (pawn->HasAuthority())
-	{
-		//Server sets authoritative state
-		bIsRunning = true;
-		UE_LOG(LogTemp, Warning, TEXT("Server initiated StartTimer. Running: %d"), bIsRunning);
-
-		//Server commands all clients (including itself) to ensure local start
-		Client_StartTimer();
-	}
-	else
-	{
-		//Client asks server to start
-		pawn->Server_StartStopTimer(this, true);
-
-	}
-	pawn->ActivateParticleSystem(true);
+	bIsRunning = true;
+	/*UE_LOG(LogTemp, Warning, TEXT("Server initiated StartTimer. Running: %d"), bIsRunning);*/
+}
+else
+{
+	pawn->Server_StartStopTimer(this, true);
+}
+	pawn->ActivateParticleSystem(true); pawn->ActivateParticleSystem(true);
 }
 
 void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
@@ -66,18 +59,12 @@ void UTimeManager::StopTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		//Server sets authoritative state
 		bIsRunning = false;
-		UE_LOG(LogTemp, Warning, TEXT("Server initiated StopTimer. Running: %d"), bIsRunning);
-
-		//Server commands all clients (including itself) to stop and report
-		Client_StopTimer();
+		/*UE_LOG(LogTemp, Warning, TEXT("Server initiated StopTimer. Running: %d"), bIsRunning);*/
 	}
 	else
 	{
-		//Client asks server to stop
 		pawn->Server_StartStopTimer(this, false);
-
 	}
 	pawn->ActivateParticleSystem(false);
 }
@@ -89,13 +76,11 @@ void UTimeManager::ResetTimer(ABrickSpacePawn* pawn)
 
 	if (pawn->HasAuthority())
 	{
-		// Server commands ALL machines (including itself) to reset
 		Multicast_ResetTimer();
-		UE_LOG(LogTemp, Warning, TEXT("Server initiated ResetTimer."));
+		//UE_LOG(LogTemp, Warning, TEXT("Server initiated ResetTimer."));
 	}
 	else
 	{
-		// Client asks server to reset
 		pawn->Server_ResetTimer(this);
 	}
 }
@@ -111,40 +96,25 @@ void UTimeManager::SetTextRenderer(UTextRenderComponent* InTextRenderer)
 	UpdateTextRenderer();
 }
 
-// --- Replication and Client RPC Implementations ---
-
 void UTimeManager::OnRep_Running()
 {
-	// Triggered when the authoritative bIsRunning state changes.
-	UE_LOG(LogTemp, Warning, TEXT("OnRep_Running called. bIsRunning: %d"), bIsRunning);
+	
+	/*UE_LOG(LogTemp, Warning, TEXT("OnRep_Running called. bIsRunning: %d"), bIsRunning);*/
 
-	// If the timer stops, ensure the display is updated to the final local time.
+	
 	if (!bIsRunning)
 	{
+		
 		UpdateTextRenderer();
+
+		if (!GetOwner()->HasAuthority())
+		{
+			/*UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);*/
+			Server_SyncStoppedTime(ElapsedTime);
+		}
 	}
 }
 
-void UTimeManager::Client_StartTimer_Implementation()
-{
-	//// Command received to start. TickComponent will handle time accumulation.
-	//UE_LOG(LogTemp, Warning, TEXT("Client received Start Timer command."));
-}
-
-void UTimeManager::Client_StopTimer_Implementation()
-{
-	// Command received to stop.
-
-	//Only clients report their final time to the server.
-	if (!GetOwner()->HasAuthority())
-	{
-		/*UE_LOG(LogTemp, Warning, TEXT("Client sending final time to server: %.2f"), ElapsedTime);*/
-		//Client calls the Server RPC to synchronize its final time.
-		Server_SyncStoppedTime(ElapsedTime);
-	}
-
-	// The replicated bIsRunning flag will be set to false, stopping the Tick.
-}
 
 void UTimeManager::Multicast_ResetTimer_Implementation()
 {
@@ -164,7 +134,7 @@ void UTimeManager::Multicast_ResetTimer_Implementation()
 
 void UTimeManager::Server_SyncStoppedTime_Implementation(float FinalTime)
 {
-	// This RPC is executed on the server, saving the client's time.
+	
 	ServerStoppedTime = FinalTime;
 	/*UE_LOG(LogTemp, Warning, TEXT("Server received final time from client: %.2f"), ServerStoppedTime);*/
 }
