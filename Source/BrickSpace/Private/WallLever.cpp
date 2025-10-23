@@ -17,7 +17,7 @@ UWallLever::UWallLever()
 void UWallLever::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 void UWallLever::Focus(USelector* cursor, bool state)
@@ -28,7 +28,7 @@ void UWallLever::Focus(USelector* cursor, bool state)
 
 void UWallLever::ForePinch(USelector* cursor, bool state)
 {
-	if (state) 
+	if (state)
 	{
 		if (cursor && clientComponent)
 		{
@@ -42,37 +42,41 @@ void UWallLever::ForePinch(USelector* cursor, bool state)
 			PrimaryComponentTick.SetTickFunctionEnable(true);
 		}
 	}
-	else 
+	else
 	{
 		if (grabbingSelector)
 		{
-			grabbingSelector->GrabFocus(false);
-			grabbingSelector = nullptr;
-			PrimaryComponentTick.SetTickFunctionEnable(false);
-			if (!box) 
+			grabbingSelector->GrabFocus(false);		
+			if (!box)
 			{
-				FRotator snapBack = FRotator(0.0f, 0.0f, 0.0f);	
-				clientComponent->SetRelativeRotation(snapBack);
-				OnLeverMoved.Broadcast(0.0f);
+				FRotator snapBack = FRotator(0.0f, 0.0f, 0.0f);
+				ABrickSpacePawn* brick = Cast<ABrickSpacePawn>(grabbingSelector->GetOwner());
+				if (brick) {
+					if (brick->HasAuthority())
+					{
+
+						clientComponent->SetRelativeRotation(snapBack);
+						OnLeverMoved.Broadcast(0.0f);
+					}
+					else
+					{
+
+
+						brick->Server_Rotate(clientComponent, snapBack);
+						OnLeverMoved.Broadcast(0.0f);
+
+					}
+				}
+			
 			}
-		
+			grabbingSelector = nullptr;
+			
+
+			PrimaryComponentTick.SetTickFunctionEnable(false);
+
 		}
 	}
 }
-
-//void UWallLever::Server_SetLeverPosition_Implementation(float NormalizedRotation)
-//{
-//
-//	if (!box)
-//	{
-//		float clampedRoll = FMath::Clamp(NormalizedRotation * MaxPitch, MinPitch, MaxPitch);
-//		FRotator finalRot = FRotator(0.0f, 0.0f, clampedRoll);
-//		clientComponent->SetRelativeRotation(finalRot);
-//	}
-//
-//	OnLeverMoved.Broadcast(NormalizedRotation);
-//}
-
 void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -88,13 +92,13 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 		//UE_LOG(LogTemp, Warning, TEXT("Error: %.2f"), ds);
 
 		FQuat currentRot = clientComponent->GetRelativeRotation().Quaternion();
-		FQuat rawNewRotQuat =  deltaRot * currentRot;
-		//clientComponent->SetRelativeRotation(rawNewRotQuat);
+		FQuat rawNewRotQuat = deltaRot * currentRot;
+
 
 
 		FRotator rawNewRot = rawNewRotQuat.Rotator();
 		float currentRoll = rawNewRot.Roll;
-		if (box) 
+		if (box)
 		{
 			float clampedRoll = FMath::Clamp(currentRoll, -94, 0);
 			FRotator finalRot = FRotator(0.0f, 0.0f, clampedRoll);
@@ -110,14 +114,20 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 			}
 		}
-		else 
+		else
 		{
 			float clampedRoll = FMath::Clamp(currentRoll, MinPitch, MaxPitch);
 			FRotator finalRot = FRotator(0.0f, 0.0f, clampedRoll);
 
-			if (GetOwner()->HasAuthority()) 
+			if (GetOwner()->HasAuthority())
 			{
 				clientComponent->SetRelativeRotation(finalRot);
+				//GEngine->AddOnScreenDebugMessage(
+				//	-1,                      // Key to identify/replace the message (use -1 for new)
+				//	5.0f,                    // Duration to display (in seconds)
+				//	FColor::Green,          // Color of the text
+				//	FString::Printf(TEXT("Hey")));
+
 			}
 			else
 			{
@@ -129,18 +139,15 @@ void UWallLever::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompo
 
 			float pctSpeed = clampedRoll / MaxPitch;
 
-			/*OnLeverMoved.Broadcast(clampedRoll);*/
 			OnLeverMoved.Broadcast(pctSpeed);
-	/*		if (GetOwner()->GetLocalRole() < ROLE_Authority)
-			{
-				Server_SetLeverPosition(pctSpeed);
-			}*/
+
+
 		}
 	}
 	else
 	{
-		
+
 		PrimaryComponentTick.SetTickFunctionEnable(false);
-		
+
 	}
 }

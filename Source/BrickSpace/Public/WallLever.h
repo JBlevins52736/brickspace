@@ -42,8 +42,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Lever")
 	USceneComponent* box;
 
-	//UFUNCTION(Server, Unreliable)
-	//void Server_SetLeverPosition(float NormalizedRotation);
 protected:
 
 	virtual void BeginPlay() override;
@@ -62,11 +60,5 @@ protected:
 
 private:
 
-	
-	//FRotator TargetLeverRotation = FRotator::ZeroRotator;
-	//FRotator CurrentLeverRotation = FRotator::ZeroRotator;
-	//float initialGrabAngle = 0.0f;
-	//FVector initialGrabVector;
-	//FVector initialGrabVector;
 	
 };

@@ -34,6 +34,7 @@ void ABrickSpacePawn::ActivateParticleSystem_Implementation(bool isActive)
 
 }
 
+
 void ABrickSpacePawn::VARLog(FString methodName)
 {
 	FString locstr = (IsLocallyControlled()) ? TEXT("LocallyControlled") : TEXT("NotLocallyControlled");
@@ -66,9 +67,10 @@ void ABrickSpacePawn::Server_MoveRelative_Implementation(USceneComponent* Target
 	TargetActor->SetRelativeTransform(InitialTransform);
 }
 
-void ABrickSpacePawn::Server_Translate_Implementation(USceneComponent* TargetActor, const FVector& worldPos)
+void ABrickSpacePawn::Server_Translate_Implementation(UWallMover* TargetActor, float pct)
 {
-	TargetActor->SetRelativeLocation(worldPos);
+	TargetActor->SetMovementTarget(pct);
+
 }
 
 void ABrickSpacePawn::Server_Rotate_Implementation(USceneComponent* TargetActor, const FRotator& Rot)
@@ -104,20 +106,9 @@ void ABrickSpacePawn::Server_StartStopTimer_Implementation(UTimeManager* timeMan
 {
 	if (!timeManager) return;
 
-	// 1. Set the authoritative state (replicated to all)
 	timeManager->bIsRunning = isRunning;
 
-	// 2. Issue the immediate command to all clients (Multicast)
-	if (isRunning)
-	{
-		timeManager->Client_StartTimer();
-	}
-	else
-	{
-		timeManager->Client_StopTimer();
-	}
-	
-	UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: Command issued. bIsRunning=%d"), timeManager->bIsRunning);
+	//UE_LOG(LogTemp, Warning, TEXT("Server_StartStopTimer: State set. bIsRunning=%d"), timeManager->bIsRunning);
 }
 
 
@@ -127,14 +118,7 @@ void ABrickSpacePawn::Server_ResetTimer_Implementation(UTimeManager* timeManager
 
 	timeManager->ResetTimer(this);
 
-	UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));
-}
-void ABrickSpacePawn::Server_UpdateWallAngle_Implementation(UWallMover* WallMover, float LeverAngle)
-{
-	if (WallMover)
-	{
-		WallMover->SetMovementTarget(LeverAngle);
-	}
+	/*UE_LOG(LogTemp, Warning, TEXT("Server_ResetTimer: Reset command issued."));*/
 }
 
 void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButton* ButtonComponent)
@@ -147,3 +131,4 @@ void ABrickSpacePawn::Server_HandleLaunchButtonPress_Implementation(USliderButto
 		ButtonComponent->Press();
 	}
 }
+

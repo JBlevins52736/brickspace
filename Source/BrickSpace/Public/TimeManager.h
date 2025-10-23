@@ -55,16 +55,6 @@ public:
 	
 public: 
 
-	UFUNCTION(Client, Reliable)
-	void Client_StartTimer();
-
-	UFUNCTION(Client, Reliable)
-	void Client_StopTimer();
-
-	//UFUNCTION(Client, Reliable)
-	//void Client_ResetTimer();
-
-	// Client-to-Server RPC
 	UFUNCTION(Server, Reliable)
 	void Server_SyncStoppedTime(float FinalTime);
 
