@@ -1,93 +1,210 @@
 # BrickSpace
 
+> **Portfolio Repository**: This is Jasen Blevins' personal portfolio version of the BrickSpace project, originally developed as part of Full Sail University's VR/AR Labs program.
 
+A collaborative AR/VR building environment for Meta Quest that brings teams together to build and create in shared physical space. Designed to inspire teamwork and develop communication skills through intuitive, hands-on interaction with virtual LEGO-style bricks.
 
-## Getting started
+## Project Background
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+BrickSpace evolved from research into assistive technology for individuals with autism, focusing on helping people develop coping skills for transitioning between challenging environments. Through exploring how different individuals handle stress and process spatial information, the project transformed into something broader: a collaborative building platform where teams of up to four people work together in an immersive environment that feels safe, structured, and engaging.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Developed as part of Full Sail University's VR/AR Labs program starting with an intensive 24-day sprint (June-July 2024), then evolved over 4 months of active development through October 2024. BrickSpace demonstrates how thoughtful AR/VR design can create experiences that enhance collaboration for everyone.
 
-## Add your files
+The project evolved through 6 major development phases:
+1. **Foundation & Framework** - Core VR interaction systems (Vodget framework)
+2. **Building Mechanics** - Snap-to-grid physics and brick system
+3. **Assembly System** - JSON-driven guided building experiences
+4. **Network Architecture** - Server-authoritative multiplayer infrastructure
+5. **Hand Tracking** - Controller-free interaction with gesture recognition
+6. **Polish & Features** - UI systems, particle effects, and social features
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+The project's technical innovations include real-time brick synchronization across 4 players, custom spatial calibration systems, and "sticky hands" prediction for robust hand tracking.
 
-```
-cd existing_repo
-git remote add origin https://simviz.fullsail.edu/vrar-labs/brickspace.git
-git branch -M main
-git push -uf origin main
-```
+## Key Features
 
-## Integrate with your tools
+### Collaborative Building
+- **Multi-User Support**: Up to 4 players can build together in the same physical space
+- **Real-Space Synchronization**: Brick movements are synchronized across all users with seamless real-time updates
+- **Play Space Alignment**: Automatic spatial calibration ensures all players see and interact with the same virtual space
+- **OculusXR Colocation**: Leverages Meta's spatial anchoring for precise multi-user alignment
 
-- [ ] [Set up project integrations](https://simviz.fullsail.edu/vrar-labs/brickspace/-/settings/integrations)
+### Intuitive Interaction
+- **Hand Tracking**: Natural brick manipulation using Meta Quest's native hand tracking
+- **Snap-to-Grid Physics**: Authentic LEGO-style stud and tube snapping system for satisfying building mechanics
+- **Clear Visual Feedback**: Intuitive visual cues guide building and collaboration
+- **Material System**: Color selection and material switching for creative expression
 
-## Collaborate with your team
+### Structured Building Experience
+- **Layer-by-Layer Assembly**: Guided building mode with predefined models (rockets, structures, etc.)
+- **Assembly Validation**: Real-time feedback ensures correct brick placement and progression
+- **Collaborative Problem-Solving**: Designed to encourage teamwork and communication
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Technical Foundation
+- **Server-Authoritative Architecture**: Robust network replication ensures consistent state across all clients
+- **Performance Optimized**: Efficient spawning system handles complex multi-user interactions maintaining 72fps on Quest 2
+- **Extensible Design**: JSON-based assembly definitions for easy content creation
+- **Custom VR Framework**: Vodget/Selector system provides foundation for all interactions
+- **Advanced Calibration**: Multiple calibration methods (2-point, 2-hand) for precise spatial alignment
+- **Robust Hand Tracking**: "Sticky hands" prediction system handles tracking loss gracefully
 
-## Test and Deploy
+### Current State (October 2024)
 
-Use the built-in continuous integration in GitLab.
+BrickSpace is feature-complete with:
+- ✅ Full multiplayer support (up to 4 players)
+- ✅ Controller-free hand tracking with gesture recognition
+- ✅ Complete assembly system with rocket launch sequence
+- ✅ Timer and interactive UI elements
+- ✅ Particle effects and visual polish
+- ✅ Eye contact detection and social features
+- ✅ Multiple maps (Main, Lobby, Test)
+- ✅ Comprehensive network replication (41 C++ classes)
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## Requirements
 
-***
+- **Unreal Engine 5.x** (custom engine build - see `.uproject` for association)
+- **Meta Quest** device with hand tracking support
+- **Windows 10/11** for development
+- **Visual Studio 2022** (for C++ compilation)
 
-# Editing this README
+## Getting Started
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### Opening the Project
 
-## Suggestions for a good README
+1. Clone this repository
+2. Double-click `BrickSpace.uproject` to open in Unreal Engine
+3. Wait for initial compilation and shader compilation to complete
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Building for Quest
 
-## Name
-Choose a self-explaining name for your project.
+1. Ensure Android development tools are installed in Unreal Engine
+2. File → Package Project → Android → Android (ASTC)
+3. Select output directory and wait for packaging to complete
+4. Deploy to Quest via SideQuest or adb
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+## Portfolio & Media
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### Documentation
+- **[Development Journey](docs/DEVELOPMENT_JOURNEY.md)** - Complete 4-month evolution from concept to completion
+- **[Technical Documentation](docs/)** - Detailed architecture and API documentation
+- **[Contributors](docs/CONTRIBUTORS.md)** - Detailed breakdown of team contributions
+- **[Media Assets](media/)** - Screenshots, diagrams, and video demonstrations
+- **[External Media](media/EXTERNAL_MEDIA.md)** - Links to videos and high-resolution materials
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+### Key Highlights
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+**Technical Achievements:**
+- Implemented real-time multi-user synchronization for up to 4 players
+- Developed custom Vodget/Selector VR interaction framework
+- Built server-authoritative network architecture from scratch
+- Created spatial colocation system using OculusXR APIs
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+**Development Timeline:**
+- **Duration**: 4 months (June - October 2024)
+- **Initial Sprint**: 24-day intensive period (June-July 2024)
+- **Role**: Core Systems Developer (Brick Spawning, Multi-User Synchronization, Early Development Planning, Asset Sourcing, Blueprint Architecture, Colocation Support)
+- **Team**: Full Sail University VR/AR Labs (9-person collaborative team)
+- **Technologies**: Unreal Engine 5.5 (C++), Meta Quest SDK, OculusXR Colocation, Niagara VFX
+- **Scale**: 411 commits, 41 C++ classes, ~10,000+ lines of code
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**Impact:**
+- Demonstrates practical application of assistive technology research
+- Showcases human-centered design in VR development
+- Highlights rapid prototyping and iterative problem-solving
+- Proves viability of controller-free hand tracking for complex interactions
+- Establishes patterns for server-authoritative VR multiplayer
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### For Recruiters & Portfolio Viewers
+
+This project demonstrates:
+- **C++ Proficiency**: Custom component architecture, network replication, real-time systems
+- **VR Development**: Hand tracking, spatial computing, multi-user experiences
+- **Problem Solving**: Synchronization challenges, performance optimization, UX design
+- **Rapid Development**: Complete multiplayer VR system in 24 days
+- **Team Collaboration**: Working within VR/AR labs environment
+
+See [SECURITY.md](SECURITY.md) for information about data privacy and security considerations.
+
+## Development Journey
+
+BrickSpace evolved through 6 major development phases over 4 months (June-October 2024), starting with an intensive 24-day sprint. The project progressed from basic VR interaction to a feature-complete multiplayer experience with hand tracking, network replication, and advanced calibration systems.
+
+**Read the complete story**: [Development Journey](docs/DEVELOPMENT_JOURNEY.md) - A detailed chronicle of challenges, breakthroughs, and technical evolution.
+
+### Project Structure
+
+- `Source/BrickSpace/` - Main C++ module
+  - `Public/` - Header files
+  - `Private/` - Implementation files
+- `Content/` - Blueprint assets, materials, models, maps
+- `Plugins/` - Custom plugins (Jacobs_VFX, ReplicationTest)
+- `Config/` - Engine and project configuration, assembly JSON files
+
+### Key Architecture
+
+See [CLAUDE.md](CLAUDE.md) for detailed architecture documentation including:
+- Vodget/Selector interaction system
+- Brick snapping mechanics
+- Assembly system
+- Network replication patterns
+
+### Assembly JSON Files
+
+Assembly instructions are defined in `Config/*.json` files. See `Config/Rocket.json` for an example format.
+
+## Design Philosophy
+
+BrickSpace was built on the principle that the best assistive technologies don't just accommodate differences—they reveal better ways for everyone to interact with digital systems. The clear visual feedback, intuitive interactions, and collaborative problem-solving environment enhance teamwork for all users, regardless of background or ability.
+
+The project demonstrates that when you design for accessibility and human-centered interaction from the ground up, you create experiences that are simply better for everyone. This approach to AR/VR development prioritizes:
+
+- **Natural Interaction**: Hand tracking and spatial interfaces that feel intuitive, not learned
+- **Collaborative Design**: Systems that encourage communication and teamwork by default
+- **Structured Freedom**: Guided experiences that provide clear goals while allowing creative expression
+- **Universal Accessibility**: Interfaces that work for diverse users without special accommodation modes
 
 ## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on contributing to this project.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Code of Conduct
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+This project follows our [Code of Conduct](CODE_OF_CONDUCT.md). Please read it before contributing.
 
 ## License
-For open source projects, say how it is licensed.
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Potential Applications
+
+While BrickSpace was designed as a collaborative building experience, the underlying principles and technical systems have broader applications:
+
+- **Training Simulations**: The multi-user synchronization and spatial alignment systems could enhance team coordination training
+- **Educational Environments**: Collaborative problem-solving in safe, structured virtual spaces
+- **Therapeutic Applications**: Building on the original assistive technology research for stress management and social skill development
+- **Remote Collaboration**: Techniques for synchronizing real-space interactions could improve remote teamwork in AR/VR
+
+## Acknowledgments
+
+Developed as part of Full Sail University's VR/AR Labs program during a 24-day intensive sprint. This project represents collaborative work exploring the intersection of assistive technology, human-centered design, and immersive collaboration systems.
+
+Special thanks to the Full Sail VR/AR Labs team and all contributors who helped shape BrickSpace from concept to working prototype.
+
+### Team Contributors
+
+BrickSpace was developed by a 9-person team during the summer 2024 VR/AR Labs intensive:
+
+- **Jasen Blevins (Repository Owner)** - **Core Systems Developer, Early Development & Planning, Asset Sourcing, Blueprint Architecture (15 commits)**
+  - Brick spawning system and multi-user synchronization
+  - Early project roadmapping and architecture planning
+  - Asset sourcing and Unreal Blueprint setup
+  - Colocation support with John Coss Vargas
+- **Dan Mapes** - Lead Network Engineer & Calibration Systems (151 commits)
+- **Delvin Porterfield** - UI Systems & Interactive Components (76 commits)
+- **Ryan Suber** - Hand Tracking & VR Interaction (76 commits)
+- **John Coss Vargas** - Colocation & Network Integration (28 commits)
+- **AnaDiaz34** - Assembly System & Materials (20 commits)
+- **PJ Glover** - Polish & Integration (18 commits)
+- **Nevin & Hemant** - Social Interaction Features (27 commits)
+- **Bryan Santiago Sinigaglia** - Supporting Development (5 commits)
+
+For detailed contribution breakdown, see [CONTRIBUTORS.md](docs/CONTRIBUTORS.md).

@@ -78,3 +78,21 @@ Content/StarterContent/HDRI/HDRI_Epic_Courtyard_Daylight.uasset
 
 #
 .htm
+
+# Claude Code local settings
+.claude/
+
+# Personal/Private notes (not for public portfolio)
+PRIVATE_NOTES.md
+*.private.md
+.env
+.env.local
+
+# Large media files (use external hosting)
+media/videos/*.mp4
+media/videos/*.mov
+media/videos/*.avi
+
+# Development builds (too large for git)
+*.apk
+*.aab
